@@ -6,30 +6,129 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+enum UserLevel  {
+  FIRST
+  SECOND
+}
+
 
 model User {
-  id            String   @id @default(uuid())
-  firstName     String
-  lastName      String
-  email         String   @unique
-  password      String
-  profile       Profile?
+   id                  String       @id @default(uuid())
+   firstName           String
+   lastName            String
+   email               String       @unique
+   level               UserLevel    @default(FIRST)
+   password            String
+   profile             Profile?
+   feedbacks           Feedback[]
+   ratings             Rating[]
+   bills               Bill[]
+   followedProducts    Product[]    @relation("UserFollowsProducts")
 
-  createdAt     DateTime @default(now())
-  passwordUpdatedAt     DateTime @default(now())
+   createdAt           DateTime     @default(now())
+   passwordUpdatedAt   DateTime     @default(now())
 }
 
 model Profile {
-  id            String   @id @default(uuid())
-  userId        String      @unique
-  username      String?  @unique
-  phoneNumber   String?  @unique
-  age           Int
-  gender        String
-  profilePicture String?
+   id                  String       @id @default(uuid())
+   phoneNumber         String
+   age                 Int
+   sex                 String
+   profilePicture      String?
+   userId              String       @unique
+   user                User         @relation(fields: [userId], references: [id])
 
-  user          User     @relation(fields: [userId], references: [id])
+   createdAt           DateTime     @default(now())
+   updatedAt           DateTime     @default(now())
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+model Product {
+   id                  String       @id @default(uuid())
+   userId              String
+   category            String
+   productName         String
+   moto                String?
+   description         String
+   about               String?
+   templateId          String
+   followers           User[]       @relation("UserFollowsProducts")
+   visibility          String
+   packages            Package[]
+   feedbacks           Feedback[]
+   ratings             Rating[]
+   bills               Bill[]
+   stories             Story[]
+
+   createdAt           DateTime     @default(now())
+   updatedAt           DateTime     @default(now())
+}
+
+model Package {
+   id                  String       @id @default(uuid())
+   productId           String
+   packageType         String
+   startDate           DateTime
+   endDate             DateTime
+   expired             Boolean
+
+   product             Product      @relation(fields: [productId], references: [id])
+
+   createdAt           DateTime     @default(now())
+   updatedAt           DateTime     @default(now())
+}
+
+model Bill {
+   id                  String       @id @default(uuid())
+   productId           String
+   userId              String
+   date                DateTime
+   amount              Float
+   paymentMethod       String
+   reference           String
+
+   product             Product      @relation(fields: [productId], references: [id])
+   user                User         @relation(fields: [userId], references: [id])
+
+   createdAt           DateTime     @default(now())
+   updatedAt           DateTime     @default(now())
+}
+
+model Feedback {
+   id                  String       @id @default(uuid())
+   userId              String
+   productId           String
+   feedback            String
+
+   user                User         @relation(fields: [userId], references: [id])
+   product             Product      @relation(fields: [productId], references: [id])
+
+   createdAt           DateTime     @default(now())
+   updatedAt           DateTime     @default(now())
+}
+
+model Rating {
+   id                  String       @id @default(uuid())
+   userId              String
+   productId           String
+   rating              Int
+
+   user                User         @relation(fields: [userId], references: [id])
+   product             Product      @relation(fields: [productId], references: [id])
+
+   createdAt           DateTime     @default(now())
+   updatedAt           DateTime     @default(now())
+}
+
+model Story {
+   id                  String       @id @default(uuid())
+   postDate            DateTime
+   contentType         String
+   text                String
+   image               String?
+
+   productId           String
+   product             Product      @relation(fields: [productId], references: [id])
+
+   createdAt           DateTime     @default(now())
+   updatedAt           DateTime     @default(now())
 }
