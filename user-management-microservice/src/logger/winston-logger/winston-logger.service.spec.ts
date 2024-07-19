@@ -1,0 +1,20 @@
+import { Test, TestingModule } from '@nestjs/testing'
+import WinstonLoggerService from './winston-logger.service'
+
+import * as Winston from 'winston'
+
+describe('WinstonLoggerService', () => {
+  let service: WinstonLoggerService
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [WinstonLoggerService],
+    }).compile()
+
+    service = module.get<WinstonLoggerService>(WinstonLoggerService)
+  })
+
+  it('should be defined', () => {
+    expect(service).toBeDefined()
+  })
+})
