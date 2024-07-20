@@ -66,6 +66,7 @@ model Product {
    description         String
    about               String?
    templateId          String
+   services            ProductService[]
    
    followers           User[]       @relation("UserFollowsProducts")
    visibility          String
@@ -78,6 +79,20 @@ model Product {
 
    createdAt           DateTime     @default(now())
    updatedAt           DateTime     @default(now())
+}
+
+model ProductService {
+  id                String    @id @default(uuid())
+  productId         String
+  name              String
+  description       String?
+  image             String?  // URL or path to the image
+  specifications    Json    // JSON field for storing specifications
+
+  product           Product  @relation(fields: [productId], references: [id])
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Package {
