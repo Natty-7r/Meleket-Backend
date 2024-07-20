@@ -67,6 +67,7 @@ model Product {
    about               String?
    templateId          String
    services            ProductService[]
+   address             ProductAddress[]
    
    followers           User[]       @relation("UserFollowsProducts")
    visibility          String
@@ -94,6 +95,23 @@ model ProductService {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
+
+model ProductAddress {
+  id                String    @id @default(uuid())
+  productId         String
+  streetAddress     String
+  specificLocation  String?   // Additional detail for specific location (e.g., suite number, building)
+  city              String
+  state             String
+  postalCode        String
+  country           String
+
+  product           Product  @relation(fields: [productId], references: [id])
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 
 model Package {
    id                  String       @id @default(uuid())
