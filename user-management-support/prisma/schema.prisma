@@ -6,24 +6,38 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-enum UserLevel  {
-  FIRST
-  SECOND
+
+
+enum UserProfileLevel  {
+  FIRST   //  just opened , cannot add business 
+  SECOND // added profile 
 }
 
+enum PackageType {
+   MONTHLY
+   SIX_MONTHLY
+   YEARLY
+}
+
+enum BusinessProfileLevel {
+   FIRST 
+   
+}
 
 model User {
    id                  String       @id @default(uuid())
    firstName           String
    lastName            String
    email               String       @unique
-   level               UserLevel    @default(FIRST)
+   profileLevel        UserProfileLevel    @default(FIRST)
    password            String
    profile             Profile?
-   feedbacks           Feedback[]
+   reviews             Review[]
    ratings             Rating[]
    bills               Bill[]
-   followedProducts    Product[]    @relation("UserFollowsProducts")
+   businesses          Business[]    @relation("UserOwnsBusiness")
+   followedBussiness   Business[]    @relation("UserFollowsBusiness")
+
 
    createdAt           DateTime     @default(now())
    passwordUpdatedAt   DateTime     @default(now())
@@ -42,38 +56,40 @@ model Profile {
    updatedAt           DateTime     @default(now())
 }
 
-
 model Category {
   id          String    @id @default(uuid())
   name        String    @db.VarChar(255)
   parentId    String?  
   level       Int
+  price       Float
+  image       String
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
   parent      Category? @relation("CategoryToCategory", fields: [parentId], references: [id])
   children    Category[] @relation("CategoryToCategory")
-  products    Product[]
+  business    Business[]
 }
 
-model Product {
+model Business {
    id                  String       @id @default(uuid())
    userId              String
    categoryId          String
-   productName         String
-   moto                String?
+   name                String
    description         String
-   about               String?
    templateId          String
-   services            ProductService[]
-   address             ProductAddress[]
+   owner               User         @relation("UserOwnsBusiness", fields: [userId], references: [id])  // New relation
    
-   followers           User[]       @relation("UserFollowsProducts")
+   services            BussinesService[]
+   address             BusinessAddress[]
+   businessContact     BusinessContact?
+   
+   followers           User[]       @relation("UserFollowsBusiness")
    visibility          String
    category            Category @relation(fields: [categoryId], references: [id])
    packages            Package[]
-   feedbacks           Feedback[]
+   reviews             Review[]
    ratings             Rating[]
    bills               Bill[]
    stories             Story[]
@@ -82,46 +98,62 @@ model Product {
    updatedAt           DateTime     @default(now())
 }
 
-model ProductService {
+model BussinesService {
   id                String    @id @default(uuid())
-  productId         String
+  businessId        String
   name              String
   description       String?
   image             String?  // URL or path to the image
   specifications    Json    // JSON field for storing specifications
 
-  product           Product  @relation(fields: [productId], references: [id])
+  business          Business  @relation(fields: [businessId], references: [id])
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
 
-model ProductAddress {
+model BusinessAddress {
   id                String    @id @default(uuid())
-  productId         String
+  businessId        String
+  country           String
+  state             String
+  city              String
   streetAddress     String
   specificLocation  String?   // Additional detail for specific location (e.g., suite number, building)
-  city              String
-  state             String
-  postalCode        String
-  country           String
 
-  product           Product  @relation(fields: [productId], references: [id])
+  business          Business  @relation(fields: [businessId], references: [id])
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+model BusinessContact {
+   id           String   @id @default(uuid())
+   businessId   String   @unique
+   phone        String?
+   email        String?
+   facebook     String?
+   instagram    String?
+   telegram     String?
+   github       String?
+   linkedIn     String?
+
+   business     Business  @relation(fields: [businessId], references: [id])
+
+   createdAt    DateTime @default(now())
+   updatedAt    DateTime @default(now())
 }
 
 
 model Package {
    id                  String       @id @default(uuid())
-   productId           String
-   packageType         String
+   businessId          String
+   packageType         PackageType
    startDate           DateTime
    endDate             DateTime
    expired             Boolean
 
-   product             Product      @relation(fields: [productId], references: [id])
+   business            Business      @relation(fields: [businessId], references: [id])
 
    createdAt           DateTime     @default(now())
    updatedAt           DateTime     @default(now())
@@ -129,28 +161,28 @@ model Package {
 
 model Bill {
    id                  String       @id @default(uuid())
-   productId           String
+   businessId          String
    userId              String
    date                DateTime
    amount              Float
    paymentMethod       String
    reference           String
 
-   product             Product      @relation(fields: [productId], references: [id])
+   business            Business      @relation(fields: [businessId], references: [id])
    user                User         @relation(fields: [userId], references: [id])
 
    createdAt           DateTime     @default(now())
    updatedAt           DateTime     @default(now())
 }
 
-model Feedback {
+model Review {
    id                  String       @id @default(uuid())
    userId              String
-   productId           String
-   feedback            String
+   businessId          String
+   review              String
 
    user                User         @relation(fields: [userId], references: [id])
-   product             Product      @relation(fields: [productId], references: [id])
+   business            Business      @relation(fields: [businessId], references: [id])
 
    createdAt           DateTime     @default(now())
    updatedAt           DateTime     @default(now())
@@ -159,11 +191,11 @@ model Feedback {
 model Rating {
    id                  String       @id @default(uuid())
    userId              String
-   productId           String
+   businessId          String
    rating              Int
 
    user                User         @relation(fields: [userId], references: [id])
-   product             Product      @relation(fields: [productId], references: [id])
+   business            Business      @relation(fields: [businessId], references: [id])
 
    createdAt           DateTime     @default(now())
    updatedAt           DateTime     @default(now())
@@ -176,8 +208,8 @@ model Story {
    text                String
    image               String?
 
-   productId           String
-   product             Product      @relation(fields: [productId], references: [id])
+   businessId          String
+   business            Business      @relation(fields: [businessId], references: [id])
 
    createdAt           DateTime     @default(now())
    updatedAt           DateTime     @default(now())
