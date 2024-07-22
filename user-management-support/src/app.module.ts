@@ -10,9 +10,11 @@ import WinstonLoggerModule from './logger/winston-logger/winston-logger.module'
 import ErrorExceptionFilter from './common/filters/error.filter'
 import ActivityInterceptor from './common/interceptors/activity.interceptor'
 import PrismaModule from './prisma/prisma.module'
+import { ConfigModule } from '@nestjs/config'
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     ClientsModule.register([
       {

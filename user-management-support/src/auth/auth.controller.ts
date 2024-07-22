@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
@@ -12,6 +12,9 @@ import { User } from '@prisma/client'
 import AuthService from './auth.service'
 import { CreateAccountDto, SignInDto } from './dto'
 import LocalAuthGuard from './guards/local-auth.guard'
+import GoogleOAuthGuard from './guards/google-auth.guard'
+import { Request as RequestType } from 'express'
+import { AuthGuard } from '@nestjs/passport'
 
 @Controller('auth')
 export default class AuthController {
@@ -41,5 +44,18 @@ export default class AuthController {
   @ApiInternalServerErrorResponse({ description: 'Something went wrong' })
   async login(@Request() req: RequestWithUser) {
     return this.authService.login(req.user as User)
+  }
+
+  @Get('google-auth')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Request() req: RequestType) {
+    return 'google auth trying '
+  }
+
+  @Get('google-redirect')
+  @UseGuards(GoogleOAuthGuard)
+  googleAuthRedirect(@Request() req: RequestType) {
+    console.log(req)
+    // return this.authService.googleLogin(req)
   }
 }
