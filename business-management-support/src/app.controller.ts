@@ -1,5 +1,14 @@
-import { Controller, Get } from '@nestjs/common'
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
 import AppService from './app.service'
+import JwtAuthGuard from './auth/guards/jwt.guard'
+
+// @UseGuards(JwtAuthGuard)
 
 @Controller()
 export default class AppController {

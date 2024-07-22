@@ -34,3 +34,15 @@ export interface FunctionCallResponse {
 }
 
 export type RequestWithUser = User & Request
+
+export type MulterStorageConfig = {
+  folder: string
+  filePrefix: string
+}
+
+export type FileType = 'image' | 'pdf' | 'txt' | 'doc'
+
+export type MulterFilterConfig = {
+  fileType: FileType
+  maxSize: number // in MB
+}
