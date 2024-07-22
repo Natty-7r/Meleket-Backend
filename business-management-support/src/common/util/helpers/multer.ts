@@ -1,9 +1,9 @@
 import { BadRequestException } from '@nestjs/common'
 import { Request } from 'express'
-import { FileType, MulterFilterConfig, MulterStorageConfig } from '../types'
 import { diskStorage } from 'multer'
 import { extname } from 'path'
-import { changeSpaceByHypen } from './string'
+import { FileType, MulterFilterConfig, MulterStorageConfig } from '../types'
+import { changeSpaceByHypen } from './string-util'
 
 export const multerFilter = ({ fileType, maxSize = 5 }: MulterFilterConfig) => {
   const mimeTypes: { [key in FileType]: string[] } = {

@@ -3,10 +3,13 @@ import {
   Controller,
   Post,
   Put,
+  Request,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
 import {
+  ApiBadRequestResponse,
   ApiConflictResponse,
   ApiConsumes,
   ApiCreatedResponse,
@@ -21,8 +24,10 @@ import {
   UpdateCategoryDto,
   UpdateCategoryImageDto,
 } from './dto/update-category.dto'
+import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 
 @Controller('business')
+@UseGuards(JwtAuthGuard)
 export default class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
@@ -31,7 +36,8 @@ export default class BusinessController {
     type: CreateCategoryDto,
     description: 'Category  created succefully',
   })
-  @ApiConflictResponse({ description: 'Category exists' })
+  @ApiBadRequestResponse({ description: 'Invalid parent id' })
+  @ApiConflictResponse({ description: 'Category with the same name exists' })
   @UseInterceptors(
     FileInterceptor('image', {
       storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
@@ -43,7 +49,9 @@ export default class BusinessController {
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
     @UploadedFile() file: Express.Multer.File,
+    @Request() req: any,
   ) {
+    console.log(req.user)
     return this.businessService.createCategory({
       ...createCategoryDto,
       image: file?.path || 'uploads/category/category.png',
@@ -57,6 +65,7 @@ export default class BusinessController {
     description: 'Category  updated succefully',
   })
   @ApiNotFoundResponse({ description: 'Invalid category id  ' })
+  @ApiBadRequestResponse({ description: 'Invalid parent id' })
   @UseInterceptors(
     FileInterceptor('image', {
       storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),

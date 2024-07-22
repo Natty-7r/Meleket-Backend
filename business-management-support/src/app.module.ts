@@ -3,6 +3,7 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { ConfigModule } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
+import AuthModule from './auth/auth.module'
 
 import AppController from './app.controller'
 import AppService from './app.service'
@@ -37,6 +38,7 @@ import BusinessModule from './business/business.module'
     ]),
     WinstonLoggerModule,
     BusinessModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
