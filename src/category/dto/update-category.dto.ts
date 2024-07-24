@@ -52,6 +52,17 @@ export class UpdateCategoryDto {
   @IsNumber()
   @Transform(({ value }) => Number(value))
   price: number
+
+
+  @ApiPropertyOptional({
+    type: Boolean,
+    example: true,
+    description: 'to verify user created account',
+  })
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => Boolean(value))
+  verified: boolean
 }
 
 export class UpdateCategoryImageDto {

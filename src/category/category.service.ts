@@ -55,13 +55,12 @@ export default class CategoryService {
     name,
     level,
     price,
-    parentId,
+    parentId,verified
   }: UpdateCategoryDto) {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
-
-    if (!category) throw new NotFoundException('Invalid category id')
+    if (!category || !id) throw new NotFoundException('Invalid category id')
 
     if (parentId) {
       const parentCategory = await this.prismaService.category.findFirst({
@@ -80,6 +79,7 @@ export default class CategoryService {
         name: name || category.name,
         price: price || category.price,
         parentId: parentId || category.parentId,
+        verified:verified || category.verified
       },
     })
     return {
@@ -109,6 +109,29 @@ export default class CategoryService {
     return {
       status: 'success',
       message: 'Category updated  successfully',
+      data: {
+        ...updatedCategory,
+      },
+    }
+  }
+  async verifyCategory(id :string) {
+    const category = await this.prismaService.category.findFirst({
+      where: { id },
+    })
+
+    if (!category) throw new NotFoundException('Invalid category id')
+
+    const updatedCategory = await this.prismaService.category.update({
+      where: {
+        id,
+      },
+      data: {
+      verified:true
+      },
+    })
+    return {
+      status: 'success',
+      message: 'Category verified  successfully',
       data: {
         ...updatedCategory,
       },

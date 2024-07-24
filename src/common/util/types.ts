@@ -33,7 +33,9 @@ export interface FunctionCallResponse {
   data: any
 }
 
-export type RequestWithUser = User & Request
+export interface RequestWithUser  extends Request{
+user :User
+}
 
 export type MulterStorageConfig = {
   folder: string

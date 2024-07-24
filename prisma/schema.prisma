@@ -7,210 +7,214 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-enum UserProfileLevel  {
-  FIRST   //  just opened , cannot add business 
+enum UserProfileLevel {
+  FIRST //  just opened , cannot add business 
   SECOND // added profile 
 }
 
 enum PackageType {
-   MONTHLY
-   SIX_MONTHLY
-   YEARLY
+  MONTHLY
+  SIX_MONTHLY
+  YEARLY
 }
 
 enum BusinessProfileLevel {
-   FIRST 
-   
+  FIRST
+}
+
+enum UserType {
+  CLIENT_USER
+  ADMIN
+  SUPER_ADMIN
 }
 
 model User {
-   id                  String       @id @default(uuid())
-   firstName           String
-   lastName            String
-   email               String       @unique
-   profileLevel        UserProfileLevel    @default(FIRST)
-   password            String
-   profile             Profile?
-   reviews             Review[]
-   ratings             Rating[]
-   bills               Bill[]
-   businesses          Business[]    @relation("UserOwnsBusiness")
-   followedBussiness   Business[]    @relation("UserFollowsBusiness")
+  id                String           @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String           @unique
+  profileLevel      UserProfileLevel @default(FIRST)
+  userType          UserType         @default(CLIENT_USER)
+  password          String
+  profile           Profile?
+  reviews           Review[]
+  ratings           Rating[]
+  bills             Bill[]
+  businesses        Business[]       @relation("UserOwnsBusiness")
+  followedBussiness Business[]       @relation("UserFollowsBusiness")
 
-
-   createdAt           DateTime     @default(now())
-   passwordUpdatedAt   DateTime     @default(now())
+  createdAt         DateTime @default(now())
+  passwordUpdatedAt DateTime @default(now())
 }
 
 model Profile {
-   id                  String       @id @default(uuid())
-   phoneNumber         String
-   age                 Int
-   sex                 String
-   profilePicture      String?
-   userId              String       @unique
-   user                User         @relation(fields: [userId], references: [id])
+  id             String  @id @default(uuid())
+  phoneNumber    String
+  age            Int
+  sex            String
+  profilePicture String?
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id])
 
-   createdAt           DateTime     @default(now())
-   updatedAt           DateTime     @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Category {
-  id          String    @id @default(uuid())
-  name        String    @db.VarChar(255)
-  parentId    String?  
-  level       Int
-  price       Float
-  image       String
+  id       String  @id @default(uuid())
+  name     String  @db.VarChar(255)
+  parentId String?
+  level    Int
+  price    Float
+  image    String
+  verified Boolean @default(false)
 
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  parent      Category? @relation("CategoryToCategory", fields: [parentId], references: [id])
-  children    Category[] @relation("CategoryToCategory")
-  business    Business[]
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToCategory")
+  business Business[]
 }
 
 model Business {
-   id                  String       @id @default(uuid())
-   userId              String
-   categoryId          String
-   name                String
-   description         String
-   templateId          String
-   owner               User         @relation("UserOwnsBusiness", fields: [userId], references: [id])  // New relation
-   
-   services            BussinesService[]
-   address             BusinessAddress[]
-   businessContact     BusinessContact?
-   
-   followers           User[]       @relation("UserFollowsBusiness")
-   visibility          String
-   category            Category @relation(fields: [categoryId], references: [id])
-   packages            Package[]
-   reviews             Review[]
-   ratings             Rating[]
-   bills               Bill[]
-   stories             Story[]
+  id          String @id @default(uuid())
+  userId      String
+  categoryId  String
+  name        String
+  description String
+  templateId  String
+  owner       User   @relation("UserOwnsBusiness", fields: [userId], references: [id]) // New relation
 
-   createdAt           DateTime     @default(now())
-   updatedAt           DateTime     @default(now())
+  services        BussinesService[]
+  address         BusinessAddress[]
+  businessContact BusinessContact?
+
+  followers  User[]    @relation("UserFollowsBusiness")
+  visibility String
+  category   Category  @relation(fields: [categoryId], references: [id])
+  packages   Package[]
+  reviews    Review[]
+  ratings    Rating[]
+  bills      Bill[]
+  stories    Story[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model BussinesService {
-  id                String    @id @default(uuid())
-  businessId        String
-  name              String
-  description       String?
-  image             String?  // URL or path to the image
-  specifications    Json    // JSON field for storing specifications
+  id             String  @id @default(uuid())
+  businessId     String
+  name           String
+  description    String?
+  image          String? // URL or path to the image
+  specifications Json // JSON field for storing specifications
 
-  business          Business  @relation(fields: [businessId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model BusinessAddress {
-  id                String    @id @default(uuid())
-  businessId        String
-  country           String
-  state             String
-  city              String
-  streetAddress     String
-  specificLocation  String?   // Additional detail for specific location (e.g., suite number, building)
+  id               String  @id @default(uuid())
+  businessId       String
+  country          String
+  state            String
+  city             String
+  streetAddress    String
+  specificLocation String? // Additional detail for specific location (e.g., suite number, building)
 
-  business          Business  @relation(fields: [businessId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model BusinessContact {
-   id           String   @id @default(uuid())
-   businessId   String   @unique
-   phone        String?
-   email        String?
-   facebook     String?
-   instagram    String?
-   telegram     String?
-   github       String?
-   linkedIn     String?
+  id         String  @id @default(uuid())
+  businessId String  @unique
+  phone      String?
+  email      String?
+  facebook   String?
+  instagram  String?
+  telegram   String?
+  github     String?
+  linkedIn   String?
 
-   business     Business  @relation(fields: [businessId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
 
-   createdAt    DateTime @default(now())
-   updatedAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
-
 model Package {
-   id                  String       @id @default(uuid())
-   businessId          String
-   packageType         PackageType
-   startDate           DateTime
-   endDate             DateTime
-   expired             Boolean
+  id          String      @id @default(uuid())
+  businessId  String
+  packageType PackageType
+  startDate   DateTime
+  endDate     DateTime
+  expired     Boolean
 
-   business            Business      @relation(fields: [businessId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
 
-   createdAt           DateTime     @default(now())
-   updatedAt           DateTime     @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Bill {
-   id                  String       @id @default(uuid())
-   businessId          String
-   userId              String
-   date                DateTime
-   amount              Float
-   paymentMethod       String
-   reference           String
+  id            String   @id @default(uuid())
+  businessId    String
+  userId        String
+  date          DateTime
+  amount        Float
+  paymentMethod String
+  reference     String
 
-   business            Business      @relation(fields: [businessId], references: [id])
-   user                User         @relation(fields: [userId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 
-   createdAt           DateTime     @default(now())
-   updatedAt           DateTime     @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Review {
-   id                  String       @id @default(uuid())
-   userId              String
-   businessId          String
-   review              String
+  id         String @id @default(uuid())
+  userId     String
+  businessId String
+  review     String
 
-   user                User         @relation(fields: [userId], references: [id])
-   business            Business      @relation(fields: [businessId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
 
-   createdAt           DateTime     @default(now())
-   updatedAt           DateTime     @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Rating {
-   id                  String       @id @default(uuid())
-   userId              String
-   businessId          String
-   rating              Int
+  id         String @id @default(uuid())
+  userId     String
+  businessId String
+  rating     Int
 
-   user                User         @relation(fields: [userId], references: [id])
-   business            Business      @relation(fields: [businessId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
 
-   createdAt           DateTime     @default(now())
-   updatedAt           DateTime     @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Story {
-   id                  String       @id @default(uuid())
-   postDate            DateTime
-   contentType         String
-   text                String
-   image               String?
+  id          String   @id @default(uuid())
+  postDate    DateTime
+  contentType String
+  text        String
+  image       String?
 
-   businessId          String
-   business            Business      @relation(fields: [businessId], references: [id])
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
 
-   createdAt           DateTime     @default(now())
-   updatedAt           DateTime     @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }

@@ -7,7 +7,7 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
-import { User } from '@prisma/client'
+import { User, UserType } from '@prisma/client'
 import { CreateAccountDto, SignInDto } from './dto'
 
 @Injectable()
@@ -66,6 +66,7 @@ export default class AuthService {
       sub: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
+      UserType:user.userType
     }
 
     return {

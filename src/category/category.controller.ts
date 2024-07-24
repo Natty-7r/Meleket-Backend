@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Param,
   Post,
   Put,
   // Request,
@@ -21,12 +22,16 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express'
 import { multerFilter, muluterStorage } from 'src/common/util/helpers/multer'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
-import { CreateCategoryDto } from './dto/create-category.dto'
+import { CreateCategoryDto, CreateCategoryFinalDto } from './dto/create-category.dto'
 import CategoryService from './category.service'
 import {
   UpdateCategoryDto,
   UpdateCategoryImageDto,
 } from './dto/update-category.dto'
+import User from 'src/common/decorators/user.decorator'
+import { User as UserAsType } from '@prisma/client'
+import RolesGuard from 'src/common/guards/role.guard'
+import Roles from 'src/common/decorators/roles.decorator'
 
 @ApiTags('Category')
 @Controller('category')
@@ -52,19 +57,19 @@ export default class CategoryController {
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
     @UploadedFile() file: Express.Multer.File,
-    // @Request() req: any,
+   @User() user:UserAsType
   ) {
-    // console.log(req.user)
     return this.categoryService.createCategory({
       ...createCategoryDto,
       image: file?.path || 'uploads/category/category.png',
       price: createCategoryDto?.price || 50,
+      verified: user?.userType =='ADMIN'|| user.userType =='SUPER_ADMIN' ? true:false
     })
   }
 
   @ApiOperation({ description: 'Update category' })
   @ApiCreatedResponse({
-    type: CreateCategoryDto,
+    type: UpdateCategoryDto,
     description: 'Category  updated succefully',
   })
   @ApiNotFoundResponse({ description: 'Invalid category id  ' })
@@ -74,6 +79,9 @@ export default class CategoryController {
       storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
     }),
   )
+
+  @Roles('ADMIN','SUPER_ADMIN')
+  @UseGuards(RolesGuard)
   @Put('update-category')
   updateCategory(@Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoryService.updateCategory(updateCategoryDto)
@@ -82,7 +90,7 @@ export default class CategoryController {
   // update category
   @ApiOperation({ description: 'Update category image' })
   @ApiCreatedResponse({
-    type: CreateCategoryDto,
+    type: CreateCategoryFinalDto,
     description: 'Category  image  updated succefully',
   })
   @ApiNotFoundResponse({ description: 'Invalid category id  ' })
@@ -93,11 +101,31 @@ export default class CategoryController {
     }),
   )
   @ApiConsumes('multipart/form-data')
+  @Roles('ADMIN','SUPER_ADMIN')
+  @UseGuards(RolesGuard)
   @Put('update-category-image')
   updateCategoryImage(
     @Body() { id }: UpdateCategoryImageDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.categoryService.updateCategoryImage({ id, image: file.path })
+  }
+
+
+  
+  @ApiOperation({ description: 'Verify  image' })
+  @ApiCreatedResponse({
+    type: CreateCategoryFinalDto,
+    description: 'Category verified succefully',
+  })
+  @ApiNotFoundResponse({ description: 'Invalid category id  ' })
+
+  @Roles('ADMIN','SUPER_ADMIN')
+  @UseGuards(RolesGuard)
+  @Put('verify-category')
+  verifyCategory(
+  @Param('id') id:string
+  ) {
+    return this.categoryService.verifyCategory(id)
   }
 }
