@@ -53,7 +53,6 @@ export class UpdateCategoryDto {
   @Transform(({ value }) => Number(value))
   price: number
 
-
   @ApiPropertyOptional({
     type: Boolean,
     example: true,

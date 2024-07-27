@@ -19,7 +19,6 @@ export const multerFilter = ({ fileType, maxSize = 5 }: MulterFilterConfig) => {
   const allowedTypes = mimeTypes[fileType]
 
   return (req: Request, file: Express.Multer.File, callback: any) => {
-    console.log(file, 'file in filter')
     // Ensure the file is an file format
     if (!file) {
       return callback(new BadRequestException('File cannot be empty!'), false)
@@ -55,12 +54,6 @@ export const muluterStorage = (
     filename: (req, file, cb) => {
       const name = file.originalname.split('.')[0]
       const extension = extname(file.originalname)
-      const randomName = Array(32)
-        .fill(null)
-        .map(() => Math.round(Math.random() * 16).toString(16))
-        .join('')
-
-      console.log(randomName, 'rrrr')
       cb(
         null,
         `${filePrefix}_${changeSpaceByHypen(name)}-${Date.now().toString()}${extension}`,

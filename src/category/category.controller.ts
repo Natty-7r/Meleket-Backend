@@ -1,10 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   Param,
   Post,
   Put,
-  // Request,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -22,7 +23,10 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express'
 import { multerFilter, muluterStorage } from 'src/common/util/helpers/multer'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
-import { CreateCategoryDto, CreateCategoryFinalDto } from './dto/create-category.dto'
+import {
+  CreateCategoryDto,
+  CreateCategoryFinalDto,
+} from './dto/create-category.dto'
 import CategoryService from './category.service'
 import {
   UpdateCategoryDto,
@@ -32,77 +36,63 @@ import User from 'src/common/decorators/user.decorator'
 import { User as UserAsType } from '@prisma/client'
 import RolesGuard from 'src/common/guards/role.guard'
 import Roles from 'src/common/decorators/roles.decorator'
+import UpdateParentCategoryDto from './dto/update-category-parent.dto'
+import CreateCategorySwaggerDefinition from './decorators/swagger/create-category.swagger'
+import UpdateCategorySwaggerDefinition from './decorators/swagger/update-image-category.swagger '
+import UpdateCImageategorySwaggerDefinition from './decorators/swagger/update-image-category.swagger '
+import VerifyCategorySwaggerDefinition from './decorators/swagger/verify-category.swagger'
 
 @ApiTags('Category')
 @Controller('category')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @ApiOperation({ description: 'Create category' })
-  @ApiCreatedResponse({
-    type: CreateCategoryDto,
-    description: 'Category  created succefully',
-  })
-  @ApiBadRequestResponse({ description: 'Invalid parent id' })
-  @ApiConflictResponse({ description: 'Category with the same name exists' })
+  @CreateCategorySwaggerDefinition()
+  @Post('create-category')
   @UseInterceptors(
     FileInterceptor('image', {
       storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
       fileFilter: multerFilter({ fileType: 'image', maxSize: 5 }),
     }),
   )
-  @ApiConsumes('multipart/form-data')
-  @Post('create-category')
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
     @UploadedFile() file: Express.Multer.File,
-   @User() user:UserAsType
+    @User() user: UserAsType,
   ) {
     return this.categoryService.createCategory({
       ...createCategoryDto,
       image: file?.path || 'uploads/category/category.png',
       price: createCategoryDto?.price || 50,
-      verified: user?.userType =='ADMIN'|| user.userType =='SUPER_ADMIN' ? true:false
+      verified:
+        user?.userType == 'ADMIN' || user?.userType === 'SUPER_ADMIN'
+          ? true
+          : false,
     })
   }
 
-  @ApiOperation({ description: 'Update category' })
-  @ApiCreatedResponse({
-    type: UpdateCategoryDto,
-    description: 'Category  updated succefully',
-  })
-  @ApiNotFoundResponse({ description: 'Invalid category id  ' })
-  @ApiBadRequestResponse({ description: 'Invalid parent id' })
+  @UpdateCategorySwaggerDefinition()
   @UseInterceptors(
     FileInterceptor('image', {
       storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
     }),
   )
-
-  @Roles('ADMIN','SUPER_ADMIN')
-  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'SUPER_ADMIN')
   @Put('update-category')
   updateCategory(@Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoryService.updateCategory(updateCategoryDto)
   }
 
   // update category
-  @ApiOperation({ description: 'Update category image' })
-  @ApiCreatedResponse({
-    type: CreateCategoryFinalDto,
-    description: 'Category  image  updated succefully',
-  })
-  @ApiNotFoundResponse({ description: 'Invalid category id  ' })
+  @UpdateCImageategorySwaggerDefinition()
   @UseInterceptors(
     FileInterceptor('image', {
       storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
       fileFilter: multerFilter({ fileType: 'image', maxSize: 5 }),
     }),
   )
-  @ApiConsumes('multipart/form-data')
-  @Roles('ADMIN','SUPER_ADMIN')
-  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'SUPER_ADMIN')
   @Put('update-category-image')
   updateCategoryImage(
     @Body() { id }: UpdateCategoryImageDto,
@@ -111,21 +101,47 @@ export default class CategoryController {
     return this.categoryService.updateCategoryImage({ id, image: file.path })
   }
 
+  @VerifyCategorySwaggerDefinition()
+  @Roles('ADMIN', 'SUPER_ADMIN')
+  @Put('verify-category')
+  verifyCategory(@Param('id') id: string) {
+    return this.categoryService.verifyCategory(id)
+  }
 
-  
-  @ApiOperation({ description: 'Verify  image' })
+  @ApiOperation({ description: 'Get categories' })
+  @ApiCreatedResponse({
+    description: 'Category verified succefully',
+  })
+  @Roles('ADMIN', 'SUPER_ADMIN')
+  @Get('all')
+  getCategories() {
+    return this.categoryService.getCategories()
+  }
+
+  @ApiOperation({ description: 'Delete category ' })
   @ApiCreatedResponse({
     type: CreateCategoryFinalDto,
     description: 'Category verified succefully',
   })
   @ApiNotFoundResponse({ description: 'Invalid category id  ' })
+  @ApiNotFoundResponse({ description: 'Category has children  ' })
+  @Roles('ADMIN', 'SUPER_ADMIN')
+  @Delete('delete')
+  deleteCategory(@Param('id') id: string) {
+    return this.categoryService.deleteCategory(id)
+  }
 
-  @Roles('ADMIN','SUPER_ADMIN')
-  @UseGuards(RolesGuard)
-  @Put('verify-category')
-  verifyCategory(
-  @Param('id') id:string
+  @ApiOperation({ description: 'Update Parent category' })
+  @ApiCreatedResponse({
+    type: CreateCategoryFinalDto,
+    description: 'Parent category updated  succefully',
+  })
+  @ApiNotFoundResponse({ description: 'Invalid parent  id  ' })
+  @Roles('ADMIN', 'SUPER_ADMIN')
+  @Put('update-parent')
+  updateParentCategory(
+    @Body() updateParentCategoryDto: UpdateParentCategoryDto,
   ) {
-    return this.categoryService.verifyCategory(id)
+    return this.categoryService.updateParentCategory(updateParentCategoryDto)
   }
 }

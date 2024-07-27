@@ -66,7 +66,7 @@ export default class AuthService {
       sub: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
-      UserType:user.userType
+      UserType: user.userType,
     }
 
     return {
