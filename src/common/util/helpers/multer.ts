@@ -42,7 +42,7 @@ export const multerFilter = ({ fileType, maxSize = 5 }: MulterFilterConfig) => {
         false,
       )
     }
-    callback(null, true)
+    return callback(null, true)
   }
 }
 

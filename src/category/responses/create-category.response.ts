@@ -1,6 +1,6 @@
 import { ApiResponseProperty } from '@nestjs/swagger'
 
-export default class CreateAccountResponse {
+export default class CreateCategoryResponse {
   @ApiResponseProperty({
     type: String,
     example: '8ada29bb-5c51-4dd9-9819-4fb5175dd5ac',

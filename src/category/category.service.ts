@@ -9,12 +9,10 @@ import PrismaService from 'src/prisma/prisma.service'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import { CategoryTreeNode } from 'src/common/util/types'
 import { Category } from '@prisma/client'
-import { CreateCategoryFinalDto } from './dto/create-category.dto'
-import {
-  UpdateCategoryDto,
-  UpdateCategoryImageFinalDto,
-} from './dto/update-category.dto'
+import UpdateCategoryDto from './dto/update-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
+import CreateCategoryDto from './dto/create-category.dto'
+import UpdateCategoryImageDto from './dto/update-category-image.dto '
 
 @Injectable()
 @UseGuards(JwtAuthGuard)
@@ -52,7 +50,10 @@ export default class CategoryService {
     return categoryTree
   }
 
-  async createCategory(createCategoryDto: CreateCategoryFinalDto) {
+  async createCategory(
+    createCategoryDto: CreateCategoryDto,
+    verified: boolean,
+  ) {
     console.log(createCategoryDto)
     const previesCategory = await this.prismaService.category.findFirst({
       where: { name: createCategoryDto.name.toLocaleLowerCase().trim() },
@@ -61,7 +62,7 @@ export default class CategoryService {
       throw new ConflictException('Category with same name exits!')
 
     if (createCategoryDto.parentId) {
-      if (createCategoryDto.level == 1)
+      if (createCategoryDto.level === 1)
         throw new ConflictException(
           'first level category can not have Parent id ',
         )
@@ -72,7 +73,7 @@ export default class CategoryService {
       if (!parentCategory)
         throw new BadRequestException('Invalid parent category id ')
 
-      if (createCategoryDto.level != parentCategory.level - 1)
+      if (createCategoryDto.level !== parentCategory.level - 1)
         throw new ConflictException('Parent level should current level -1  ')
     } else if (createCategoryDto.level !== 1)
       throw new BadRequestException('New category should have level of 1 ')
@@ -81,6 +82,7 @@ export default class CategoryService {
       data: {
         name: createCategoryDto.name.toLocaleLowerCase().trim(), // changing name for search
         ...createCategoryDto,
+        verified,
       },
     })
 
@@ -135,7 +137,7 @@ export default class CategoryService {
     }
   }
 
-  async updateCategoryImage({ id, image }: UpdateCategoryImageFinalDto) {
+  async updateCategoryImage({ id }: UpdateCategoryImageDto, image: string) {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })

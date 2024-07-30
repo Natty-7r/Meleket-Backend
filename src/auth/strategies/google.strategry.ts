@@ -10,11 +10,6 @@ export default class GoogleStrategy extends PassportStrategy(
   'google',
 ) {
   constructor(private readonly configService: ConfigService) {
-    const clientID = configService.get('GOOGLE_CLIENT_ID')
-    const clientSecret = configService.get('GOOGLE_CLIENT_SECRETE')
-    const callbackURL = configService.get('GOOGLE_REDIRECT_URL')
-
-    console.log(callbackURL, clientID, clientSecret)
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -37,7 +32,6 @@ export default class GoogleStrategy extends PassportStrategy(
   ): Promise<any> {
     const { id, name, emails, photos } = profile
 
-    console.log(profile)
     const user = {
       provider: 'google',
       providerId: id,

@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Transform } from 'class-transformer'
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
 
-export class UpdateCategoryDto {
+export default class UpdateCategoryDto {
   @ApiProperty({
     type: String,
     example: 'id',
@@ -62,29 +62,4 @@ export class UpdateCategoryDto {
   @IsNumber()
   @Transform(({ value }) => Boolean(value))
   verified: boolean
-}
-
-export class UpdateCategoryImageDto {
-  @ApiProperty({
-    type: String,
-    example: 'id',
-    description: 'Category Id',
-  })
-  @IsString()
-  @IsNotEmpty()
-  id: string
-}
-
-export class UpdateCategoryImageFinalDto {
-  @ApiProperty({
-    type: String,
-    example: 'id',
-    description: 'Category Id',
-  })
-  @IsString()
-  @IsNotEmpty()
-  id: string
-
-  @IsString()
-  image: string
 }

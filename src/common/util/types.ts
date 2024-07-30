@@ -59,17 +59,7 @@ export interface CategoryTreeNode {
   children: CategoryTreeNode[]
 }
 
-// id       String  @id @default(uuid())
-// name     String  @db.VarChar(255)
-// parentId String?
-// level    Int
-// price    Float
-// image    String
-// verified Boolean @default(false)
-
-// createdAt DateTime @default(now())
-// updatedAt DateTime @updatedAt
-
-// parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
-// children Category[] @relation("CategoryToCategory")
-// business Business[]
+export type CategoryTreeSwaggerConfig = {
+  operationName: string
+  successMessage: string
+}

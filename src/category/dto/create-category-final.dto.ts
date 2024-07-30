@@ -1,8 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Transform } from 'class-transformer'
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator'
 
-export default class CreateCategoryDto {
+export class CreateCategoryDto {
   @ApiProperty({
     type: String,
     example: 'Barber',
@@ -49,4 +55,29 @@ export default class CreateCategoryDto {
   })
   @IsString()
   image: string
+}
+
+export class CreateCategoryFinalDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string
+
+  @IsOptional()
+  @IsString()
+  parentId: string
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Transform(({ value }) => Number(value))
+  level: number
+
+  @IsNumber()
+  @Transform(({ value }) => Number(value))
+  price: number
+
+  @IsString()
+  image: string
+
+  @IsBoolean()
+  verified: boolean
 }

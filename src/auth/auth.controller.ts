@@ -5,16 +5,19 @@ import { User } from '@prisma/client'
 import { Request as RequestType } from 'express'
 import { AuthGuard } from '@nestjs/passport'
 import AuthService from './auth.service'
-import { CreateAccountDto, SignInDto } from './dto'
+import { CreateAccountDto } from './dto'
 import LocalAuthGuard from './guards/local-auth.guard'
 import GoogleOAuthGuard from './guards/google-auth.guard'
-import CreateAccountSwaggerDefinition from './decorators/swagger/create-account.swagger.dto'
-import SignInSwaggerDefinition from './decorators/swagger/sign-in.swagger.dto'
+import {
+  CreateAccountSwaggerDefinition,
+  SignInSwaggerDefinition,
+} from './decorators/auth-swagger-definition.decorator'
 
 @ApiTags('Auth')
 @Controller('auth')
 export default class AuthController {
   constructor(private readonly authService: AuthService) {}
+
   @CreateAccountSwaggerDefinition()
   @Post('/create-account')
   createAccount(@Body() creaeteAccountDto: CreateAccountDto) {

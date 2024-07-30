@@ -1,14 +1,16 @@
 import { applyDecorators } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
 } from '@nestjs/swagger'
 import SignInResponse from 'src/auth/responses/sign-in.response'
+import CreateAccountResponse from '../responses/create-account.response'
 
-const SignInSwaggerDefinition = () => {
+export const SignInSwaggerDefinition = () => {
   return applyDecorators(
     ApiOperation({ summary: 'User Login  ' }),
     ApiCreatedResponse({
@@ -23,4 +25,14 @@ const SignInSwaggerDefinition = () => {
   )
 }
 
-export default SignInSwaggerDefinition
+export const CreateAccountSwaggerDefinition = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'Create user account' }),
+    ApiCreatedResponse({
+      type: CreateAccountResponse,
+      description: 'user account created successfully',
+    }),
+    ApiConflictResponse({ description: 'Email is already in use!' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+}
