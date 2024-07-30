@@ -1,103 +1,100 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
+  Param,
   Post,
   Put,
-  // Request,
   UploadedFile,
-  UseGuards,
-  UseInterceptors,
 } from '@nestjs/common'
-import {
-  ApiBadRequestResponse,
-  ApiConflictResponse,
-  ApiConsumes,
-  ApiCreatedResponse,
-  ApiNotFoundResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger'
+import { ApiTags } from '@nestjs/swagger'
 
-import { FileInterceptor } from '@nestjs/platform-express'
-import { multerFilter, muluterStorage } from 'src/common/util/helpers/multer'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
-import { CreateCategoryDto } from './dto/create-category.dto'
+import User from 'src/common/decorators/user.decorator'
+import { User as UserAsType } from '@prisma/client'
+import CreateCategoryDto from './dto/create-category.dto'
 import CategoryService from './category.service'
+import UpdateCategoryDto from './dto/update-category.dto'
+import { CreateCategorySwaggerDefinition } from './decorators/swagger-definition.decorator'
 import {
-  UpdateCategoryDto,
-  UpdateCategoryImageDto,
-} from './dto/update-category.dto'
+  CreateCategory,
+  DeleteCategory,
+  GetCategories,
+  UpdateCategory,
+  UpdateCategoryImage,
+  UpdateCategoryParent,
+  VerifyCategory,
+} from './decorators/category-api-endpoint.decorator'
+import UpdateParentCategoryDto from './dto/update-category-parent.dto'
+import UpdateCategoryImageDto from './dto/update-category-image.dto '
 
 @ApiTags('Category')
 @Controller('category')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @ApiOperation({ description: 'Create category' })
-  @ApiCreatedResponse({
-    type: CreateCategoryDto,
-    description: 'Category  created succefully',
-  })
-  @ApiBadRequestResponse({ description: 'Invalid parent id' })
-  @ApiConflictResponse({ description: 'Category with the same name exists' })
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
-      fileFilter: multerFilter({ fileType: 'image', maxSize: 5 }),
-    }),
-  )
-  @ApiConsumes('multipart/form-data')
+  @CreateCategorySwaggerDefinition()
+  @CreateCategory()
   @Post('create-category')
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
     @UploadedFile() file: Express.Multer.File,
-    // @Request() req: any,
+    @User() user: UserAsType,
   ) {
-    // console.log(req.user)
-    return this.categoryService.createCategory({
-      ...createCategoryDto,
-      image: file?.path || 'uploads/category/category.png',
-      price: createCategoryDto?.price || 50,
-    })
+    return this.categoryService.createCategory(
+      {
+        ...createCategoryDto,
+        image: file?.path || 'uploads/category/category.png',
+        price: createCategoryDto?.price || 50,
+      },
+      !!(user?.userType === 'ADMIN' || user?.userType === 'SUPER_ADMIN'),
+    )
   }
 
-  @ApiOperation({ description: 'Update category' })
-  @ApiCreatedResponse({
-    type: CreateCategoryDto,
-    description: 'Category  updated succefully',
-  })
-  @ApiNotFoundResponse({ description: 'Invalid category id  ' })
-  @ApiBadRequestResponse({ description: 'Invalid parent id' })
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
-    }),
-  )
+  @UpdateCategory()
   @Put('update-category')
   updateCategory(@Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoryService.updateCategory(updateCategoryDto)
   }
 
   // update category
-  @ApiOperation({ description: 'Update category image' })
-  @ApiCreatedResponse({
-    type: CreateCategoryDto,
-    description: 'Category  image  updated succefully',
-  })
-  @ApiNotFoundResponse({ description: 'Invalid category id  ' })
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
-      fileFilter: multerFilter({ fileType: 'image', maxSize: 5 }),
-    }),
-  )
-  @ApiConsumes('multipart/form-data')
+  @UpdateCategoryImage()
   @Put('update-category-image')
   updateCategoryImage(
-    @Body() { id }: UpdateCategoryImageDto,
+    @Body() updateCategoryImageDto: UpdateCategoryImageDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.categoryService.updateCategoryImage({ id, image: file.path })
+    return this.categoryService.updateCategoryImage(
+      updateCategoryImageDto,
+      file.path,
+    )
+  }
+
+  @VerifyCategory()
+  @Put('verify-category')
+  verifyCategory(@Param('id') id: string) {
+    return this.categoryService.verifyCategory(id)
+  }
+
+  @GetCategories()
+  @Get('all')
+  getCategories() {
+    return this.categoryService.getCategories()
+  }
+
+  @DeleteCategory()
+  @Delete('delete')
+  deleteCategory(@Param('id') id: string) {
+    return this.categoryService.deleteCategory(id)
+  }
+
+  @UpdateCategoryParent()
+  @Put('update-parent')
+  updateParentCategory(
+    @Body() updateParentCategoryDto: UpdateParentCategoryDto,
+  ) {
+    return this.categoryService.updateParentCategory(updateParentCategoryDto)
   }
 }

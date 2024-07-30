@@ -33,7 +33,9 @@ export interface FunctionCallResponse {
   data: any
 }
 
-export type RequestWithUser = User & Request
+export interface RequestWithUser extends Request {
+  user: User
+}
 
 export type MulterStorageConfig = {
   folder: string
@@ -45,4 +47,19 @@ export type FileType = 'image' | 'pdf' | 'txt' | 'doc'
 export type MulterFilterConfig = {
   fileType: FileType
   maxSize: number // in MB
+}
+
+export interface CategoryTreeNode {
+  id: string
+  name: string
+  parentId: string | null
+  level: number
+  price: number
+  image: string
+  children: CategoryTreeNode[]
+}
+
+export type CategoryTreeSwaggerConfig = {
+  operationName: string
+  successMessage: string
 }

@@ -17,7 +17,6 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js'],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
@@ -114,4 +113,11 @@ module.exports = {
       },
     ],
   },
+  ignorePatterns: [
+    '.eslintrc.js',
+    '**/*.decorator.ts', // Ignores all TypeScript files with '.decorator.ts' in their name
+    '**/*.decorator.js', // Ignores all JavaScript files with '.decorator.js' in their name
+    '**/*.swagger.ts', // Ignores all TypeScript files with '.decorator.ts' in their name
+    '**/*.swagger.js', //
+  ],
 }
