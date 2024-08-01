@@ -33,8 +33,10 @@ export interface FunctionCallResponse {
   data: any
 }
 
+export type USER = User
+
 export interface RequestWithUser extends Request {
-  user: User
+  user: USER
 }
 
 export type MulterStorageConfig = {
