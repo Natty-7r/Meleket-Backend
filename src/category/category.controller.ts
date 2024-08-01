@@ -7,16 +7,15 @@ import {
   Post,
   Put,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import User from 'src/common/decorators/user.decorator'
-import { User as UserAsType } from '@prisma/client'
 import CreateCategoryDto from './dto/create-category.dto'
 import CategoryService from './category.service'
 import UpdateCategoryDto from './dto/update-category.dto'
-import { CreateCategorySwaggerDefinition } from './decorators/swagger-definition.decorator'
 import {
   CreateCategory,
   DeleteCategory,
@@ -28,20 +27,20 @@ import {
 } from './decorators/category-api-endpoint.decorator'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import UpdateCategoryImageDto from './dto/update-category-image.dto '
+import { USER } from 'src/common/util/types'
 
 @ApiTags('Category')
 @Controller('category')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @CreateCategorySwaggerDefinition()
   @CreateCategory()
   @Post('create-category')
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
     @UploadedFile() file: Express.Multer.File,
-    @User() user: UserAsType,
+    @User() user: USER,
   ) {
     return this.categoryService.createCategory(
       {
@@ -49,7 +48,7 @@ export default class CategoryController {
         image: file?.path || 'uploads/category/category.png',
         price: createCategoryDto?.price || 50,
       },
-      !!(user?.userType === 'ADMIN' || user?.userType === 'SUPER_ADMIN'),
+      user.userType != 'CLIENT_USER',
     )
   }
 
@@ -59,7 +58,6 @@ export default class CategoryController {
     return this.categoryService.updateCategory(updateCategoryDto)
   }
 
-  // update category
   @UpdateCategoryImage()
   @Put('update-category-image')
   updateCategoryImage(
