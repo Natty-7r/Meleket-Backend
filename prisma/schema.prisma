@@ -8,8 +8,8 @@ datasource db {
 }
 
 enum UserProfileLevel {
-  FIRST //  just opened , cannot add business 
-  SECOND // added profile 
+  CREATED //  just opened , cannot add business 
+  VERIFIED // by email 
 }
 
 enum PackageType {
@@ -18,8 +18,10 @@ enum PackageType {
   YEARLY
 }
 
-enum BusinessProfileLevel {
-  FIRST
+enum BusinessVisiblityStatus {
+ CREATED // no buyed package
+ ACTIVE
+ HIDDEN  // when package is done
 }
 
 enum UserType {
@@ -27,6 +29,33 @@ enum UserType {
   ADMIN
   SUPER_ADMIN
 }
+
+enum OTPType  {
+  VERFICATION
+  RESET
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+}
+
+enum AdminStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ChannelType {
+  EMAIL
+  PHONE
+}
+
+enum StoryContentType {
+  STRING
+  IMAGE
+  BOTH
+}
+
 
 model User {
   id                String           @id @default(uuid())
@@ -46,6 +75,33 @@ model User {
   createdAt         DateTime @default(now())
   passwordUpdatedAt DateTime @default(now())
 }
+
+
+
+model OTP {
+  id            String           @id @default(uuid())
+  code          String           @unique
+  type          OTPType
+  channelType  ChannelType
+  channelValue String
+  isVerified   Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model Admin {
+  id              String       @id @default(cuid())
+  firstName      String
+  lastName       String
+  email           String       @unique
+  password        String
+  role            AdminRole
+  status          AdminStatus
+  inactiveReason String?      @default("")
+  createdAat      DateTime     @default(now()) @map("created_at")
+  updatedAat      DateTime     @updatedAt @map("updated_at")
+}
+
 
 model Profile {
   id             String  @id @default(uuid())
@@ -91,7 +147,7 @@ model Business {
   businessContact BusinessContact?
 
   followers  User[]    @relation("UserFollowsBusiness")
-  visibility String
+  visibility BusinessVisiblityStatus  @default(CREATED)
   category   Category  @relation(fields: [categoryId], references: [id])
   packages   Package[]
   reviews    Review[]
@@ -208,7 +264,7 @@ model Rating {
 model Story {
   id          String   @id @default(uuid())
   postDate    DateTime
-  contentType String
+  contentType StoryContentType
   text        String
   image       String?
 
