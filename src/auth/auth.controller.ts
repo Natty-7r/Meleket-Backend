@@ -2,7 +2,6 @@ import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { RequestWithUser } from 'src/common/util/types'
 import { User } from '@prisma/client'
-// import { Request as RequestType } from 'express'
 import { AuthGuard } from '@nestjs/passport'
 import AuthService from './auth.service'
 import { CreateAccountDto } from './dto'
@@ -31,7 +30,7 @@ export default class AuthController {
     return this.authService.login(req.user as User)
   }
 
-  @Get('google-auth')
+  @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
     return 'google auth trying '

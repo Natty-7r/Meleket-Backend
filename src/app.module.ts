@@ -18,7 +18,6 @@ import CategoryModule from './category/category.module'
       secret: process.env.JWT_SECRETE,
       signOptions: { expiresIn: '60s' },
     }),
-    PrismaModule,
     ClientsModule.register([
       {
         name: 'BUSINESS_MANAGEMENT_SERVICE',
