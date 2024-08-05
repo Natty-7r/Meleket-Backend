@@ -16,6 +16,7 @@ export default (): Config => ({
   },
   jwt: {
     secret: process.env.JWT_SECRETE,
+    expiresIn: process.env.EXPIRES_IN,
   },
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID,

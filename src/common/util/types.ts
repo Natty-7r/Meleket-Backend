@@ -87,6 +87,7 @@ export interface Config {
   }
   jwt: {
     secret: string
+    expiresIn: any
   }
   google: {
     clientId: string
