@@ -3,6 +3,7 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { ConfigModule } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
+import MessageModule from './message/message.module'
 import AuthModule from './auth/auth.module'
 
 import WinstonLoggerModule from './logger/winston-logger/winston-logger.module'
@@ -36,6 +37,7 @@ import CategoryModule from './category/category.module'
     WinstonLoggerModule,
     CategoryModule,
     AuthModule,
+    MessageModule,
   ],
 
   providers: [
