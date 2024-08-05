@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { RequestWithUser } from 'src/common/util/types'
+import { RequestWithUser, SignUpType } from 'src/common/util/types'
 import { User } from '@prisma/client'
 import { AuthGuard } from '@nestjs/passport'
 import AuthService from './auth.service'
@@ -20,7 +20,10 @@ export default class AuthController {
   @CreateAccountSwaggerDefinition()
   @Post('/create-account')
   createAccount(@Body() creaeteAccountDto: CreateAccountDto) {
-    return this.authService.createAccount(creaeteAccountDto)
+    return this.authService.createAccount(
+      creaeteAccountDto,
+      SignUpType.BY_EMAIL,
+    )
   }
 
   @SignInSwaggerDefinition()

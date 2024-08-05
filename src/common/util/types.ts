@@ -65,3 +65,8 @@ export type CategoryTreeSwaggerConfig = {
   operationName: string
   successMessage: string
 }
+
+export enum SignUpType {
+  BY_EMAIL = 'BY_EMAIL',
+  OAUTH = 'OAUTH',
+}

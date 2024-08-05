@@ -62,7 +62,7 @@ model User {
   firstName         String
   lastName          String
   email             String           @unique
-  profileLevel      UserProfileLevel @default(FIRST)
+  profileLevel      UserProfileLevel @default(CREATED)
   userType          UserType         @default(CLIENT_USER)
   password          String
   profile           Profile?

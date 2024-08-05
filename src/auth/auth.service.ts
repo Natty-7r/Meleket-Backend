@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { User } from '@prisma/client'
 import { CreateAccountDto, SignInDto } from './dto'
+import { SignUpType } from 'src/common/util/types'
 
 @Injectable()
 export default class AuthService {
@@ -17,12 +18,10 @@ export default class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async createAccount({
-    firstName,
-    lastName,
-    email,
-    password,
-  }: CreateAccountDto) {
+  async createAccount(
+    { firstName, lastName, email, password }: CreateAccountDto,
+    signUpType: SignUpType,
+  ) {
     const user = await this.prismaService.user.findFirst({ where: { email } })
     if (user) throw new ConflictException('Email is already in use!')
     const hashedPassword = await bcrypt.hash(password, 12)
@@ -33,6 +32,8 @@ export default class AuthService {
         lastName,
         email,
         password: hashedPassword,
+        profileLevel:
+          signUpType == SignUpType.BY_EMAIL ? 'VERIFIED' : 'CREATED',
       },
     })
 
