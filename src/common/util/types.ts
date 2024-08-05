@@ -70,3 +70,38 @@ export enum SignUpType {
   BY_EMAIL = 'BY_EMAIL',
   OAUTH = 'OAUTH',
 }
+
+export interface Config {
+  server: {
+    host: string
+    port: number
+  }
+  db: {
+    user: string
+    password: string
+    name: string
+    url: string
+  }
+  otp: {
+    length: number
+  }
+  jwt: {
+    secret: string
+  }
+  google: {
+    clientId: string
+    clientSecret: string
+    redirectUrl: string
+  }
+  twilio: {
+    accountSid: string
+    authToken: string
+    smsSender: string
+  }
+  email: {
+    host: string
+    port: number
+    sender: string
+    senderPassword: string
+  }
+}
