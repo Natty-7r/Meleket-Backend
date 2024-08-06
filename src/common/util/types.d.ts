@@ -106,3 +106,14 @@ export interface Config {
     senderPassword: string
   }
 }
+
+export type SendSMSParam = {
+  recieverPhone: string
+  smsBody: string
+}
+
+export type SendEmailParam = {
+  recieverEmail: string
+  subject: string
+  body: string
+}
