@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { User } from '@prisma/client'
+import { OTPType, User } from '@prisma/client'
 
 export type ExceptionResponse = {
   message: string
@@ -108,18 +108,25 @@ export interface Config {
   }
 }
 
-export type SendSMSParam = {
-  recieverPhone: string
+export interface SendSMSParam {
+  smsAddress: string
   smsBody: string
 }
 
-export type SendEmailParam = {
-  recieverEmail: string
+export interface SendEmailParam {
+  address: string
+  subject: string
+  body: string
+}
+
+export interface SendMessageParam {
+  address: string
   subject: string
   body: string
 }
 export interface SendOTPParam {
-  channelValue: string
+  address: string
   firstName: string
   otp: string
+  otpType: OTPType
 }
