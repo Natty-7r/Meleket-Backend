@@ -13,6 +13,7 @@ export default (): Config => ({
   },
   otp: {
     length: parseInt(process.env.OTP_LENGTH, 10) || 6,
+    expirationMinute: parseInt(process.env.OTP_EXPIRATION_MINUTE, 10) || 6,
   },
   jwt: {
     secret: process.env.JWT_SECRETE,

@@ -84,6 +84,7 @@ export interface Config {
   }
   otp: {
     length: number
+    expirationMinute: number
   }
   jwt: {
     secret: string
@@ -116,4 +117,9 @@ export type SendEmailParam = {
   recieverEmail: string
   subject: string
   body: string
+}
+export interface SendOTPParam {
+  channelValue: string
+  firstName: string
+  otp: string
 }

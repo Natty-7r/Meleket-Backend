@@ -6,6 +6,7 @@ import LocalStrategy from './strategies/local.strategy'
 import { ConfigModule, ConfigService } from '@nestjs/config' // Import ConfigModule and ConfigService
 import GoogleStrategy from './strategies/google.strategry'
 import JwtStrategy from './strategies/jwt.strategry'
+import MessageModule from 'src/message/message.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import JwtStrategy from './strategies/jwt.strategry'
         signOptions: { expiresIn: configService.get<string>('jwt.expiresIn') },
       }),
     }),
+    MessageModule,
   ],
   providers: [AuthService, LocalStrategy, GoogleStrategy, JwtStrategy],
   controllers: [AuthController],
