@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { TwilioService } from 'nestjs-twilio'
 import { ConfigService } from '@nestjs/config'
 import {
+  SendAccountCreationParam,
   SendMessageParam,
   SendOTPParam,
   SendSMSParam,
@@ -42,4 +43,7 @@ export default class SmsStrategy implements MessageStrategy {
 
     await this.#sendSMS({ smsAddress: address, smsBody })
   }
+  async SendAccountCreationMessage(
+    params: SendAccountCreationParam,
+  ): Promise<void> {}
 }

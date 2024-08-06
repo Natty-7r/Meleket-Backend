@@ -15,7 +15,7 @@ export default class CreateOTPDto {
     example: 'CLIENT_USER',
     description: 'user type',
   })
-  @IsEmail()
+  @IsString()
   @IsNotEmpty()
   userType: UserType
 

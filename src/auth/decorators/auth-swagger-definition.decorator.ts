@@ -7,11 +7,12 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
+  ApiResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 import SignInResponse from 'src/auth/responses/sign-in.response'
 import CreateAccountResponse from '../responses/create-account.response'
-import CreateOTPDto from '../dto/create-otp.dto'
-import UpdatePasswordDto from '../dto/update-passowrd.dto'
+import CreateAdminAccountResponse from '../responses/create-admin.response '
 
 export const SignInSwaggerDefinition = () => {
   return applyDecorators(
@@ -28,7 +29,7 @@ export const SignInSwaggerDefinition = () => {
   )
 }
 
-export const CreateAccountSwaggerDefinition = () => {
+export const CreateUserAccountSwaggerDefinition = () => {
   return applyDecorators(
     ApiOperation({ summary: 'Create user account' }),
     ApiCreatedResponse({
@@ -39,12 +40,23 @@ export const CreateAccountSwaggerDefinition = () => {
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
   )
 }
+export const CreateAdminSwaggerDefinition = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'Create admin account' }),
+    ApiCreatedResponse({
+      type: CreateAdminAccountResponse,
+      description: 'admin account created successfully',
+    }),
+    ApiConflictResponse({ description: 'Email is already in use!' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+}
 
 export const RequestOTPSwaggerDefinition = () => {
   return applyDecorators(
     ApiOperation({ summary: 'Request OTP ' }),
-    ApiCreatedResponse({
-      type: CreateOTPDto,
+    ApiResponse({
+      type: String,
       description: 'OTP created successfully',
     }),
     ApiBadRequestResponse({ description: 'Invalid email or phone number' }),
@@ -55,8 +67,8 @@ export const RequestOTPSwaggerDefinition = () => {
 export const VerifyOTPSwaggerDefinition = () => {
   return applyDecorators(
     ApiOperation({ summary: 'verifiy OTP ' }),
-    ApiCreatedResponse({
-      type: CreateOTPDto,
+    ApiResponse({
+      type: String,
       description: 'OTP verified successfully',
     }),
     ApiNotFoundResponse({ description: 'OTP not found' }),
@@ -68,9 +80,9 @@ export const VerifyOTPSwaggerDefinition = () => {
 export const VerifyUserSwaggerDefinition = () => {
   return applyDecorators(
     ApiOperation({ summary: 'verifiy user ' }),
-    ApiCreatedResponse({
-      type: CreateOTPDto,
-      description: 'iser verified successfully',
+    ApiResponse({
+      type: String,
+      description: 'user verified successfully',
     }),
     ApiNotFoundResponse({ description: 'OTP not found' }),
     ApiBadRequestResponse({ description: 'Invalid email' }),
@@ -82,13 +94,42 @@ export const VerifyUserSwaggerDefinition = () => {
 export const UpdatePasswordSwaggerDefinition = () => {
   return applyDecorators(
     ApiOperation({ summary: 'update password user ' }),
-    ApiCreatedResponse({
-      type: UpdatePasswordDto,
+    ApiResponse({
+      type: String,
       description: 'password verified successfully',
     }),
     ApiBadRequestResponse({ description: 'Invalid user id ' }),
     ApiNotFoundResponse({ description: 'OTP not found' }),
     ApiBadRequestResponse({ description: 'Invalid OTP' }),
     ApiGoneResponse({ description: 'OTP expired' }),
+  )
+}
+export const UpdateAdminStatusSwaggerDefinition = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'update admin status ' }),
+    ApiResponse({
+      type: String,
+      description: 'Admin status updated successfully',
+    }),
+    ApiBadRequestResponse({ description: 'Invalid admin id ' }),
+  )
+}
+export const GetAdminsSwaggerDefinition = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'get all  admins ' }),
+    ApiResponse({
+      type: Array<CreateAdminAccountResponse>,
+      description: 'Admins fetched  successfully',
+    }),
+  )
+}
+export const DeleteAdminAccountSwaggerDefinition = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'update admin status ' }),
+    ApiResponse({
+      type: String,
+      description: 'Admin status updated successfully',
+    }),
+    ApiBadRequestResponse({ description: 'Invalid admin id ' }),
   )
 }

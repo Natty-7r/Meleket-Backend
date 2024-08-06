@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { UserType } from '@prisma/client'
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator'
+import { IsNotEmpty, IsString } from 'class-validator'
 
 export default class UpdatePasswordDto {
   @ApiProperty({
     type: String,
-    example: 'CLIENT_USER',
+    example: 'ADMIN',
     description: 'user type',
   })
-  @IsEmail()
+  @IsString()
   @IsNotEmpty()
   userType: UserType
 

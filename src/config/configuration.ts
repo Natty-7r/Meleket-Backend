@@ -17,7 +17,7 @@ export default (): Config => ({
   },
   jwt: {
     secret: process.env.JWT_SECRETE,
-    expiresIn: process.env.EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN,
   },
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID,
@@ -34,5 +34,11 @@ export default (): Config => ({
     port: parseInt(process.env.EMAIL_PORT, 10) || 465,
     sender: process.env.EMAIL_SENDER,
     senderPassword: process.env.EMAIL_SENDER_PASSWORD,
+  },
+  superAdmin: {
+    firstName: process.env.SUPER_ADMIN_FIRST_NAME,
+    lastName: process.env.SUPER_ADMIN_LAST_NAME,
+    email: process.env.SUPER_ADMIN_EMAIL,
+    password: process.env.SUPER_ADMIN_PASSWORD,
   },
 })

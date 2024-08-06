@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { OTPType, User } from '@prisma/client'
+import { Admin, OTPType, User } from '@prisma/client'
 
 export type ExceptionResponse = {
   message: string
@@ -33,7 +33,7 @@ export interface FunctionCallResponse {
   data: any
 }
 
-export type USER = User
+export type USER = User | Admin
 
 export interface RequestWithUser extends Request {
   user: USER
@@ -106,6 +106,12 @@ export interface Config {
     sender: string
     senderPassword: string
   }
+  superAdmin: {
+    firstName: string
+    lastName: string
+    email: string
+    password: string
+  }
 }
 
 export interface SendSMSParam {
@@ -129,4 +135,9 @@ export interface SendOTPParam {
   firstName: string
   otp: string
   otpType: OTPType
+}
+export interface SendAccountCreationParam {
+  address: string
+  firstName: string
+  password: string
 }

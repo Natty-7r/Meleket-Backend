@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import {
+  SendAccountCreationParam,
   SendEmailParam,
   SendMessageParam,
   SendOTPParam,
 } from 'src/common/util/types'
 import MessageStrategy from '../interfaces/message-strategry.interface'
 import {
+  generateAccountCreationEmailMessage,
   generateResetEmailOTPMessage,
   generateVerifyEmailOTPMessage,
 } from 'src/common/util/helpers/string-util'
@@ -49,6 +51,21 @@ export default class EmailStrategy implements MessageStrategy {
         otpType == 'VERIFICATION'
           ? 'Verify Your Account'
           : 'Reset Your Account',
+    })
+  }
+  async SendAccountCreationMessage({
+    firstName,
+    address,
+    password,
+  }: SendAccountCreationParam): Promise<void> {
+    const emailBody = generateAccountCreationEmailMessage({
+      firstName,
+      password,
+    })
+    await this.#sendEmail({
+      address,
+      body: emailBody,
+      subject: 'New Account Creation',
     })
   }
 }

@@ -30,19 +30,17 @@ enum UserType {
   SUPER_ADMIN
 }
 
+
+
 enum OTPType {
   VERIFICATION
   RESET
 }
 
-enum AdminRole {
-  SUPER_ADMIN
-  ADMIN
-}
-
 enum AdminStatus {
   ACTIVE
   INACTIVE
+  CREATED // in active b/c just created need to reset password
 }
 
 enum ChannelType {
@@ -94,9 +92,9 @@ model Admin {
   lastName       String
   email          String      @unique
   password       String
-  userType       UserType
-  status         AdminStatus
-  inactiveReason String?     @default("")
+  userType       UserType     @default(ADMIN)
+  status         AdminStatus @default(CREATED)
+  inactiveReason String?     @default("new account")
   createdAat     DateTime    @default(now()) @map("created_at")
   updatedAat     DateTime    @updatedAt @map("updated_at")
 }

@@ -2,15 +2,22 @@ import {
   BadGatewayException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
-import { OTPType, User, Category } from '@prisma/client'
-import { CreateAccountDto, SignInDto } from './dto'
-import { SignUpType } from 'src/common/util/types'
+import { OTPType, User, Category, UserType, Admin } from '@prisma/client'
+import {
+  CreateAccountDto,
+  CreateAdminDto,
+  SignInDto,
+  UpdateAdminStatusDto,
+} from './dto'
+import { SignUpType, USER } from 'src/common/util/types'
 import { generateOTP } from 'src/common/util/helpers/numbers'
 import MessageService from 'src/message/message.service'
 import VerifyOTPDto from './dto/verify-otp.dto'
@@ -30,9 +37,22 @@ export default class AuthService {
     private readonly confgiService: ConfigService,
     private readonly smsStrategy: SmsStrategy,
     private readonly emailStrategy: EmailStrategy,
-  ) {}
-
-  async createAccount(
+    private readonly configService: ConfigService,
+  ) {
+    this.#createSuperAdminAccount()
+  }
+  async #createSuperAdminAccount() {
+    const admins = await this.prismaService.admin.findMany({})
+    if (admins.length == 0)
+      this.createAdminAccount({
+        firstName: this.configService.get<string>('superAdmin.firstName'),
+        lastName: this.configService.get<string>('superAdmin.lastName'),
+        email: this.configService.get<string>('superAdmin.email'),
+        password: this.configService.get<string>('superAdmin.password'),
+        role: 'SUPER_ADMIN',
+      })
+  }
+  async createUserAccount(
     { firstName, lastName, email, password }: CreateAccountDto,
     signUpType: SignUpType,
   ) {
@@ -78,9 +98,56 @@ export default class AuthService {
       },
     }
   }
+  async createAdminAccount({
+    firstName,
+    lastName,
+    email,
+    password,
+    role,
+  }: CreateAdminDto) {
+    const admin = await this.prismaService.admin.findFirst({ where: { email } })
+    if (admin) throw new ConflictException('Email is already in use!')
+    const hashedPassword = await bcrypt.hash(password, 12)
+
+    const adminCreated = await this.prismaService.admin.create({
+      data: {
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        userType: role,
+        status: 'CREATED',
+        inactiveReason: 'new account',
+      },
+    })
+
+    this.messageService.setStrategy(this.emailStrategy)
+    await this.messageService.SendAccountCreationMessage({
+      firstName,
+      password,
+      address: email,
+    })
+
+    const { password: _, ...rest } = adminCreated
+
+    return {
+      status: 'success',
+      message: 'Admin created successfully',
+      data: {
+        ...rest,
+      },
+    }
+  }
 
   async validateUser({ email, password }: SignInDto): Promise<any> {
-    const user = await this.prismaService.user.findFirst({ where: { email } })
+    let userType: UserType = 'CLIENT_USER'
+    let user: USER = await this.prismaService.user.findFirst({
+      where: { email },
+    })
+    if (!user) {
+      userType = 'ADMIN'
+      user = await this.prismaService.admin.findFirst({ where: { email } })
+    }
     if (!user)
       throw new NotFoundException(`No user is registered with ${email} email`)
 
@@ -88,20 +155,34 @@ export default class AuthService {
     if (!doesPasswordMatch)
       throw new BadRequestException('Invalid Email or Password')
 
+    if (userType != 'CLIENT_USER' && (user as any).status != 'ACTIVE')
+      throw new UnauthorizedException('Admin is Inactive currenlty ')
+
     const { password: _, ...result } = user
     return result
-    return null
   }
 
-  async login(user: User) {
-    const payload = {
-      email: user.email,
-      sub: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      UserType: user.userType,
-    }
+  async login(user: USER) {
+    const payload =
+      user.userType == 'CLIENT_USER'
+        ? {
+            email: user.email,
+            sub: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            UserType: user.userType,
+          }
+        : {
+            email: user.email,
+            sub: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            UserType: user.userType,
+            status: (user as Admin).status,
+          }
 
+    if (payload?.status == 'CREATED' || payload?.status == 'INACTIVE')
+      throw new ForbiddenException('User not active')
     return {
       status: 'success',
       message: 'User Logged in successfully',
@@ -271,6 +352,7 @@ export default class AuthService {
     type: OTPType
     userId: string
   }) {
+    console.log(type, userId)
     const otpRecord = await this.prismaService.oTP.findFirst({
       where: { type, userId },
     })
@@ -299,17 +381,73 @@ export default class AuthService {
           })
     if (!user) throw new BadRequestException('Invalid user id ')
 
-    await this.#checkOTPVerification({ type: 'VERIFICATION', userId })
+    await this.#checkOTPVerification({ type: 'RESET', userId })
 
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    await this.prismaService.user.update({
-      where: { id: userId },
-      data: { password: hashedPassword },
+    if (userType == 'CLIENT_USER')
+      await this.prismaService.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      })
+    else {
+      await this.prismaService.admin.update({
+        where: { id: userId },
+        data: {
+          password: hashedPassword,
+          // activating user when updating password
+          status:
+            (user as Admin).status == 'CREATED'
+              ? 'ACTIVE'
+              : (user as Admin).status,
+          inactiveReason:
+            (user as Admin).status == 'CREATED'
+              ? ''
+              : (user as Admin).inactiveReason,
+        },
+      })
+    }
+    return {
+      status: 'success',
+      message: 'Password updated successfully',
+    }
+  }
+  async getAdmins() {
+    const admins = await this.prismaService.admin.findMany({})
+    return {
+      status: 'success',
+      message: 'Admin fetched   successfully',
+      data: admins,
+    }
+  }
+  async updateAdminStatus({ id, status, reason }: UpdateAdminStatusDto) {
+    const admin = await this.prismaService.admin.findUnique({
+      where: { id: id },
+    })
+    if (!admin) throw new BadRequestException('Invalid admin id ')
+
+    await this.prismaService.admin.update({
+      where: { id: id },
+      data: { status: status, inactiveReason: reason || '' },
     })
     return {
       status: 'success',
-      message: 'Password updated in successfully',
+      message: 'Admin status updated  successfully',
+    }
+  }
+
+  async deleteAdminAccount(id: string) {
+    const admin = await this.prismaService.admin.findUnique({
+      where: { id: id },
+    })
+    if (!admin) throw new BadRequestException('Invalid admin id ')
+
+    await this.prismaService.admin.delete({
+      where: { id: id },
+    })
+    return {
+      status: 'success',
+      message: 'Admin account deleted  successfully',
     }
   }
 }

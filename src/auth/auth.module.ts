@@ -14,10 +14,15 @@ import MessageModule from 'src/message/message.module'
     JwtModule.registerAsync({
       imports: [ConfigModule], // Import ConfigModule
       inject: [ConfigService], // Inject ConfigService
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.secret'), // Use ConfigService to get JWT secret
-        signOptions: { expiresIn: configService.get<string>('jwt.expiresIn') },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        console.log(configService.get('jwt'), 'jjjjjjjjjjjj')
+        return {
+          secret: configService.get<string>('jwt.secret'), // Use ConfigService to get JWT secret
+          signOptions: {
+            expiresIn: configService.get<string>('jwt.expiresIn'),
+          },
+        }
+      },
     }),
     MessageModule,
   ],
