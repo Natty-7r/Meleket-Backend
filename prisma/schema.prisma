@@ -19,9 +19,9 @@ enum PackageType {
 }
 
 enum BusinessVisiblityStatus {
- CREATED // no buyed package
- ACTIVE
- HIDDEN  // when package is done
+  CREATED // no buyed package
+  ACTIVE
+  HIDDEN // when package is done
 }
 
 enum UserType {
@@ -30,8 +30,8 @@ enum UserType {
   SUPER_ADMIN
 }
 
-enum OTPType  {
-  VERFICATION
+enum OTPType {
+  VERIFICATION
   RESET
 }
 
@@ -56,12 +56,12 @@ enum StoryContentType {
   BOTH
 }
 
-
 model User {
   id                String           @id @default(uuid())
   firstName         String
   lastName          String
   email             String           @unique
+  phoneNumber       String?
   profileLevel      UserProfileLevel @default(CREATED)
   userType          UserType         @default(CLIENT_USER)
   password          String
@@ -76,36 +76,33 @@ model User {
   passwordUpdatedAt DateTime @default(now())
 }
 
-
-
 model OTP {
-  id            String           @id @default(uuid())
-  code          String           @unique
-  type          OTPType
+  id           String      @id @default(uuid())
+  userId       String
+  code         String      @unique
+  type         OTPType
   channelType  ChannelType
   channelValue String
-  isVerified   Boolean          @default(false)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  isVerified   Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model Admin {
-  id              String       @id @default(cuid())
+  id             String      @id @default(cuid())
   firstName      String
   lastName       String
-  email           String       @unique
-  password        String
-  role            AdminRole
-  status          AdminStatus
-  inactiveReason String?      @default("")
-  createdAat      DateTime     @default(now()) @map("created_at")
-  updatedAat      DateTime     @updatedAt @map("updated_at")
+  email          String      @unique
+  password       String
+  userType       UserType
+  status         AdminStatus
+  inactiveReason String?     @default("")
+  createdAat     DateTime    @default(now()) @map("created_at")
+  updatedAat     DateTime    @updatedAt @map("updated_at")
 }
-
 
 model Profile {
   id             String  @id @default(uuid())
-  phoneNumber    String
   age            Int
   sex            String
   profilePicture String?
@@ -146,9 +143,9 @@ model Business {
   address         BusinessAddress[]
   businessContact BusinessContact?
 
-  followers  User[]    @relation("UserFollowsBusiness")
-  visibility BusinessVisiblityStatus  @default(CREATED)
-  category   Category  @relation(fields: [categoryId], references: [id])
+  followers  User[]                  @relation("UserFollowsBusiness")
+  visibility BusinessVisiblityStatus @default(CREATED)
+  category   Category                @relation(fields: [categoryId], references: [id])
   packages   Package[]
   reviews    Review[]
   ratings    Rating[]
@@ -262,7 +259,7 @@ model Rating {
 }
 
 model Story {
-  id          String   @id @default(uuid())
+  id          String           @id @default(uuid())
   postDate    DateTime
   contentType StoryContentType
   text        String

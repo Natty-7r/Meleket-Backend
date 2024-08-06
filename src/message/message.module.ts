@@ -3,6 +3,8 @@ import { Global, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TwilioModule } from 'nestjs-twilio'
 import { MailerModule } from '@nestjs-modules/mailer'
+import SmsStrategy from './strategies/sms.strategy'
+import EmailStrategy from './strategies/email.strategy'
 
 @Global()
 @Module({
@@ -31,7 +33,7 @@ import { MailerModule } from '@nestjs-modules/mailer'
       }),
     }),
   ],
-  providers: [MessageService],
-  exports: [MessageService],
+  providers: [MessageService, SmsStrategy, EmailStrategy],
+  exports: [MessageService, SmsStrategy, EmailStrategy],
 })
 export default class MessageModule {}

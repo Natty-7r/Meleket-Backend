@@ -45,7 +45,10 @@ export default class EmailStrategy implements MessageStrategy {
     await this.#sendEmail({
       address,
       body: emailBody,
-      subject: 'Verify Your Account',
+      subject:
+        otpType == 'VERIFICATION'
+          ? 'Verify Your Account'
+          : 'Reset Your Account',
     })
   }
 }
