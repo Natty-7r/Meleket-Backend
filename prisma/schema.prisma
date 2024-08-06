@@ -8,8 +8,8 @@ datasource db {
 }
 
 enum UserProfileLevel {
-  FIRST //  just opened , cannot add business 
-  SECOND // added profile 
+  CREATED //  just opened , cannot add business 
+  VERIFIED // by email 
 }
 
 enum PackageType {
@@ -18,8 +18,10 @@ enum PackageType {
   YEARLY
 }
 
-enum BusinessProfileLevel {
-  FIRST
+enum BusinessVisiblityStatus {
+  CREATED // no buyed package
+  ACTIVE
+  HIDDEN // when package is done
 }
 
 enum UserType {
@@ -28,12 +30,37 @@ enum UserType {
   SUPER_ADMIN
 }
 
+
+
+enum OTPType {
+  VERIFICATION
+  RESET
+}
+
+enum AdminStatus {
+  ACTIVE
+  INACTIVE
+  CREATED // in active b/c just created need to reset password
+}
+
+enum ChannelType {
+  EMAIL
+  PHONE
+}
+
+enum StoryContentType {
+  STRING
+  IMAGE
+  BOTH
+}
+
 model User {
   id                String           @id @default(uuid())
   firstName         String
   lastName          String
   email             String           @unique
-  profileLevel      UserProfileLevel @default(FIRST)
+  phoneNumber       String?
+  profileLevel      UserProfileLevel @default(CREATED)
   userType          UserType         @default(CLIENT_USER)
   password          String
   profile           Profile?
@@ -47,9 +74,33 @@ model User {
   passwordUpdatedAt DateTime @default(now())
 }
 
+model OTP {
+  id           String      @id @default(uuid())
+  userId       String
+  code         String      @unique
+  type         OTPType
+  channelType  ChannelType
+  channelValue String
+  isVerified   Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Admin {
+  id             String      @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String      @unique
+  password       String
+  userType       UserType     @default(ADMIN)
+  status         AdminStatus @default(CREATED)
+  inactiveReason String?     @default("new account")
+  createdAat     DateTime    @default(now()) @map("created_at")
+  updatedAat     DateTime    @updatedAt @map("updated_at")
+}
+
 model Profile {
   id             String  @id @default(uuid())
-  phoneNumber    String
   age            Int
   sex            String
   profilePicture String?
@@ -90,9 +141,9 @@ model Business {
   address         BusinessAddress[]
   businessContact BusinessContact?
 
-  followers  User[]    @relation("UserFollowsBusiness")
-  visibility String
-  category   Category  @relation(fields: [categoryId], references: [id])
+  followers  User[]                  @relation("UserFollowsBusiness")
+  visibility BusinessVisiblityStatus @default(CREATED)
+  category   Category                @relation(fields: [categoryId], references: [id])
   packages   Package[]
   reviews    Review[]
   ratings    Rating[]
@@ -206,9 +257,9 @@ model Rating {
 }
 
 model Story {
-  id          String   @id @default(uuid())
+  id          String           @id @default(uuid())
   postDate    DateTime
-  contentType String
+  contentType StoryContentType
   text        String
   image       String?
 

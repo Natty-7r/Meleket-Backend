@@ -1,42 +1,22 @@
 import { Module } from '@nestjs/common'
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
-import { ClientsModule, Transport } from '@nestjs/microservices'
 import { ConfigModule } from '@nestjs/config'
-import { JwtModule } from '@nestjs/jwt'
+import MessageModule from './message/message.module'
 import AuthModule from './auth/auth.module'
 
 import WinstonLoggerModule from './logger/winston-logger/winston-logger.module'
 import ErrorExceptionFilter from './common/filters/error.filter'
 import ActivityInterceptor from './common/interceptors/activity.interceptor'
-import PrismaModule from './prisma/prisma.module'
 import CategoryModule from './category/category.module'
+import configuration from './config/configuration'
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRETE,
-      signOptions: { expiresIn: '60s' },
-    }),
-    PrismaModule,
-    ClientsModule.register([
-      {
-        name: 'BUSINESS_MANAGEMENT_SERVICE',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            clientId: 'business-management',
-            brokers: ['127.0.0.1:9092'],
-          },
-          consumer: {
-            groupId: 'business-management-consumer',
-          },
-        },
-      },
-    ]),
+    ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     WinstonLoggerModule,
     CategoryModule,
     AuthModule,
+    MessageModule,
   ],
 
   providers: [

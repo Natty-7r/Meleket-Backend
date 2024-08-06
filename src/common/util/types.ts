@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { User } from '@prisma/client'
+import { Admin, OTPType, User } from '@prisma/client'
 
 export type ExceptionResponse = {
   message: string
@@ -33,7 +33,7 @@ export interface FunctionCallResponse {
   data: any
 }
 
-export type USER = User
+export type USER = User | Admin
 
 export interface RequestWithUser extends Request {
   user: USER
@@ -64,4 +64,80 @@ export interface CategoryTreeNode {
 export type CategoryTreeSwaggerConfig = {
   operationName: string
   successMessage: string
+}
+
+export enum SignUpType {
+  BY_EMAIL = 'BY_EMAIL',
+  OAUTH = 'OAUTH',
+}
+
+export interface Config {
+  server: {
+    host: string
+    port: number
+  }
+  db: {
+    user: string
+    password: string
+    name: string
+    url: string
+  }
+  otp: {
+    length: number
+    expirationMinute: number
+  }
+  jwt: {
+    secret: string
+    expiresIn: any
+  }
+  google: {
+    clientId: string
+    clientSecret: string
+    redirectUrl: string
+  }
+  twilio: {
+    accountSid: string
+    authToken: string
+    smsSender: string
+  }
+  email: {
+    host: string
+    port: number
+    sender: string
+    senderPassword: string
+  }
+  superAdmin: {
+    firstName: string
+    lastName: string
+    email: string
+    password: string
+  }
+}
+
+export interface SendSMSParam {
+  smsAddress: string
+  smsBody: string
+}
+
+export interface SendEmailParam {
+  address: string
+  subject: string
+  body: string
+}
+
+export interface SendMessageParam {
+  address: string
+  subject: string
+  body: string
+}
+export interface SendOTPParam {
+  address: string
+  firstName: string
+  otp: string
+  otpType: OTPType
+}
+export interface SendAccountCreationParam {
+  address: string
+  firstName: string
+  password: string
 }
