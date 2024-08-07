@@ -1,21 +1,19 @@
 version: '3.8'
 
 services:
-  backend:
+  meleket-backend:
+    env_file: './.env'
     build:
       context: ./
+      args:
+        DATABASE_URL: ${DATABASE_URL}
     container_name: meleket_backend
     ports:
       - '8080:8080'
     depends_on:
       - database
     environment:
-      DATABASE_HOST: localhost
-      DATABASE_PORT: 5432
-      DATABASE_USER: natty
-      DATABASE_PASSWORD: postgres
-      DATABASE_NAME: meleket
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/meleket?schema=public
+      - DATABASE_URL=${DATABASE_URL}
 
   database:
     image: postgres:latest
@@ -25,7 +23,7 @@ services:
     environment:
       POSTGRES_DB: meleket
       POSTGRES_USER: natty
-      POSTGRES_PASSWORD: postres
+      POSTGRES_PASSWORD: postgres
     volumes:
       - db_data:/var/lib/postgresql/data
 
