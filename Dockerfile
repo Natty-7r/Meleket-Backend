@@ -7,6 +7,9 @@ WORKDIR /meleket
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
+# Copy the prisma directory
+COPY prisma ./prisma
+
 # Install dependencies
 RUN npm i -g @nestjs/cli
 RUN npm i prisma
