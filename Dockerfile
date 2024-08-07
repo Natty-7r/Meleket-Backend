@@ -9,8 +9,11 @@ COPY package*.json ./
 
 # Install dependencies
 RUN npm i -g @nestjs/cli
+RUN  npm i -g @prisma/cli
 RUN npm install
+
 RUN npx prisma generate 
+
 RUN npx prisma db push
 
 # Copy the rest of the application code
