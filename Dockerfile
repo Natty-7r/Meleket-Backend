@@ -11,7 +11,7 @@ COPY package*.json ./
 COPY prisma ./prisma
 
 # Copy the .env file
-COPY .env ./
+# COPY .env ./
 
 # Set build argument for DATABASE_URL
 ARG DATABASE_URL
