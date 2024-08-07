@@ -33,6 +33,9 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# start the app 
+ RUN npm run prod
+
 # Expose the application port (if it needs to communicate over HTTP, otherwise omit)
 EXPOSE 8080
 
