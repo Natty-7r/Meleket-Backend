@@ -20,7 +20,7 @@ ENV DATABASE_URL=${DATABASE_URL}
 
 # Install dependencies
 RUN npm i -g @nestjs/cli
-RUN npm i prisma
+
 RUN npm install
 
 RUN npx prisma generate 
