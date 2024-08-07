@@ -10,6 +10,14 @@ COPY package*.json ./
 # Copy the prisma directory
 COPY prisma ./prisma
 
+# Set build argument for DATABASE_URL
+ARG DATABASE_URL
+
+# Set environment variable for Prisma
+ENV DATABASE_URL=${DATABASE_URL}
+
+
+
 # Install dependencies
 RUN npm i -g @nestjs/cli
 RUN npm i prisma
