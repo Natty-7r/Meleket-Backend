@@ -1,12 +1,12 @@
-version: "3.8"
+version: '3.8'
 
 services:
   backend:
     build:
-       context: ./
+      context: ./
     container_name: meleket_backend
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
       - database
     environment:
@@ -15,13 +15,13 @@ services:
       DATABASE_USER: natty
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: meleket
-
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/meleket?schema=public
 
   database:
     image: postgres:latest
     container_name: postgres_db
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_DB: meleket
       POSTGRES_USER: natty
