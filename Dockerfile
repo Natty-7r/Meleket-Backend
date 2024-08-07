@@ -13,11 +13,17 @@ COPY prisma ./prisma
 # Copy the .env file
 # COPY .env ./
 
+# Copy the script to create .env file
+COPY create-env-file.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/create-env-file.sh
+
 # Set build argument for DATABASE_URL
 ARG DATABASE_URL
 
 # Set environment variable for Prisma
 ENV DATABASE_URL=${DATABASE_URL}
+
+
 
 
 
