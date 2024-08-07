@@ -125,7 +125,7 @@ export default class AuthService {
     })
 
     this.messageService.setStrategy(this.emailStrategy)
-    await this.messageService.SendAccountCreationMessage({
+    await this.messageService.sendAccountCreationMessage({
       firstName,
       password,
       address: email,

@@ -31,7 +31,7 @@ export default class EmailStrategy implements MessageStrategy {
     })
   }
 
-  async sendMessageParam(messageParams: SendMessageParam): Promise<void> {}
+  async sendMessage(params: SendMessageParam): Promise<void> {}
 
   async sendOTP({
     otp,
@@ -40,7 +40,7 @@ export default class EmailStrategy implements MessageStrategy {
     address,
   }: SendOTPParam): Promise<void> {
     const emailBody =
-      otpType == 'VERIFICATION'
+      otpType === 'VERIFICATION'
         ? generateVerifyEmailOTPMessage({ firstName, otp })
         : generateResetEmailOTPMessage({ firstName, otp })
 
@@ -48,7 +48,7 @@ export default class EmailStrategy implements MessageStrategy {
       address,
       body: emailBody,
       subject:
-        otpType == 'VERIFICATION'
+        otpType === 'VERIFICATION'
           ? 'Verify Your Account'
           : 'Reset Your Account',
     })

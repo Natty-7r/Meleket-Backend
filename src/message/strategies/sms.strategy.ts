@@ -28,7 +28,7 @@ export default class SmsStrategy implements MessageStrategy {
     })
   }
 
-  async sendMessageParam(messageParams: SendMessageParam): Promise<void> {}
+  async sendMessage(messageParams: SendMessageParam): Promise<void> {}
 
   async sendOTP({
     otp,

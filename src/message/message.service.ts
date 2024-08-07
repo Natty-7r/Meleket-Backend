@@ -28,7 +28,7 @@ export default class MessageService implements MessageStrategy {
     return this.strategy.sendAccountCreationMessage(params)
   }
 
-  async sendMessageParam(params: SendMessageParam): Promise<void> {
+  async sendMessage(params: SendMessageParam): Promise<void> {
     if (!this.strategy) {
       throw new Error('No strategy set')
     }
