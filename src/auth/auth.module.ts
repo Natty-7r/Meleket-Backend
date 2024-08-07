@@ -7,6 +7,7 @@ import AuthController from './auth.controller'
 import LocalStrategy from './strategies/local.strategy'
 import GoogleStrategy from './strategies/google.strategry'
 import JwtStrategy from './strategies/jwt.strategry'
+import configuration from 'src/config/configuration'
 
 @Module({
   imports: [
@@ -14,11 +15,11 @@ import JwtStrategy from './strategies/jwt.strategry'
     JwtModule.registerAsync({
       imports: [ConfigModule], // Import ConfigModule
       inject: [ConfigService], // Inject ConfigService
-      useFactory: async (configService: ConfigService) => {
+      useFactory: async () => {
         return {
-          secret: configService.get<string>('jwt.secret'), // Use ConfigService to get JWT secret
+          secret: configuration().jwt.secret, // Use ConfigService to get JWT secret
           signOptions: {
-            expiresIn: configService.get<string>('jwt.expiresIn'),
+            expiresIn: configuration().jwt.expiresIn,
           },
         }
       },
