@@ -23,8 +23,6 @@ export default class GoogleStrategy extends PassportStrategy(
     //   callbackURL,
     //   scope: ['email', 'profile'],
     // })4
-
-    console.log(this)
   }
 
   async validate(

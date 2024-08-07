@@ -6,13 +6,13 @@ import {
   SendMessageParam,
   SendOTPParam,
 } from 'src/common/util/types'
-import MessageStrategy from '../interfaces/message-strategry.interface'
 import {
   generateAccountCreationEmailMessage,
   generateResetEmailOTPMessage,
   generateVerifyEmailOTPMessage,
 } from 'src/common/util/helpers/string-util'
 import { MailerService } from '@nestjs-modules/mailer'
+import MessageStrategy from '../interfaces/message-strategry.interface'
 
 @Injectable()
 export default class EmailStrategy implements MessageStrategy {
@@ -31,7 +31,7 @@ export default class EmailStrategy implements MessageStrategy {
     })
   }
 
-  async SendMessageParam(messageParams: SendMessageParam): Promise<void> {}
+  async sendMessageParam(messageParams: SendMessageParam): Promise<void> {}
 
   async sendOTP({
     otp,
@@ -53,7 +53,8 @@ export default class EmailStrategy implements MessageStrategy {
           : 'Reset Your Account',
     })
   }
-  async SendAccountCreationMessage({
+
+  async sendAccountCreationMessage({
     firstName,
     address,
     password,

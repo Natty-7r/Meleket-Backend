@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
+import { ConfigModule, ConfigService } from '@nestjs/config' // Import ConfigModule and ConfigService
+import MessageModule from 'src/message/message.module'
 import AuthService from './auth.service'
 import AuthController from './auth.controller'
 import LocalStrategy from './strategies/local.strategy'
-import { ConfigModule, ConfigService } from '@nestjs/config' // Import ConfigModule and ConfigService
 import GoogleStrategy from './strategies/google.strategry'
 import JwtStrategy from './strategies/jwt.strategry'
-import MessageModule from 'src/message/message.module'
 
 @Module({
   imports: [
@@ -15,7 +15,6 @@ import MessageModule from 'src/message/message.module'
       imports: [ConfigModule], // Import ConfigModule
       inject: [ConfigService], // Inject ConfigService
       useFactory: async (configService: ConfigService) => {
-        console.log(configService.get('jwt'), 'jjjjjjjjjjjj')
         return {
           secret: configService.get<string>('jwt.secret'), // Use ConfigService to get JWT secret
           signOptions: {

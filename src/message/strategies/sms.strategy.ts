@@ -7,11 +7,11 @@ import {
   SendOTPParam,
   SendSMSParam,
 } from 'src/common/util/types'
-import MessageStrategy from '../interfaces/message-strategry.interface'
 import {
   generateResetSMSOTPMessage,
   generateVerifySMSOTPMessage,
 } from 'src/common/util/helpers/string-util'
+import MessageStrategy from '../interfaces/message-strategry.interface'
 
 @Injectable()
 export default class SmsStrategy implements MessageStrategy {
@@ -28,7 +28,7 @@ export default class SmsStrategy implements MessageStrategy {
     })
   }
 
-  async SendMessageParam(messageParams: SendMessageParam): Promise<void> {}
+  async sendMessageParam(messageParams: SendMessageParam): Promise<void> {}
 
   async sendOTP({
     otp,
@@ -37,13 +37,14 @@ export default class SmsStrategy implements MessageStrategy {
     address,
   }: SendOTPParam): Promise<void> {
     const smsBody =
-      otpType == 'VERIFICATION'
+      otpType === 'VERIFICATION'
         ? generateVerifySMSOTPMessage({ firstName, otp })
         : generateResetSMSOTPMessage({ firstName, otp })
 
     await this.#sendSMS({ smsAddress: address, smsBody })
   }
-  async SendAccountCreationMessage(
+
+  async sendAccountCreationMessage(
     params: SendAccountCreationParam,
   ): Promise<void> {}
 }

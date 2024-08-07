@@ -10,22 +10,22 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
-import { OTPType, User, Category, UserType, Admin } from '@prisma/client'
+import { OTPType, UserType, Admin } from '@prisma/client'
+import { SignUpType, USER } from 'src/common/util/types'
+import { generateOTP } from 'src/common/util/helpers/numbers'
+import MessageService from 'src/message/message.service'
+import { ConfigService } from '@nestjs/config'
+import EmailStrategy from 'src/message/strategies/email.strategy'
 import {
   CreateAccountDto,
   CreateAdminDto,
   SignInDto,
   UpdateAdminStatusDto,
 } from './dto'
-import { SignUpType, USER } from 'src/common/util/types'
-import { generateOTP } from 'src/common/util/helpers/numbers'
-import MessageService from 'src/message/message.service'
 import VerifyOTPDto from './dto/verify-otp.dto'
-import { ConfigService } from '@nestjs/config'
 import CreateOTPDto from './dto/create-otp.dto'
 import VerifyUserDto from './dto/verify-user.dto'
 import SmsStrategy from '../message/strategies/sms.strategy'
-import EmailStrategy from 'src/message/strategies/email.strategy'
 import UpdatePasswordDto from './dto/update-passowrd.dto'
 
 @Injectable()
@@ -41,9 +41,10 @@ export default class AuthService {
   ) {
     this.#createSuperAdminAccount()
   }
+
   async #createSuperAdminAccount() {
     const admins = await this.prismaService.admin.findMany({})
-    if (admins.length == 0)
+    if (admins.length === 0)
       this.createAdminAccount({
         firstName: this.configService.get<string>('superAdmin.firstName'),
         lastName: this.configService.get<string>('superAdmin.lastName'),
@@ -52,6 +53,7 @@ export default class AuthService {
         role: 'SUPER_ADMIN',
       })
   }
+
   async createUserAccount(
     { firstName, lastName, email, password }: CreateAccountDto,
     signUpType: SignUpType,
@@ -67,15 +69,15 @@ export default class AuthService {
         email,
         password: hashedPassword,
         profileLevel:
-          signUpType == SignUpType.BY_EMAIL ? 'CREATED' : 'VERIFIED',
+          signUpType === SignUpType.BY_EMAIL ? 'CREATED' : 'VERIFIED',
       },
     })
 
     const { password: _, ...rest } = userCreated
-    if (signUpType == SignUpType.BY_EMAIL) {
+    if (signUpType === SignUpType.BY_EMAIL) {
       const { otpCode } = await this.#createOTP({
         channelType: 'EMAIL',
-        email: email,
+        email,
         type: 'VERIFICATION',
         phone: '',
         userType: 'CLIENT_USER',
@@ -98,6 +100,7 @@ export default class AuthService {
       },
     }
   }
+
   async createAdminAccount({
     firstName,
     lastName,
@@ -107,7 +110,7 @@ export default class AuthService {
   }: CreateAdminDto) {
     const admin = await this.prismaService.admin.findFirst({ where: { email } })
     if (admin) throw new ConflictException('Email is already in use!')
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await bcrypt.hash('password', 12)
 
     const adminCreated = await this.prismaService.admin.create({
       data: {
@@ -155,7 +158,7 @@ export default class AuthService {
     if (!doesPasswordMatch)
       throw new BadRequestException('Invalid Email or Password')
 
-    if (userType != 'CLIENT_USER' && (user as any).status != 'ACTIVE')
+    if (userType !== 'CLIENT_USER' && (user as any).status !== 'ACTIVE')
       throw new UnauthorizedException('Admin is Inactive currenlty ')
 
     const { password: _, ...result } = user
@@ -181,7 +184,7 @@ export default class AuthService {
             status: (user as Admin).status,
           }
 
-    if (payload?.status == 'CREATED' || payload?.status == 'INACTIVE')
+    if (payload?.status === 'CREATED' || payload?.status === 'INACTIVE')
       throw new ForbiddenException('User not active')
     return {
       status: 'success',
@@ -199,9 +202,9 @@ export default class AuthService {
     userType,
   }: CreateOTPDto) {
     const otpCode = generateOTP()
-    let colSpecification = {},
-      channelValue = 'EMAIL'
-    if (channelType == 'EMAIL') {
+    let colSpecification = {}
+    let channelValue = 'EMAIL'
+    if (channelType === 'EMAIL') {
       colSpecification = { email }
       channelValue = email
     } else {
@@ -210,7 +213,7 @@ export default class AuthService {
     }
 
     const user =
-      userType == 'CLIENT_USER'
+      userType === 'CLIENT_USER'
         ? await this.prismaService.user.findFirst({
             where: { ...colSpecification },
           })
@@ -219,10 +222,10 @@ export default class AuthService {
           })
     if (!user)
       throw new BadGatewayException(
-        `Invalid ${channelType == 'EMAIL' ? 'email' : 'phone number'}`,
+        `Invalid ${channelType === 'EMAIL' ? 'email' : 'phone number'}`,
       )
 
-    if ((user as any).profileLevel == 'VERIFIED' || type == 'VERIFICATION')
+    if ((user as any).profileLevel === 'VERIFIED' || type === 'VERIFICATION')
       throw new ConflictException('User is already verified ')
 
     const otpRecord = await this.prismaService.oTP.findFirst({
@@ -248,13 +251,14 @@ export default class AuthService {
 
     return { otpCode, type, channelValue, channelType, user }
   }
+
   // to request otp for verification and reset
   async requestOTP(createOTPDto: CreateOTPDto) {
     const { channelType, channelValue, otpCode, user, type } =
       await this.#createOTP(createOTPDto)
 
     // sending otp via appropriate channel
-    channelType == 'EMAIL'
+    channelType === 'EMAIL'
       ? this.messageService.setStrategy(this.emailStrategy)
       : this.messageService.setStrategy(this.smsStrategy)
 
@@ -283,7 +287,7 @@ export default class AuthService {
     otp: otpCode,
     channelType,
   }: VerifyOTPDto) {
-    const channelValue = channelType == 'EMAIL' ? email : phone
+    const channelValue = channelType === 'EMAIL' ? email : phone
     const otpRecord = await this.prismaService.oTP.findFirst({
       where: { type, channelValue },
     })
@@ -301,7 +305,7 @@ export default class AuthService {
       throw new BadRequestException('OTP has expired')
     }
 
-    if (otpCode != otpRecord.code) {
+    if (otpCode !== otpRecord.code) {
       throw new BadRequestException('Invalid OTP')
     }
 
@@ -315,6 +319,7 @@ export default class AuthService {
       message: 'OTP Verified',
     }
   }
+
   async verifyUser({ email, otp: otpCode }: VerifyUserDto) {
     const user = await this.prismaService.user.findFirst({
       where: { email },
@@ -345,6 +350,7 @@ export default class AuthService {
       message: 'User Verified successfully',
     }
   }
+
   async #checkOTPVerification({
     type,
     userId,
@@ -370,9 +376,10 @@ export default class AuthService {
 
     if (!otpRecord.isVerified) throw new BadGatewayException('OTP not verified')
   }
+
   async updatePassword({ password, userId, userType }: UpdatePasswordDto) {
     const user =
-      userType == 'CLIENT_USER'
+      userType === 'CLIENT_USER'
         ? await this.prismaService.user.findUnique({
             where: { id: userId },
           })
@@ -385,7 +392,7 @@ export default class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    if (userType == 'CLIENT_USER')
+    if (userType === 'CLIENT_USER')
       await this.prismaService.user.update({
         where: { id: userId },
         data: { password: hashedPassword },
@@ -397,11 +404,11 @@ export default class AuthService {
           password: hashedPassword,
           // activating user when updating password
           status:
-            (user as Admin).status == 'CREATED'
+            (user as Admin).status === 'CREATED'
               ? 'ACTIVE'
               : (user as Admin).status,
           inactiveReason:
-            (user as Admin).status == 'CREATED'
+            (user as Admin).status === 'CREATED'
               ? ''
               : (user as Admin).inactiveReason,
         },
@@ -412,6 +419,7 @@ export default class AuthService {
       message: 'Password updated successfully',
     }
   }
+
   async getAdmins() {
     const admins = await this.prismaService.admin.findMany({})
     return {
@@ -420,15 +428,16 @@ export default class AuthService {
       data: admins,
     }
   }
+
   async updateAdminStatus({ id, status, reason }: UpdateAdminStatusDto) {
     const admin = await this.prismaService.admin.findUnique({
-      where: { id: id },
+      where: { id },
     })
     if (!admin) throw new BadRequestException('Invalid admin id ')
 
     await this.prismaService.admin.update({
-      where: { id: id },
-      data: { status: status, inactiveReason: reason || '' },
+      where: { id },
+      data: { status, inactiveReason: reason || '' },
     })
     return {
       status: 'success',
@@ -438,12 +447,12 @@ export default class AuthService {
 
   async deleteAdminAccount(id: string) {
     const admin = await this.prismaService.admin.findUnique({
-      where: { id: id },
+      where: { id },
     })
     if (!admin) throw new BadRequestException('Invalid admin id ')
 
     await this.prismaService.admin.delete({
-      where: { id: id },
+      where: { id },
     })
     return {
       status: 'success',

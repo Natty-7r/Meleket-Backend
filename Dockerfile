@@ -2,12 +2,14 @@
 FROM node:20-alpine
 
 # Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /meleket
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
+RUN npm i -g @nestjs/cli
+RUN npx prisma generate && npx prisma db push
 RUN npm install
 
 # Copy the rest of the application code
@@ -17,7 +19,7 @@ COPY . .
 RUN npm run build
 
 # Expose the application port (if it needs to communicate over HTTP, otherwise omit)
-EXPOSE 3001
+EXPOSE 8080
 
 # Start the application
 CMD ["npm", "run", "start:prod"]

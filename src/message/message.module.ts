@@ -1,8 +1,8 @@
-import MessageService from './message.service'
 import { Global, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TwilioModule } from 'nestjs-twilio'
 import { MailerModule } from '@nestjs-modules/mailer'
+import MessageService from './message.service'
 import SmsStrategy from './strategies/sms.strategy'
 import EmailStrategy from './strategies/email.strategy'
 

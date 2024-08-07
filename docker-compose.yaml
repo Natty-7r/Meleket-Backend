@@ -1,12 +1,12 @@
 version: "3.8"
 
 services:
-  gateway:
+  backend:
     build:
-      context: ./user-management-support
-    container_name: user_management_support
+       context: ./
+    container_name: meleket_backend
     ports:
-      - "3000:3000"
+      - "8080:8080"
     depends_on:
       - database
     environment:
@@ -14,20 +14,8 @@ services:
       DATABASE_PORT: 5432
       DATABASE_USER: natty
       DATABASE_PASSWORD: postgres
-      DATABASE_NAME: add-board
+      DATABASE_NAME: meleket
 
-  microservice:
-    build:
-      context: ./user-management-microservice
-    container_name: user_management_microservice
-    depends_on:
-      - database
-    environment:
-      DATABASE_HOST: localhost
-      DATABASE_PORT: 5432
-      DATABASE_USER: natty
-      DATABASE_PASSWORD: postgres
-      DATABASE_NAME: add-board
 
   database:
     image: postgres:latest
@@ -35,7 +23,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: add-board
+      POSTGRES_DB: meleket
       POSTGRES_USER: natty
       POSTGRES_PASSWORD: postres
     volumes:

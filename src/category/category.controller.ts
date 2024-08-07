@@ -13,6 +13,7 @@ import { ApiTags } from '@nestjs/swagger'
 
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import User from 'src/common/decorators/user.decorator'
+import { USER } from 'src/common/util/types'
 import CreateCategoryDto from './dto/create-category.dto'
 import CategoryService from './category.service'
 import UpdateCategoryDto from './dto/update-category.dto'
@@ -27,7 +28,6 @@ import {
 } from './decorators/category-api-endpoint.decorator'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import UpdateCategoryImageDto from './dto/update-category-image.dto '
-import { USER } from 'src/common/util/types'
 
 @ApiTags('Category')
 @Controller('category')
@@ -48,7 +48,7 @@ export default class CategoryController {
         image: file?.path || 'uploads/category/category.png',
         price: createCategoryDto?.price || 50,
       },
-      user.userType != 'CLIENT_USER',
+      user.userType !== 'CLIENT_USER',
     )
   }
 

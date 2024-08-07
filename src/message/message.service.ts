@@ -20,11 +20,18 @@ export default class MessageService implements MessageStrategy {
     }
     return this.strategy.sendOTP(params)
   }
-  async SendAccountCreationMessage(params: SendAccountCreationParam) {
+
+  async sendAccountCreationMessage(params: SendAccountCreationParam) {
     if (!this.strategy) {
       throw new Error('No strategy set')
     }
-    return this.strategy.SendAccountCreationMessage(params)
+    return this.strategy.sendAccountCreationMessage(params)
   }
-  async SendMessageParam(params: SendMessageParam): Promise<void> {}
+
+  async sendMessageParam(params: SendMessageParam): Promise<void> {
+    if (!this.strategy) {
+      throw new Error('No strategy set')
+    }
+    return this.strategy.sendMessage(params)
+  }
 }

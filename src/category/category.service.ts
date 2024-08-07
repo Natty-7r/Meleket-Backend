@@ -54,7 +54,6 @@ export default class CategoryService {
     createCategoryDto: CreateCategoryDto,
     verified: boolean,
   ) {
-    console.log(createCategoryDto)
     const previesCategory = await this.prismaService.category.findFirst({
       where: { name: createCategoryDto.name.toLocaleLowerCase().trim() },
     })
