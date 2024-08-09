@@ -14,8 +14,8 @@ COPY prisma ./prisma
 # COPY .env ./
 
 # Copy the script to create .env file
-COPY create-env-file.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/create-env-file.sh
+# COPY create-env-file.sh /usr/local/bin/
+# RUN chmod +x /usr/local/bin/create-env-file.sh
 
 # Set build argument for DATABASE_URL
 ARG DATABASE_URL
@@ -33,6 +33,7 @@ RUN npm i -g @nestjs/cli
 RUN npm install
 
 RUN npx prisma generate 
+RUN npx prisma db push 
 
 # RUN npx prisma db push
 
