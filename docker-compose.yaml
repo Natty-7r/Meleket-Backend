@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   meleket-backend:
-    image: meleket-backend
+    image: meleket_backend
     volumes:
       - db_data:/etc/data
     environment:
