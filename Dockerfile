@@ -10,7 +10,7 @@ COPY package*.json ./
 # Copy the prisma directory
 COPY prisma ./prisma
 
-COPY .env ./
+# COPY .env ./
 
 
 
