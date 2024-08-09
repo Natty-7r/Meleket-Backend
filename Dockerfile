@@ -10,13 +10,6 @@ COPY package*.json ./
 # Copy the prisma directory
 COPY prisma ./prisma
 
-# Copy the .env file
-# COPY .env ./
-
-# Copy the script to create .env file
-# COPY create-env-file.sh /usr/local/bin/
-# RUN chmod +x /usr/local/bin/create-env-file.sh
-
 # Set build argument for DATABASE_URL
 ARG DATABASE_URL
 
@@ -24,25 +17,20 @@ ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
 
-
-
-
-RUN npm install
-
-RUN npx prisma generate 
-RUN npx prisma db set
-
-# RUN npx prisma db push
-
 # Copy the rest of the application code
 COPY . .
 
+RUN npm install
+
 # Build the application
+RUN  npx prisma generate
+
 RUN npm run build
+
 
 
 # Expose the application port (if it needs to communicate over HTTP, otherwise omit)
 EXPOSE 8080
 
 # Start the application
-CMD ["npm", "run", "prod"]
+CMD ["npm", "run", "start:prod"] 
