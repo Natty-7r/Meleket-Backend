@@ -23,7 +23,7 @@ RUN npm install
 # Build the application
 RUN  npx prisma generate
 
-RUN npm run build
+RUN npx prisma db push 
 
 
 
@@ -31,4 +31,4 @@ RUN npm run build
 EXPOSE 8080
 
 # Start the application
-CMD ["npm", "run", "start:prod"] 
+CMD ["npm", "run", "start:dev"] 

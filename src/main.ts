@@ -11,6 +11,7 @@ async function bootstrap() {
     .setDescription('API Docs for Meleket web application')
     .setVersion('1.0')
     .build()
+
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('docs', app, document)
   const port = process.env.PORT || 3000
