@@ -4,18 +4,17 @@
 
 </div>
 
-
 ## Description
 
-  MELEKET ADD-BOARD  is bussiness listing and advertisment platform where bussiness owners can have their bussiness posted on and advertised.
-  This is the backend applicaiton developed by nest js 
-
+MELEKET ADD-BOARD is bussiness listing and advertisment platform where bussiness owners can have their bussiness posted on and advertised.
+This is the backend applicaiton developed by nest js
 
 ## Installation
 
 ```bash
 $ git clone [url]
 ```
+
 ```bash
 $ npm install
 ```
@@ -24,7 +23,7 @@ $ npm install
 
 ```bash
 # development
-$ npm run dev 
+$ npm run dev
 
 # watch mode
 $ npm run start:dev
@@ -49,6 +48,4 @@ $ npm run test:cov
 ## Stay in touch
 
 - Author - Natty-7(https://github.com/Natty-7r)
-- Email - [https://nestjs.com](mailto:nati7fekadu@gmail.com)
-
-
+- Email - (mailto:nati7fekadu@gmail.com)
