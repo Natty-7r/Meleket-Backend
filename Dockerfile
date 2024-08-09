@@ -33,7 +33,7 @@ RUN npm i -g @nestjs/cli
 RUN npm install
 
 RUN npx prisma generate 
-RUN npx prisma db push 
+RUN npx prisma db push
 
 # RUN npx prisma db push
 
@@ -43,11 +43,9 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# start the app 
- RUN npm run prod
 
 # Expose the application port (if it needs to communicate over HTTP, otherwise omit)
 EXPOSE 8080
 
 # Start the application
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "prod"]
