@@ -4,7 +4,6 @@ import AuthService from './auth.service'
 
 describe('AuthService', () => {
   let service: AuthService
-  let prisma: PrismaService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -12,7 +11,6 @@ describe('AuthService', () => {
     }).compile()
 
     service = module.get<AuthService>(AuthService)
-    prisma = module.get<PrismaService>(PrismaService)
   })
 
   it('should be defined', () => {

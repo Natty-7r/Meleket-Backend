@@ -12,10 +12,10 @@ import { ApiTags } from '@nestjs/swagger'
 import { RequestWithUser, SignUpType } from 'src/common/util/types'
 import { User } from '@prisma/client'
 import { AuthGuard } from '@nestjs/passport'
+import { Public } from 'src/common/decorators/public.decorator'
 import AuthService from './auth.service'
 import LocalAuthGuard from './guards/local-auth.guard'
 import GoogleOAuthGuard from './guards/google-auth.guard'
-import { Public } from 'src/common/decorators/public.decorator'
 import {
   VerifyUserDto,
   VerifyOTPDto,
@@ -78,6 +78,7 @@ export default class AuthController {
   googleAuthRedirect() {
     // return this.authService.googleLogin(req)
   }
+
   @RequestOTP()
   @Post('request-otp')
   requestOTP(@Body() createOTPDto: CreateOTPDto) {
@@ -95,6 +96,7 @@ export default class AuthController {
   verifyUser(@Body() verifyUserDto: VerifyUserDto) {
     return this.authService.verifyUser(verifyUserDto)
   }
+
   @UpdatePassword()
   @Put('update-password')
   updatePassword(@Body() updatePasswordDto: UpdatePasswordDto) {
