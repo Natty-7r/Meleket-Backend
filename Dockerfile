@@ -27,13 +27,10 @@ ENV DATABASE_URL=${DATABASE_URL}
 
 
 
-# Install dependencies
-RUN npm i -g @nestjs/cli
-
 RUN npm install
 
 RUN npx prisma generate 
-RUN npx prisma db push
+RUN npx prisma db set
 
 # RUN npx prisma db push
 
