@@ -135,6 +135,7 @@ model Business {
   name        String
   description String
   templateId  String
+  name           String
   owner       User   @relation("UserOwnsBusiness", fields: [userId], references: [id]) // New relation
 
   services        BussinesService[]
