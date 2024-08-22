@@ -13,7 +13,7 @@ import CategoryModule from './category/category.module'
 import configuration from './config/configuration'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
-import { BusinessModule } from './business/business.module';
+import BusinessModule from './business/business.module'
 
 @Module({
   imports: [
