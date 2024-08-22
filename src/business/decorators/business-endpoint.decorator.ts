@@ -14,7 +14,7 @@ import { ApiForbiddenResponse } from '@nestjs/swagger'
 
 const ClientRole = () =>
   applyDecorators(
-    ClientRole(),
+    Roles('CLIENT_USER'),
     ApiForbiddenResponse({ description: 'Only owner can manupulate' }),
   )
 export const CreateBusiness = () =>
@@ -67,7 +67,7 @@ export const AddBusinessService = () =>
     AddBussinessServiceSwaggerDefinition(),
   )
 
-export const UpdateBusinessService = () =>
+export const UpdateBusinessServices = () =>
   applyDecorators(ClientRole, UpdateBussinessServiceSwaggerDefinition())
 
 export const UpdateBusinessServiceImage = () =>

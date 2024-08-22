@@ -14,7 +14,7 @@ import {
   CreateBusiness,
   UpdateBusiness,
   UpdateBusinessImage,
-  UpdateBusinessService,
+  UpdateBusinessServices,
   UpdateBusinessServiceImage,
 } from './decorators/business-endpoint.decorator'
 import { USER } from 'src/common/util/types'
@@ -30,8 +30,8 @@ import UpdateBusinessDto from './dto/update-business.dto'
 export default class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
+  @Post('create-business')
   @CreateBusiness()
-  @Post()
   async createBusiness(
     @Body() createBusinessDto: CreateBusinessDto,
     @User() user: USER,
@@ -44,7 +44,7 @@ export default class BusinessController {
     )
   }
 
-  @Post()
+  @Put('update-business-image')
   @UpdateBusinessImage()
   async updateBusinessImage(
     @Param('id') id: string,
@@ -58,7 +58,7 @@ export default class BusinessController {
     })
   }
 
-  @Put()
+  @Put('update-buinesss')
   @UpdateBusiness()
   async updateBusiness(
     @Body() updateBusinessDto: UpdateBusinessDto,
@@ -67,8 +67,8 @@ export default class BusinessController {
     return this.businessService.updateBusiness(updateBusinessDto, user.id)
   }
 
+  @Post('add-business')
   @AddBusinessService()
-  @Post()
   async addBusinessService(
     @Body() createBusinessServiceDto: CreateBusinessServiceDto,
     @User() user: USER,
@@ -81,8 +81,8 @@ export default class BusinessController {
     )
   }
 
+  @Put('update-business-service-image')
   @UpdateBusinessServiceImage()
-  @Put()
   async updateBusinessServiceImage(
     @Param('id') id: string,
     @User() user: USER,
@@ -95,9 +95,9 @@ export default class BusinessController {
     })
   }
 
-  @UpdateBusinessService()
-  @Put()
-  async updateBusinessService(
+  @Put('update-services')
+  @UpdateBusinessServices()
+  async updateBusinessServices(
     @Body() updateBusinessServiceDto: UpdateBusinessServiceDtos,
     @User() user: USER,
   ) {
