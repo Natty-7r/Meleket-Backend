@@ -49,6 +49,7 @@ export type FileType = 'image' | 'pdf' | 'txt' | 'doc'
 export type MulterFilterConfig = {
   fileType: FileType
   maxSize: number // in MB
+  optional?: boolean
 }
 
 export interface CategoryTreeNode {
