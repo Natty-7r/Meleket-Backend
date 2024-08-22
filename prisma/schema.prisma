@@ -133,7 +133,7 @@
     name        String
     description String
     templateId  String
-    mainImage   String
+    mainImageUrl   String
     owner       User   @relation("UserOwnsBusiness", fields: [ownerId], references: [id]) // New relation
 
     services        BussinesService[]
