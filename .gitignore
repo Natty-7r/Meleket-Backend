@@ -4,7 +4,7 @@
 /build
 
 #  prisma migrations
-/prisma/migrateions
+/prisma/migrations
 
 # Logs
 logs
