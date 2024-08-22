@@ -2,7 +2,7 @@ import { Body, Controller, UploadedFile } from '@nestjs/common'
 import CreateBusinessDto from './dto/create-business.dto'
 import BusinessService from './business.service'
 import { ApiTags } from '@nestjs/swagger'
-import { CreateBusiness } from './decorator/business-endpoint.decorator'
+import { CreateBusiness } from './decorators/business-endpoint.decorator'
 import { USER } from 'src/common/util/types'
 import User from 'src/common/decorators/user.decorator'
 
