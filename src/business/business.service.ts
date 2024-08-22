@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import CreateBusinessDto from './dto/create-business.dto'
+import UpdateBusinessDto from './dto/update-business.dto'
 
 @Injectable()
 export default class BusinessService {
@@ -15,12 +16,14 @@ export default class BusinessService {
       where: { name },
     })
     if (business) throw new ConflictException('Business is taken')
+    return business
   }
   async checkBusinessId(id: string) {
     const business = await this.prismaService.business.findFirst({
       where: { id },
     })
     if (business) throw new ConflictException('Invalid business ID')
+    return business
   }
 
   async createBusiness(
@@ -75,6 +78,25 @@ export default class BusinessService {
     return {
       status: 'success',
       message: 'Buisness image updated successfully',
+      data: {
+        ...updatedBusiness,
+      },
+    }
+  }
+  async updateBusiness({ id, name, description }: UpdateBusinessDto) {
+    const business = await this.checkBusinessId(id)
+
+    const updatedBusiness = await this.prismaService.business.update({
+      where: { id },
+      data: {
+        name: name || business.name,
+        description: description || business.description,
+      },
+    })
+
+    return {
+      status: 'success',
+      message: 'Buisness updated successfully',
       data: {
         ...updatedBusiness,
       },

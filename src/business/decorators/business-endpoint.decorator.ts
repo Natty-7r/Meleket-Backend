@@ -3,6 +3,7 @@ import Roles from 'src/common/decorators/roles.decorator'
 import {
   UpdateBussinessImageSwaggerDefinition,
   CreateBussinessSwaggerDefinition,
+  UpdateBussinessSwaggerDefinition,
 } from './business-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/util/helpers/multer'
@@ -34,3 +35,6 @@ export const UpdateBusinessImage = () =>
     ),
     UpdateBussinessImageSwaggerDefinition(),
   )
+
+export const UpdateBusiness = () =>
+  applyDecorators(Roles('CLIENT_USER'), UpdateBussinessSwaggerDefinition())

@@ -13,15 +13,6 @@ export default class CreateBusinessDto {
 
   @ApiProperty({
     type: String,
-    example: 'user_uuid',
-    description: 'ID of the user who owns the business',
-  })
-  @IsUUID()
-  @IsNotEmpty()
-  userId: string
-
-  @ApiProperty({
-    type: String,
     example: 'category_uuid',
     description: 'ID of the category the business belongs to',
   })

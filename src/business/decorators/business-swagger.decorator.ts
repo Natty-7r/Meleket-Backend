@@ -34,3 +34,13 @@ export const UpdateBussinessImageSwaggerDefinition = () =>
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
     ApiConsumes('image'),
   )
+
+export const UpdateBussinessSwaggerDefinition = () =>
+  applyDecorators(
+    ApiResponse({
+      description: 'Business  updated successfully',
+      type: CreateBusinessResponse,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid business Id' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
