@@ -54,7 +54,7 @@ export const CreateCategorySwaggerDefinition = () =>
     }),
     ApiBadRequestResponse({ description: 'Invalid parent id' }),
     ApiConflictResponse({ description: 'Category with the same name exists' }),
-    ApiConsumes('multipart/form-data'),
+    ApiConsumes('image'),
   )
 
 export const DeleteCategorySwaggerDefinition = () =>

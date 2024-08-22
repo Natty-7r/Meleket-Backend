@@ -12,12 +12,29 @@ export default class BusinessService {
     })
     if (business) throw new ConflictException('Business is taken')
   }
-  async createBusiness(createBusinessDto: CreateBusinessDto) {
+  async createBusiness(
+    createBusinessDto: CreateBusinessDto,
+    userId: string,
+    mainImage?: string,
+  ) {
     await this.checkBusinessName(createBusinessDto.name)
+
+    const businessMainImage =
+      { image: mainImage } ||
+      (await this.prismaService.category.findFirst({
+        where: {
+          id: createBusinessDto.categoryId,
+        },
+        select: {
+          image: true,
+        },
+      }))
 
     const business = await this.prismaService.business.create({
       data: {
         ...createBusinessDto,
+        mainImage: businessMainImage.image,
+        ownerId: userId,
       },
     })
 

@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common'
 import {
   ApiConflictResponse,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
@@ -17,4 +18,5 @@ export const CreateBussinessSwaggerDefinition = () =>
     }),
     ApiConflictResponse({ description: 'Business name already taken' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiConsumes('image'),
   )
