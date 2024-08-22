@@ -4,13 +4,22 @@ import {
   UpdateBussinessImageSwaggerDefinition,
   CreateBussinessSwaggerDefinition,
   UpdateBussinessSwaggerDefinition,
+  AddBussinessServiceSwaggerDefinition,
+  UpdateBussinessServiceImageSwaggerDefinition,
+  UpdateBussinessServiceSwaggerDefinition,
 } from './business-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/util/helpers/multer'
+import { ApiForbiddenResponse } from '@nestjs/swagger'
 
+const ClientRole = () =>
+  applyDecorators(
+    ClientRole(),
+    ApiForbiddenResponse({ description: 'Only owner can manupulate' }),
+  )
 export const CreateBusiness = () =>
   applyDecorators(
-    Roles('CLIENT_USER'),
+    ClientRole(),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'business', filePrefix: 'b' }),
@@ -26,7 +35,7 @@ export const CreateBusiness = () =>
 
 export const UpdateBusinessImage = () =>
   applyDecorators(
-    Roles('CLIENT_USER'),
+    ClientRole(),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'business', filePrefix: 'b' }),
@@ -38,3 +47,43 @@ export const UpdateBusinessImage = () =>
 
 export const UpdateBusiness = () =>
   applyDecorators(Roles('CLIENT_USER'), UpdateBussinessSwaggerDefinition())
+
+export const AddBusinessService = () =>
+  applyDecorators(
+    ClientRole(),
+    UseInterceptors(
+      FileInterceptor('image', {
+        storage: muluterStorage({
+          folder: 'business/service',
+          filePrefix: 'b',
+        }),
+        fileFilter: multerFilter({
+          fileType: 'image',
+          maxSize: 5,
+          optional: true,
+        }),
+      }),
+    ),
+    AddBussinessServiceSwaggerDefinition(),
+  )
+
+export const UpdateBusinessService = () =>
+  applyDecorators(ClientRole, UpdateBussinessServiceSwaggerDefinition())
+
+export const UpdateBusinessServiceImage = () =>
+  applyDecorators(
+    ClientRole(),
+    UseInterceptors(
+      FileInterceptor('image', {
+        storage: muluterStorage({
+          folder: 'business/service',
+          filePrefix: 'b',
+        }),
+        fileFilter: multerFilter({
+          fileType: 'image',
+          maxSize: 5,
+        }),
+      }),
+    ),
+    UpdateBussinessServiceImageSwaggerDefinition(),
+  )
