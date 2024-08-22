@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+#  prisma migrations
+/prisma/migrateions
+
 # Logs
 logs
 *.log
