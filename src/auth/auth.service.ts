@@ -225,7 +225,7 @@ export default class AuthService {
         `Invalid ${channelType === 'EMAIL' ? 'email' : 'phone number'}`,
       )
 
-    if ((user as any).profileLevel === 'VERIFIED' || type === 'VERIFICATION')
+    if ((user as any).profileLevel === 'VERIFIED' && type === 'VERIFICATION')
       throw new ConflictException('User is already verified ')
 
     const otpRecord = await this.prismaService.oTP.findFirst({
