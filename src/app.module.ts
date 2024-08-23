@@ -30,7 +30,6 @@ import BusinessModule from './business/business.module'
     CategoryModule,
     AuthModule,
     MessageModule,
-    BusinessModule,
   ],
 
   providers: [

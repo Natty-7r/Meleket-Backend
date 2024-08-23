@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import {
   SendAccountCreationParam,
@@ -13,22 +13,36 @@ import {
 } from 'src/common/util/helpers/string-util'
 import { MailerService } from '@nestjs-modules/mailer'
 import MessageStrategy from '../interfaces/message-strategry.interface'
+import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
+import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
+import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
 
 @Injectable()
 export default class EmailStrategy implements MessageStrategy {
   constructor(
     private mailerService: MailerService,
     private configService: ConfigService,
-  ) {}
+    private errorLogger: WinstonLoggerService,
+    private activityrLogger: WinstonLoggerService,
+  ) {
+    this.errorLogger.configure(new ErrorLoggerStrategry())
+    this.activityrLogger.configure(new ActivityLoggerStrategry())
+  }
 
   async #sendEmail({ address, subject, body }: SendEmailParam) {
-    this.mailerService.sendMail({
-      sender: this.configService.get<string>('email.sender'),
-      to: address,
-      subject,
-      text: subject,
-      html: body,
-    })
+    try {
+      const message = await this.mailerService.sendMail({
+        sender: this.configService.get<string>('email.sender'),
+        to: address,
+        subject,
+        text: subject,
+        html: body,
+      })
+      this.activityrLogger.log(message)
+      return message
+    } catch (error) {
+      this.errorLogger.error(error)
+    }
   }
 
   async sendMessage(params: SendMessageParam): Promise<void> {}
