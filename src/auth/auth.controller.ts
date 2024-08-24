@@ -24,6 +24,7 @@ import {
   UpdatePasswordDto,
   CreateAdminDto,
   UpdateAdminStatusDto,
+  SignInDto,
 } from './dto'
 
 import {
@@ -63,7 +64,7 @@ export default class AuthController {
   @SignIn()
   @UseGuards(LocalAuthGuard)
   @Post('/sign-in')
-  async login(@Request() req: RequestWithUser) {
+  async login(@Body() signInDto: SignInDto, @Request() req: RequestWithUser) {
     return this.authService.login(req.user as User)
   }
 
