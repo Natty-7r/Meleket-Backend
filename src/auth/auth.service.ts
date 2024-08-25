@@ -83,12 +83,12 @@ export default class AuthService {
         userType: 'CLIENT_USER',
       })
 
-      this.messageService.setStrategy(this.smsStrategy)
+      this.messageService.setStrategy(this.emailStrategy)
       this.messageService.sendOTP({
         otp: otpCode,
         otpType: 'VERIFICATION',
         firstName,
-        address: '+2519972285604',
+        address: email,
       })
     }
 
