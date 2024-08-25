@@ -136,9 +136,9 @@ model Business {
   mainImageUrl String
   owner        User   @relation("UserOwnsBusiness", fields: [ownerId], references: [id]) // New relation
 
-  services        BussinesService[]
-  address         BusinessAddress[]
-  businessContact BusinessContact?
+  services BussinesService[]
+  address  BusinessAddress[]
+  contact  BusinessContact?
 
   followers  User[]                  @relation("UserFollowsBusiness")
   visibility BusinessVisiblityStatus @default(CREATED)

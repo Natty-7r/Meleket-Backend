@@ -3,12 +3,14 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
 import UpdateBusinessServiceDto from './dto/update-business-service.dto'
+import SearchBusinessDto from './dto/search-business.dto'
 
 @Injectable()
 export default class BusinessService {
@@ -90,6 +92,7 @@ export default class BusinessService {
         mainImageUrl: businessMainImage.image,
         ownerId: userId,
         name: createBusinessDto.name.toLowerCase().trim(),
+        description: createBusinessDto.description.toLowerCase().trim(),
       },
     })
 
@@ -138,8 +141,8 @@ export default class BusinessService {
     const updatedBusiness = await this.prismaService.business.update({
       where: { id },
       data: {
-        name: name || business.name.toLowerCase().trim(),
-        description: description || business.description,
+        name: name.toLowerCase().trim() || business.name,
+        description: description.toLowerCase().trim() || business.description,
       },
     })
 
@@ -166,9 +169,9 @@ export default class BusinessService {
 
     const buinessService = await this.prismaService.bussinesService.create({
       data: {
-        name,
+        name: name.toLowerCase().trim(),
         businessId,
-        description,
+        description: description.toLowerCase().trim(),
         specifications: specifications as any,
         image: imageUrl,
       },
@@ -220,7 +223,8 @@ export default class BusinessService {
         where: { id },
         data: {
           name: name.toLowerCase().trim() || businessService.description,
-          description: description || businessService.description,
+          description:
+            description.toLowerCase().trim() || businessService.description,
           specifications:
             specifications || (businessService.specifications as any),
         },
@@ -235,6 +239,171 @@ export default class BusinessService {
       status: 'success',
       message: 'Buisness services updated successfully',
       data: { ...business },
+    }
+  }
+
+  async getAllBusiness() {
+    const business = await this.prismaService.business.findMany()
+    return {
+      status: 'success',
+      message: 'All buisness fetched successfully',
+      data: business,
+    }
+  }
+
+  async getBusinessDetail(id: string) {
+    const businessDetail = await this.prismaService.business.findFirst({
+      where: { id },
+      select: {
+        followers: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        ratings: true,
+        reviews: true,
+        address: true,
+        contact: true,
+        services: true,
+      },
+    })
+    return {
+      status: 'success',
+      message: 'All buisness fetched successfully',
+      data: businessDetail,
+    }
+  }
+
+  async getUserBusinessDetail(businessId: string, userId: string) {
+    await this.#checkOwner({ userId, businessId })
+    const businessDetail = await this.prismaService.business.findFirst({
+      where: { id: businessId },
+      select: {
+        followers: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        ratings: true,
+        reviews: true,
+        address: true,
+        contact: true,
+        services: true,
+        bills: true,
+        packages: true,
+      },
+    })
+    return {
+      status: 'success',
+      message: 'All buisness fetched successfully',
+      data: businessDetail,
+    }
+  }
+
+  async getCategoryBusiness({ categoryId }: { categoryId: string }) {
+    const category = await this.prismaService.category.findFirst({
+      where: { id: categoryId },
+    })
+    if (!category) throw new NotFoundException('Invalid category id ')
+    const business = await this.prismaService.business.findMany({
+      where: { categoryId },
+    })
+    return {
+      status: 'success',
+      message: `${category.name}  buisness fetched successfully`,
+      data: business,
+    }
+  }
+
+  async searchBusiness(searchKey: string) {
+    const business = await this.prismaService.business.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: searchKey.toLowerCase().trim(),
+            },
+          },
+          {
+            description: {
+              contains: searchKey.toLowerCase().trim(),
+            },
+          },
+        ],
+      },
+    })
+    if (!business || business.length == 0)
+      throw new NotFoundException(`no buisness for  ${searchKey} key `)
+    return {
+      status: 'success',
+      message: `buisness for ${searchKey} key fetched successfully`,
+      data: business,
+    }
+  }
+
+  async searchBYNameDescription({ name, description }: SearchBusinessDto) {
+    const business = await this.prismaService.business.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: name.toLowerCase().trim(),
+            },
+          },
+          {
+            description: {
+              contains: name.toLowerCase().trim(),
+            },
+          },
+        ],
+      },
+    })
+    if (!business || business.length == 0)
+      throw new NotFoundException(
+        `no buisness for name:${name} , description:${description} key `,
+      )
+    return {
+      status: 'success',
+      message: `buisness for ${name} , ${description} key fetched successfully`,
+      data: business,
+    }
+  }
+  async searchBusinessBYAddress(location: string) {
+    const business = await this.prismaService.business.findMany({
+      where: {
+        address: {
+          some: {
+            OR: [
+              {
+                city: {
+                  contains: location,
+                },
+                country: {
+                  contains: location,
+                },
+                specificLocation: {
+                  contains: location,
+                },
+                state: {
+                  contains: location,
+                },
+                streetAddress: {
+                  contains: location,
+                },
+              },
+            ],
+          },
+        },
+      },
+    })
+    if (!business || business.length == 0)
+      throw new NotFoundException(`no buisness for name:${location} location  `)
+    return {
+      status: 'success',
+      message: `buisness for ${location} location fetched successfully`,
+      data: business,
     }
   }
 }

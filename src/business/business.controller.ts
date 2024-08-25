@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
 } from '@nestjs/common'
 import CreateBusinessDto from './dto/create-business.dto'
@@ -16,6 +18,10 @@ import {
   UpdateBusinessImage,
   UpdateBusinessServices,
   UpdateBusinessServiceImage,
+  GetCategoryBusinesses,
+  SearchBusiness,
+  GetBusinesses,
+  GetUserBusinesses,
 } from './decorators/business-endpoint.decorator'
 import { USER } from 'src/common/util/types'
 import User from 'src/common/decorators/user.decorator'
@@ -106,5 +112,37 @@ export default class BusinessController {
 
       user.id,
     )
+  }
+
+  @Get('user')
+  @GetUserBusinesses()
+  getUserBusiness() {
+    return this.businessService.getAllBusiness()
+  }
+
+  @Get('all')
+  @GetBusinesses()
+  getAllBusiness() {
+    return this.businessService.getAllBusiness()
+  }
+
+  @Get('category')
+  @GetCategoryBusinesses()
+  getCategoryBusiness(@Param('categoryrId') categoryId: string) {
+    return this.businessService.getCategoryBusiness({ categoryId })
+  }
+
+  @Get('search')
+  @SearchBusiness()
+  searchBusiness(@Query('key') searchKey: string) {
+    return this.businessService.searchBusiness(searchKey)
+  }
+  @Get('search-name-description')
+  @SearchBusiness()
+  searchBYNameDescription(
+    @Query('name') name?: string,
+    @Query('description') description?: string,
+  ) {
+    return this.businessService.searchBYNameDescription({ name, description })
   }
 }
