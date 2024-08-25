@@ -118,6 +118,7 @@ export interface Config {
 export interface SendSMSParam {
   smsAddress: string
   smsBody: string
+  subject: string
 }
 
 export interface SendEmailParam {

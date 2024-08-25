@@ -83,12 +83,12 @@ export default class AuthService {
         userType: 'CLIENT_USER',
       })
 
-      this.messageService.setStrategy(this.emailStrategy)
-      await this.messageService.sendOTP({
+      this.messageService.setStrategy(this.smsStrategy)
+      this.messageService.sendOTP({
         otp: otpCode,
         otpType: 'VERIFICATION',
         firstName,
-        address: email,
+        address: '+2519972285604',
       })
     }
 
@@ -358,7 +358,6 @@ export default class AuthService {
     type: OTPType
     userId: string
   }) {
-    console.log(type, userId)
     const otpRecord = await this.prismaService.oTP.findFirst({
       where: { type, userId },
     })

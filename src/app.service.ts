@@ -12,7 +12,6 @@ export default class AppService {
       const fileContent = fs.readFileSync(readmePath, 'utf8')
       return marked.parse(fileContent)
     } catch (err) {
-      console.log(err)
       throw new InternalServerErrorException('Unable to read readme file')
     }
   }

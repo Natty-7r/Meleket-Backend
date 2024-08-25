@@ -15,7 +15,6 @@ import JwtStrategy from './strategies/jwt.strategry'
       imports: [ConfigModule], // Import ConfigModule
       inject: [ConfigService], // Inject ConfigService
       useFactory: async (configService: ConfigService) => {
-        console.log(configService.get('jwt'), 'jwt config')
         return {
           secret: configService.get<string>('jwt.secret'), // Use ConfigService to get JWT secret
           signOptions: {

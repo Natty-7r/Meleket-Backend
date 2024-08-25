@@ -28,17 +28,27 @@ export default class SmsStrategy implements MessageStrategy {
     this.activityrLogger.configure(new ActivityLoggerStrategry())
   }
 
-  async #sendSMS({ smsBody, smsAddress }: SendSMSParam) {
+  async #sendSMS({ smsBody, smsAddress, subject }: SendSMSParam) {
     try {
       const message = await this.twilioService.client.messages.create({
         from: this.configService.get<string>('twilio.smsSender'),
         body: smsBody,
         to: smsAddress,
       })
-      this.activityrLogger.log(message as any)
+      this.activityrLogger.log('', {
+        ...message,
+        to: smsAddress,
+        subject,
+      })
       return message
     } catch (error) {
-      this.errorLogger.error(error)
+      const smsError = {
+        message: 'Unable to send Sms ',
+        to: smsAddress,
+        subject,
+        ...error,
+      }
+      this.errorLogger.error('', smsError)
     }
   }
 
@@ -55,7 +65,14 @@ export default class SmsStrategy implements MessageStrategy {
         ? generateVerifySMSOTPMessage({ firstName, otp })
         : generateResetSMSOTPMessage({ firstName, otp })
 
-    await this.#sendSMS({ smsAddress: address, smsBody })
+    await this.#sendSMS({
+      smsAddress: address,
+      smsBody,
+      subject:
+        otpType === 'VERIFICATION'
+          ? 'Verify Your Account'
+          : 'Reset Your Account',
+    })
   }
 
   async sendAccountCreationMessage(

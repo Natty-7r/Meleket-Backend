@@ -12,9 +12,7 @@ export default class GoogleOAuthGuard extends AuthGuard('google') {
 
     const activate = (await super.canActivate(context)) as boolean
 
-    // console.log(activate, 'activate')
     await super.logIn(request)
-    // console.log(activate)
     return activate
   }
 }

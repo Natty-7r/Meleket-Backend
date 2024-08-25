@@ -38,10 +38,16 @@ export default class EmailStrategy implements MessageStrategy {
         text: subject,
         html: body,
       })
-      this.activityrLogger.log(message)
+      this.activityrLogger.log('', { ...message, to: address, subject })
       return message
     } catch (error) {
-      this.errorLogger.error(error)
+      const emailError = {
+        message: 'Unable to send email',
+        to: address,
+        subject,
+        ...error,
+      }
+      this.errorLogger.error('', emailError)
     }
   }
 
