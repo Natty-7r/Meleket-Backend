@@ -173,7 +173,7 @@ model BusinessAddress {
   country          String
   state            String
   city             String
-  streetAddress    String
+  streetAddress    String?
   specificLocation String? // Additional detail for specific location (e.g., suite number, building)
 
   business Business @relation(fields: [businessId], references: [id])
