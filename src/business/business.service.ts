@@ -72,16 +72,16 @@ export default class BusinessService {
   ) {
     await this.checkBusinessName(createBusinessDto.name)
 
-    const businessMainImage =
-      { image: mainImage } ||
-      (await this.prismaService.category.findFirst({
-        where: {
-          id: createBusinessDto.categoryId,
-        },
-        select: {
-          image: true,
-        },
-      }))
+    const businessMainImage = mainImage
+      ? { image: mainImage }
+      : await this.prismaService.category.findFirst({
+          where: {
+            id: createBusinessDto.categoryId,
+          },
+          select: {
+            image: true,
+          },
+        })
 
     const business = await this.prismaService.business.create({
       data: {

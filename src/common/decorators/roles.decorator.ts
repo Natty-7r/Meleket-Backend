@@ -9,7 +9,6 @@ const Roles = (...roles: UserType[]) =>
   applyDecorators(
     SetMetadata(ROLES_KEY, roles),
     UseGuards(JwtAuthGuard, RolesGuard),
-    UseGuards(RolesGuard),
     ApiBearerAuth(),
     ApiUnauthorizedResponse({ description: 'Unauthorized' }),
   )
