@@ -14,7 +14,7 @@ import UpdateBusinessServiceDto from './dto/update-business-service.dto'
 export default class BusinessService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async checkOwner({
+  async #checkOwner({
     userId,
     businessId,
   }: {
@@ -29,20 +29,21 @@ export default class BusinessService {
     return business
   }
 
-  async checkBusinessName(name: string) {
+  async #checkBusinessName(name: string) {
     const business = await this.prismaService.business.findFirst({
       where: { name: name.toLowerCase().trim() },
     })
-    if (business) throw new ConflictException('Business is taken')
+    if (business) throw new ConflictException('Business name  is taken')
     return business
   }
-  async checkBusinessId(id: string) {
+  async #verifiyBusinessId(id: string) {
     const business = await this.prismaService.business.findFirst({
       where: { id },
     })
-    if (business) throw new ConflictException('Invalid business ID')
+    if (!business) throw new BadRequestException('Invalid business ID')
     return business
   }
+
   async checkBusinessServiceName({
     businessId,
     name,
@@ -70,7 +71,7 @@ export default class BusinessService {
     userId: string,
     mainImage?: string,
   ) {
-    await this.checkBusinessName(createBusinessDto.name)
+    await this.#checkBusinessName(createBusinessDto.name)
 
     const businessMainImage = mainImage
       ? { image: mainImage }
@@ -109,8 +110,8 @@ export default class BusinessService {
     imageUrl: string
     userId: string
   }) {
-    await this.checkBusinessId(id)
-    await this.checkOwner({ userId, businessId: id })
+    await this.#verifiyBusinessId(id)
+    await this.#checkOwner({ userId, businessId: id })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
     const updatedBusiness = await this.prismaService.business.update({
@@ -130,8 +131,9 @@ export default class BusinessService {
     { id, name, description }: UpdateBusinessDto,
     userId: string,
   ) {
-    const business = await this.checkBusinessId(id)
-    await this.checkOwner({ userId, businessId: id })
+    console.log(id, name, description, userId)
+    const business = await this.#verifiyBusinessId(id)
+    await this.#checkOwner({ userId, businessId: id })
 
     const updatedBusiness = await this.prismaService.business.update({
       where: { id },
@@ -155,8 +157,8 @@ export default class BusinessService {
     userId: string,
     imageUrl?: string,
   ) {
-    await this.checkOwner({ userId, businessId })
-    await this.checkBusinessId(businessId)
+    await this.#checkOwner({ userId, businessId })
+    await this.#verifiyBusinessId(businessId)
     await this.checkBusinessServiceName({
       businessId,
       name,
@@ -190,7 +192,7 @@ export default class BusinessService {
     userId: string
   }) {
     await this.checkBusinessServiceId(id)
-    await this.checkOwner({ userId, businessId: id })
+    await this.#checkOwner({ userId, businessId: id })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
     const updatedBusiness = await this.prismaService.bussinesService.update({
@@ -212,7 +214,7 @@ export default class BusinessService {
     userId: string,
   ) {
     for (const { id, description, name, specifications } of services) {
-      await this.checkOwner({ userId, businessId: businessId })
+      await this.#checkOwner({ userId, businessId: businessId })
       const businessService = await this.checkBusinessServiceId(id)
       await this.prismaService.bussinesService.update({
         where: { id },
