@@ -1,4 +1,8 @@
 import {
+  capitalize,
+  tolowercaseCustom,
+} from './../common/util/helpers/string-util'
+import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
@@ -10,7 +14,6 @@ import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
 import UpdateBusinessServiceDto from './dto/update-business-service.dto'
-import SearchBusinessDto from './dto/search-business.dto'
 
 @Injectable()
 export default class BusinessService {
@@ -44,6 +47,52 @@ export default class BusinessService {
     })
     if (!business) throw new BadRequestException('Invalid business ID')
     return business
+  }
+
+  async #checkBusinessAddress({
+    country,
+    state,
+    city,
+    specificLocaiton,
+    streetAddress,
+    businessId,
+  }: {
+    businessId: string
+    country: string
+    state: string
+    city: string
+    streetAddress?: string
+    specificLocaiton?: string
+  }) {
+    const business = await this.prismaService.business.findFirst({
+      where: {
+        id: businessId,
+        address: {
+          some: {
+            OR: [
+              {
+                country: {
+                  contains: tolowercaseCustom(country),
+                },
+                city: {
+                  contains: tolowercaseCustom(city),
+                },
+                state: {
+                  contains: tolowercaseCustom(state),
+                },
+                streetAddress: {
+                  contains: tolowercaseCustom(streetAddress || ''),
+                },
+                specificLocation: {
+                  contains: tolowercaseCustom(specificLocaiton || ''),
+                },
+              },
+            ],
+          },
+        },
+      },
+    })
+    if (business) throw new ConflictException('the address already regisred ')
   }
 
   async checkBusinessServiceName({
@@ -155,6 +204,8 @@ export default class BusinessService {
     }
   }
 
+  // business service related
+
   async addBussinessService(
     { name, description, businessId, specifications }: CreateBusinessServiceDto,
     userId: string,
@@ -241,6 +292,37 @@ export default class BusinessService {
       data: { ...business },
     }
   }
+  async deleteBusinessServices({
+    id,
+    businessId,
+    userId,
+  }: {
+    businessId: string
+    id: string
+    userId: string
+  }) {
+    await this.#checkOwner({ businessId, userId })
+
+    const service = await this.prismaService.bussinesService.findFirst({
+      where: { id, businessId },
+    })
+    if (!service)
+      throw new BadRequestException('Invalid business or service Id')
+
+    await this.prismaService.bussinesService.delete({
+      where: {
+        businessId,
+        id: id,
+      },
+    })
+    return {
+      status: 'success',
+      message: 'Buisness services deleted successfully',
+      data: null,
+    }
+  }
+
+  // fetch related
 
   async getAllBusiness() {
     const business = await this.prismaService.business.findMany()
@@ -343,34 +425,7 @@ export default class BusinessService {
     }
   }
 
-  async searchBYNameDescription({ name, description }: SearchBusinessDto) {
-    const business = await this.prismaService.business.findMany({
-      where: {
-        OR: [
-          {
-            name: {
-              contains: name.toLowerCase().trim(),
-            },
-          },
-          {
-            description: {
-              contains: name.toLowerCase().trim(),
-            },
-          },
-        ],
-      },
-    })
-    if (!business || business.length == 0)
-      throw new NotFoundException(
-        `no buisness for name:${name} , description:${description} key `,
-      )
-    return {
-      status: 'success',
-      message: `buisness for ${name} , ${description} key fetched successfully`,
-      data: business,
-    }
-  }
-  async searchBusinessBYAddress(location: string) {
+  async searchBusinessBYAddress(address: string) {
     const business = await this.prismaService.business.findMany({
       where: {
         address: {
@@ -378,19 +433,19 @@ export default class BusinessService {
             OR: [
               {
                 city: {
-                  contains: location,
+                  contains: address,
                 },
                 country: {
-                  contains: location,
+                  contains: address,
                 },
                 specificLocation: {
-                  contains: location,
+                  contains: address,
                 },
                 state: {
-                  contains: location,
+                  contains: address,
                 },
                 streetAddress: {
-                  contains: location,
+                  contains: address,
                 },
               },
             ],
@@ -399,10 +454,10 @@ export default class BusinessService {
       },
     })
     if (!business || business.length == 0)
-      throw new NotFoundException(`no buisness for name:${location} location  `)
+      throw new NotFoundException(`no buisness for name:${address} location  `)
     return {
       status: 'success',
-      message: `buisness for ${location} location fetched successfully`,
+      message: `buisness for ${address} location fetched successfully`,
       data: business,
     }
   }

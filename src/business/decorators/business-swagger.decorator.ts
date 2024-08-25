@@ -51,6 +51,7 @@ export const UpdateBusinessSwaggerDefinition = () =>
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
   )
 
+// business service related
 export const AddBusinessServiceSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ description: 'Add business service' }),
@@ -87,6 +88,18 @@ export const UpdateBusinessServiceSwaggerDefinition = () =>
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
     ApiConsumes('image'),
   )
+export const DeleteBusinessServiceSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Delete business service' }),
+    ApiResponse({
+      description: 'Business service deleted successfully',
+      type: [BusinessServicerResponse],
+    }),
+    ApiBadRequestResponse({ description: 'Invalid business/service  Id' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiParam({ description: 'Service Id', name: 'id' }),
+    ApiParam({ description: 'Susiness Id', name: 'businessId' }),
+  )
 
 export const SearchBusinessSwaggerDefinition = () =>
   applyDecorators(
@@ -98,21 +111,6 @@ export const SearchBusinessSwaggerDefinition = () =>
     ApiNotFoundResponse({ description: 'not business found for search.key' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
     ApiQuery({ description: 'search key', name: 'searchKey' }),
-  )
-
-export const SearchBusinessBYNameUDescriptionSwaggerDefinition = () =>
-  applyDecorators(
-    ApiOperation({ description: 'Search business by name U description' }),
-    ApiResponse({
-      description: 'Business for name | description .key fetched successfully',
-      type: [BusinessResponse],
-    }),
-    ApiNotFoundResponse({
-      description: 'not business found for name | description .key',
-    }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiQuery({ description: 'business description ', name: 'description' }),
-    ApiQuery({ description: 'business name ', name: 'name' }),
   )
 
 export const SearchBusinessByAddressSwaggerDefinition = () =>
@@ -128,6 +126,7 @@ export const SearchBusinessByAddressSwaggerDefinition = () =>
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
     ApiQuery({ description: 'business address', name: 'address' }),
   )
+
 export const GetBusinessSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ description: 'Get all businesses' }),

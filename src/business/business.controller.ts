@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -22,6 +23,8 @@ import {
   SearchBusiness,
   GetBusinesses,
   GetUserBusinesses,
+  SearchBusinessByAddress,
+  DeleteBusinessService,
 } from './decorators/business-endpoint.decorator'
 import { USER } from 'src/common/util/types'
 import User from 'src/common/decorators/user.decorator'
@@ -73,6 +76,7 @@ export default class BusinessController {
     return this.businessService.updateBusiness(updateBusinessDto, user.id)
   }
 
+  // service related
   @Post('add-business')
   @AddBusinessService()
   async addBusinessService(
@@ -113,6 +117,19 @@ export default class BusinessController {
       user.id,
     )
   }
+  @Delete()
+  @DeleteBusinessService()
+  deleteService(
+    @Param('id') id: string,
+    @Param('businessId') businessId: string,
+    @User() { id: userId }: USER,
+  ) {
+    return this.businessService.deleteBusinessServices({
+      userId,
+      id,
+      businessId,
+    })
+  }
 
   @Get('user')
   @GetUserBusinesses()
@@ -134,15 +151,13 @@ export default class BusinessController {
 
   @Get('search')
   @SearchBusiness()
-  searchBusiness(@Query('key') searchKey: string) {
+  searchBusiness(@Query('searchKey') searchKey: string) {
     return this.businessService.searchBusiness(searchKey)
   }
-  @Get('search-name-description')
-  @SearchBusiness()
-  searchBYNameDescription(
-    @Query('name') name?: string,
-    @Query('description') description?: string,
-  ) {
-    return this.businessService.searchBYNameDescription({ name, description })
+
+  @Get('search')
+  @SearchBusinessByAddress()
+  searchBusinessByAddress(@Query('address') address: string) {
+    return this.businessService.searchBusinessBYAddress(address)
   }
 }

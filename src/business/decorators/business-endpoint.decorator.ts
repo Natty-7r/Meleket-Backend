@@ -11,6 +11,8 @@ import {
   SearchBusinessSwaggerDefinition,
   GetBusinessSwaggerDefinition,
   GetBussinesDetailSwaggerDefinition,
+  SearchBusinessByAddressSwaggerDefinition,
+  DeleteBusinessServiceSwaggerDefinition,
 } from './business-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/util/helpers/multer'
@@ -75,6 +77,9 @@ export const AddBusinessService = () =>
 export const UpdateBusinessServices = () =>
   applyDecorators(ClientRole, UpdateBusinessServiceSwaggerDefinition())
 
+export const DeleteBusinessService = () =>
+  applyDecorators(ClientRole, DeleteBusinessServiceSwaggerDefinition())
+
 export const UpdateBusinessServiceImage = () =>
   applyDecorators(
     ClientRole(),
@@ -107,3 +112,6 @@ export const GetCategoryBusinesses = () =>
 
 export const SearchBusiness = () =>
   applyDecorators(Public(), SearchBusinessSwaggerDefinition())
+
+export const SearchBusinessByAddress = () =>
+  applyDecorators(Public(), SearchBusinessByAddressSwaggerDefinition())
