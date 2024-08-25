@@ -5,7 +5,6 @@ import {
   IsString,
   IsNotEmpty,
   IsJSON,
-  IsNotEmptyObject,
   IsArray,
   ValidateNested,
 } from 'class-validator'
