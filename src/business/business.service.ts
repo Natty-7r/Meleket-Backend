@@ -1,7 +1,4 @@
-import {
-  capitalize,
-  tolowercaseCustom,
-} from './../common/util/helpers/string-util'
+import { tolowercaseCustom } from './../common/util/helpers/string-util'
 import {
   BadRequestException,
   ConflictException,
@@ -14,11 +11,14 @@ import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
 import UpdateBusinessServiceDto from './dto/update-business-service.dto'
+import CreateBusinessAddressDto from './dto/create-business-address.dto'
+import UpdateBusinessAddressDto from './dto/update-business-address.dto'
 
 @Injectable()
 export default class BusinessService {
   constructor(private readonly prismaService: PrismaService) {}
 
+  // helper methods
   async #checkOwner({
     userId,
     businessId,
@@ -33,7 +33,6 @@ export default class BusinessService {
       throw new ForbiddenException('Only the owner can manipute business')
     return business
   }
-
   async #checkBusinessName(name: string) {
     const business = await this.prismaService.business.findFirst({
       where: { name: name.toLowerCase().trim() },
@@ -53,7 +52,7 @@ export default class BusinessService {
     country,
     state,
     city,
-    specificLocaiton,
+    specificLocation,
     streetAddress,
     businessId,
   }: {
@@ -62,7 +61,7 @@ export default class BusinessService {
     state: string
     city: string
     streetAddress?: string
-    specificLocaiton?: string
+    specificLocation?: string
   }) {
     const business = await this.prismaService.business.findFirst({
       where: {
@@ -84,7 +83,7 @@ export default class BusinessService {
                   contains: tolowercaseCustom(streetAddress || ''),
                 },
                 specificLocation: {
-                  contains: tolowercaseCustom(specificLocaiton || ''),
+                  contains: tolowercaseCustom(specificLocation || ''),
                 },
               },
             ],
@@ -95,7 +94,7 @@ export default class BusinessService {
     if (business) throw new ConflictException('the address already regisred ')
   }
 
-  async checkBusinessServiceName({
+  async #checkBusinessServiceName({
     businessId,
     name,
   }: {
@@ -109,7 +108,7 @@ export default class BusinessService {
       throw new ConflictException('Service name exist in the business')
     return business
   }
-  async checkBusinessServiceId(id: string) {
+  async #checkBusinessServiceId(id: string) {
     const business = await this.prismaService.bussinesService.findFirst({
       where: { id },
     })
@@ -213,7 +212,7 @@ export default class BusinessService {
   ) {
     await this.#checkOwner({ userId, businessId })
     await this.#verifiyBusinessId(businessId)
-    await this.checkBusinessServiceName({
+    await this.#checkBusinessServiceName({
       businessId,
       name,
     })
@@ -245,7 +244,7 @@ export default class BusinessService {
     imageUrl: string
     userId: string
   }) {
-    await this.checkBusinessServiceId(id)
+    await this.#checkBusinessServiceId(id)
     await this.#checkOwner({ userId, businessId: id })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
@@ -269,7 +268,7 @@ export default class BusinessService {
   ) {
     for (const { id, description, name, specifications } of services) {
       await this.#checkOwner({ userId, businessId: businessId })
-      const businessService = await this.checkBusinessServiceId(id)
+      const businessService = await this.#checkBusinessServiceId(id)
       await this.prismaService.bussinesService.update({
         where: { id },
         data: {
@@ -318,6 +317,106 @@ export default class BusinessService {
     return {
       status: 'success',
       message: 'Buisness services deleted successfully',
+      data: null,
+    }
+  }
+
+  // business address related
+  async createBusinessAddress(
+    {
+      businessId,
+      country,
+      city,
+      state,
+      specificLocation,
+      streetAddress,
+    }: CreateBusinessAddressDto,
+    userId: string,
+  ) {
+    await this.#checkOwner({
+      businessId,
+      userId,
+    })
+    await this.#checkBusinessAddress({
+      country,
+      city,
+      state,
+      specificLocation,
+      streetAddress,
+      businessId,
+    })
+
+    const buinessAddress = await this.prismaService.businessAddress.create({
+      data: {
+        businessId,
+        country: tolowercaseCustom(country),
+        state: tolowercaseCustom(state),
+        city: tolowercaseCustom(city),
+        streetAddress: tolowercaseCustom(streetAddress) || undefined,
+        specificLocation: tolowercaseCustom(specificLocation) || undefined,
+      },
+    })
+    return {
+      status: 'success',
+      message: 'Buisness address added successfully',
+      data: {
+        ...buinessAddress,
+      },
+    }
+  }
+  async updateBusinessAddress(
+    {
+      addressId,
+      businessId,
+      city,
+      country,
+      state,
+      specificLocation,
+      streetAddress,
+    }: UpdateBusinessAddressDto,
+    userId: string,
+  ) {
+    await this.#checkOwner({
+      businessId,
+      userId,
+    })
+
+    const buinessAddress = await this.prismaService.businessAddress.update({
+      where: { id: businessId },
+      data: {
+        country: country && tolowercaseCustom(country),
+        state: state && tolowercaseCustom(state),
+        city: city && tolowercaseCustom(city),
+        streetAddress: streetAddress && tolowercaseCustom(streetAddress),
+        specificLocation:
+          specificLocation && tolowercaseCustom(specificLocation),
+      },
+    })
+    return {
+      status: 'success',
+      message: 'Buisness address updated successfully',
+      data: {
+        ...buinessAddress,
+      },
+    }
+  }
+  async deleteBusinessAddress({
+    addressId,
+    businessId,
+    userId,
+  }: {
+    addressId: string
+    businessId: string
+    userId: string
+  }) {
+    await this.#checkOwner({ businessId, userId })
+    await this.prismaService.businessAddress.delete({
+      where: { id: addressId },
+    })
+
+    return {
+      status: 'success',
+      message: 'Buisness address deleted successfully',
       data: null,
     }
   }

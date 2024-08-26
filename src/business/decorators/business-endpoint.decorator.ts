@@ -13,11 +13,14 @@ import {
   GetBussinesDetailSwaggerDefinition,
   SearchBusinessByAddressSwaggerDefinition,
   DeleteBusinessServiceSwaggerDefinition,
+  CreateBusinessAddressSwaggerDefinition,
+  UpdateBusinessAddressSwaggerDefinition,
+  DeleteBusinessAddressSwaggerDefinition,
 } from './business-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/util/helpers/multer'
 import { ApiForbiddenResponse } from '@nestjs/swagger'
-import { Public } from 'src/common/decorators/public.decorator'
+import Public from 'src/common/decorators/public.decorator'
 
 const ClientRole = () =>
   applyDecorators(
@@ -115,3 +118,14 @@ export const SearchBusiness = () =>
 
 export const SearchBusinessByAddress = () =>
   applyDecorators(Public(), SearchBusinessByAddressSwaggerDefinition())
+
+// business address related
+
+export const CreateBusinessAddress = () =>
+  applyDecorators(ClientRole(), CreateBusinessAddressSwaggerDefinition())
+
+export const UpdateBusinessAddress = () =>
+  applyDecorators(ClientRole(), UpdateBusinessAddressSwaggerDefinition())
+
+export const DeleteBusinessAddress = () =>
+  applyDecorators(ClientRole(), DeleteBusinessAddressSwaggerDefinition())

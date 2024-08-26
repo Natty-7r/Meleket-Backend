@@ -12,8 +12,9 @@ import {
   ApiResponse,
 } from '@nestjs/swagger'
 import BusinessResponse from '../responses/business.response'
-import { BusinessServicerResponse } from '../responses/business-service.response'
+import BusinessServicerResponse from '../responses/business-service.response'
 import BusinessDetailResponse from '../responses/business-detail.response'
+import BusinessAddressResponse from '../responses/business-address.response'
 
 export const CreateBusinessSwaggerDefinition = () =>
   applyDecorators(
@@ -155,4 +156,40 @@ export const GetCategoryBusinessSwaggerDefinition = () =>
     ApiParam({ description: 'category  Id', name: 'categoryId' }),
     ApiBadRequestResponse({ description: 'Invalid category Id' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+// business address
+
+export const CreateBusinessAddressSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Add business address' }),
+    ApiResponse({
+      description: 'Business address  added successfully',
+      type: BusinessAddressResponse,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid business Id' }),
+    ApiConflictResponse({ description: 'Business address  already exists' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+export const UpdateBusinessAddressSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Update business address' }),
+    ApiResponse({
+      description: 'Business address  updated successfully',
+      type: BusinessAddressResponse,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid business Id' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+
+export const DeleteBusinessAddressSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Delete business address' }),
+    ApiResponse({
+      description: 'Business address  deleted successfully',
+      type: String,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid address Id' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiParam({ description: 'bussines Id', name: 'businessId' }),
+    ApiParam({ description: 'service Id', name: 'serviceId' }),
   )

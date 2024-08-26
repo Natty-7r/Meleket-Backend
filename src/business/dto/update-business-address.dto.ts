@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { IsOptional, IsString, IsNotEmpty } from 'class-validator'
 
-export default class CreateBusinessAddressDto {
+export default class UpdateBusinessAddressDto {
   @ApiProperty({
     description: 'Unique identifier for the business',
     example: '550e8400-e29b-41d4-a716-446655440001',
@@ -11,13 +11,21 @@ export default class CreateBusinessAddressDto {
   businessId: string
 
   @ApiProperty({
+    description: 'Unique identifier for the business',
+    example: '550e8400-e29b-41d4-a716-446655440001',
+  })
+  @IsString()
+  @IsNotEmpty()
+  addressId: string
+
+  @ApiProperty({
     description: 'Country ',
     example: 'Ethiopia',
     required: true,
   })
   @IsString()
   @IsOptional()
-  country: string
+  country?: string
 
   @ApiProperty({
     description: 'City ',
@@ -26,7 +34,7 @@ export default class CreateBusinessAddressDto {
   })
   @IsString()
   @IsOptional()
-  city: string
+  city?: string
 
   @ApiProperty({
     description: 'State',
@@ -35,7 +43,7 @@ export default class CreateBusinessAddressDto {
   })
   @IsString()
   @IsOptional()
-  state: string
+  state?: string
 
   @ApiPropertyOptional({
     description: 'Street Address',

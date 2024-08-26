@@ -25,14 +25,16 @@ import {
   GetUserBusinesses,
   SearchBusinessByAddress,
   DeleteBusinessService,
+  CreateBusinessAddress,
+  UpdateBusinessAddress,
 } from './decorators/business-endpoint.decorator'
 import { USER } from 'src/common/util/types'
 import User from 'src/common/decorators/user.decorator'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
-import UpdateBusinessServiceDtos, {
-  UpdateBusinessServiceDto,
-} from './dto/update-business-service.dto'
+import UpdateBusinessServiceDtos from './dto/update-business-service.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
+import CreateBusinessAddressDto from './dto/create-business-address.dto'
+import UpdateBusinessAddressDto from './dto/update-business-address.dto'
 
 @ApiTags('Business')
 @Controller('business')
@@ -159,5 +161,44 @@ export default class BusinessController {
   @SearchBusinessByAddress()
   searchBusinessByAddress(@Query('address') address: string) {
     return this.businessService.searchBusinessBYAddress(address)
+  }
+
+  // business address
+
+  @Post('create-address')
+  @CreateBusinessAddress()
+  createBusinessAddress(
+    @Body() createBusinessAddressDto: CreateBusinessAddressDto,
+    @User() user: USER,
+  ) {
+    return this.businessService.createBusinessAddress(
+      createBusinessAddressDto,
+      user.id,
+    )
+  }
+  @Put('update-address')
+  @UpdateBusinessAddress()
+  updateBusinessAddress(
+    @Body() updateBusinessAddressDto: UpdateBusinessAddressDto,
+    @User() user: USER,
+  ) {
+    return this.businessService.updateBusinessAddress(
+      updateBusinessAddressDto,
+      user.id,
+    )
+  }
+
+  @Put('delete-address')
+  @UpdateBusinessAddress()
+  deleteBusinessAddress(
+    @Param('businessId') businessId: string,
+    @Param('addressId') addressId: string,
+    @User() user: USER,
+  ) {
+    return this.businessService.deleteBusinessAddress({
+      businessId,
+      addressId,
+      userId: user.id,
+    })
   }
 }

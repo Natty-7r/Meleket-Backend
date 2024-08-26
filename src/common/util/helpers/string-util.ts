@@ -11,7 +11,7 @@ export const capitalize = (text: string): string =>
     )
 
 export const tolowercaseCustom = (text: string): string =>
-  text.toLocaleLowerCase().trim()
+  text.toLocaleLowerCase().trim() || text
 
 export const generateVerifyEmailOTPMessage = ({
   firstName,

@@ -12,7 +12,7 @@ import {
   VerifyOTPSwaggerDefinition,
   VerifyUserSwaggerDefinition,
 } from './auth-swagger-definition.decorator'
-import { Public } from 'src/common/decorators/public.decorator'
+import Public from 'src/common/decorators/public.decorator'
 
 const ApiEndpointDecorator = (...optionalDecorators: Function[]) =>
   applyDecorators(...(optionalDecorators as any))
