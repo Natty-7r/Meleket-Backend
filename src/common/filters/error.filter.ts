@@ -9,7 +9,7 @@ import { v4 as uuid } from 'uuid'
 import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import { Request, Response } from 'express'
 import CustomeException from '../util/exception/custome-exception'
-import { ExceptionResponse } from '../util/types'
+import { ExceptionResponse } from '../util/types/responses.type'
 import parseStackTrace from '../util/helpers/stack-trace-parser'
 
 @Catch(CustomeException)

@@ -5,7 +5,6 @@ import {
   IsString,
   IsNotEmpty,
   IsJSON,
-  IsNotEmptyObject,
   IsArray,
   ValidateNested,
 } from 'class-validator'
@@ -46,7 +45,7 @@ export class UpdateBusinessServiceDto {
   specifications?: JSON
 }
 
-export default class UpdateBusinessServiceDtos {
+export default class UpdateBusinessesServiceDto {
   @ApiProperty({
     description: 'List of services to be updated',
     type: [UpdateBusinessServiceDto],

@@ -1,16 +1,25 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
 import Roles from 'src/common/decorators/roles.decorator'
 import {
-  UpdateBussinessImageSwaggerDefinition,
-  CreateBussinessSwaggerDefinition,
-  UpdateBussinessSwaggerDefinition,
-  AddBussinessServiceSwaggerDefinition,
-  UpdateBussinessServiceImageSwaggerDefinition,
-  UpdateBussinessServiceSwaggerDefinition,
+  UpdateBusinessImageSwaggerDefinition,
+  CreateBusinessSwaggerDefinition,
+  UpdateBusinessSwaggerDefinition,
+  AddBusinessServiceSwaggerDefinition,
+  UpdateBusinessServiceImageSwaggerDefinition,
+  UpdateBusinessServiceSwaggerDefinition,
+  GetCategoryBusinessSwaggerDefinition,
+  SearchBusinessSwaggerDefinition,
+  GetBusinessSwaggerDefinition,
+  GetBussinesDetailSwaggerDefinition,
+  DeleteBusinessServiceSwaggerDefinition,
+  CreateBusinessAddressSwaggerDefinition,
+  UpdateBusinessAddressSwaggerDefinition,
+  DeleteBusinessAddressSwaggerDefinition,
 } from './business-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/util/helpers/multer'
 import { ApiForbiddenResponse } from '@nestjs/swagger'
+import Public from 'src/common/decorators/public.decorator'
 
 const ClientRole = () =>
   applyDecorators(
@@ -30,7 +39,7 @@ export const CreateBusiness = () =>
         }),
       }),
     ),
-    CreateBussinessSwaggerDefinition(),
+    CreateBusinessSwaggerDefinition(),
   )
 
 export const UpdateBusinessImage = () =>
@@ -42,11 +51,11 @@ export const UpdateBusinessImage = () =>
         fileFilter: multerFilter({ fileType: 'image', maxSize: 5 }),
       }),
     ),
-    UpdateBussinessImageSwaggerDefinition(),
+    UpdateBusinessImageSwaggerDefinition(),
   )
 
 export const UpdateBusiness = () =>
-  applyDecorators(Roles('CLIENT_USER'), UpdateBussinessSwaggerDefinition())
+  applyDecorators(Roles('CLIENT_USER'), UpdateBusinessSwaggerDefinition())
 
 export const AddBusinessService = () =>
   applyDecorators(
@@ -64,11 +73,14 @@ export const AddBusinessService = () =>
         }),
       }),
     ),
-    AddBussinessServiceSwaggerDefinition(),
+    AddBusinessServiceSwaggerDefinition(),
   )
 
 export const UpdateBusinessServices = () =>
-  applyDecorators(ClientRole, UpdateBussinessServiceSwaggerDefinition())
+  applyDecorators(ClientRole, UpdateBusinessServiceSwaggerDefinition())
+
+export const DeleteBusinessService = () =>
+  applyDecorators(ClientRole, DeleteBusinessServiceSwaggerDefinition())
 
 export const UpdateBusinessServiceImage = () =>
   applyDecorators(
@@ -85,5 +97,31 @@ export const UpdateBusinessServiceImage = () =>
         }),
       }),
     ),
-    UpdateBussinessServiceImageSwaggerDefinition(),
+    UpdateBusinessServiceImageSwaggerDefinition(),
   )
+
+export const GetBusinesses = () =>
+  applyDecorators(Public(), GetBusinessSwaggerDefinition())
+
+export const GetUserBusinesses = () =>
+  applyDecorators(ClientRole(), GetBusinessSwaggerDefinition())
+
+export const GetBusinessDetail = () =>
+  applyDecorators(Public(), GetBussinesDetailSwaggerDefinition())
+
+export const GetCategoryBusinesses = () =>
+  applyDecorators(Public(), GetCategoryBusinessSwaggerDefinition())
+
+export const SearchBusiness = () =>
+  applyDecorators(Public(), SearchBusinessSwaggerDefinition())
+
+// business address related
+
+export const CreateBusinessAddress = () =>
+  applyDecorators(ClientRole(), CreateBusinessAddressSwaggerDefinition())
+
+export const UpdateBusinessAddress = () =>
+  applyDecorators(ClientRole(), UpdateBusinessAddressSwaggerDefinition())
+
+export const DeleteBusinessAddress = () =>
+  applyDecorators(ClientRole(), DeleteBusinessAddressSwaggerDefinition())

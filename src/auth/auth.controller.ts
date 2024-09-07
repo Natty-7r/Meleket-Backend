@@ -9,10 +9,9 @@ import {
   Param,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { RequestWithUser, SignUpType } from 'src/common/util/types'
+import { RequestWithUser, SignUpType } from 'src/common/util/types/base.type'
 import { User } from '@prisma/client'
 import { AuthGuard } from '@nestjs/passport'
-import { Public } from 'src/common/decorators/public.decorator'
 import AuthService from './auth.service'
 import LocalAuthGuard from './guards/local-auth.guard'
 import GoogleOAuthGuard from './guards/google-auth.guard'
@@ -41,7 +40,6 @@ import {
 } from './decorators/auth-api-endpoint.decorator'
 
 @ApiTags('Auth')
-@Public()
 @Controller('auth')
 export default class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -64,7 +62,7 @@ export default class AuthController {
   @SignIn()
   @UseGuards(LocalAuthGuard)
   @Post('/sign-in')
-  async login(@Body() signinDto: SignInDto, @Request() req: RequestWithUser) {
+  async login(@Body() signInDto: SignInDto, @Request() req: RequestWithUser) {
     return this.authService.login(req.user as User)
   }
 
