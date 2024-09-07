@@ -43,14 +43,12 @@ export default class CategoryController {
     @UploadedFile() file: Express.Multer.File,
     @User() user: USER,
   ) {
-    return this.categoryService.createCategory(
-      {
-        ...createCategoryDto,
-        image: file?.path || 'uploads/category/category.png',
-        price: createCategoryDto?.price || 50,
-      },
-      user.userType !== 'CLIENT_USER',
-    )
+    return this.categoryService.createCategory({
+      ...createCategoryDto,
+      image: file?.path || 'uploads/category/category.png',
+      price: createCategoryDto?.price || 50,
+      verified: user.userType !== 'CLIENT_USER',
+    })
   }
 
   @UpdateCategory()
@@ -65,16 +63,16 @@ export default class CategoryController {
     @Body() updateCategoryImageDto: UpdateCategoryImageDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.categoryService.updateCategoryImage(
-      updateCategoryImageDto,
-      file.path,
-    )
+    return this.categoryService.updateCategoryImage({
+      ...updateCategoryImageDto,
+      imageUrl: file.path,
+    })
   }
 
   @VerifyCategory()
   @Put(':id/status')
   verifyCategory(@Param('id') id: string) {
-    return this.categoryService.verifyCategory(id)
+    return this.categoryService.verifyCategory({ id })
   }
 
   @UpdateCategoryParent()
@@ -99,6 +97,6 @@ export default class CategoryController {
   @DeleteCategory()
   @Delete(':id')
   deleteCategory(@Param('id') id: string) {
-    return this.categoryService.deleteCategory(id)
+    return this.categoryService.deleteCategory({ id })
   }
 }

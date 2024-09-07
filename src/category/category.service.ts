@@ -1,3 +1,4 @@
+import { ImageUrlParams } from './../common/util/types/params.type'
 import {
   BadRequestException,
   ConflictException,
@@ -8,13 +9,17 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import { CategoryTreeNode } from 'src/common/util/types/base.type'
-import { Category } from '@prisma/client'
 import UpdateCategoryDto from './dto/update-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import CreateCategoryDto from './dto/create-category.dto'
 import UpdateCategoryImageDto from './dto/update-category-image.dto '
 import BusinessService from 'src/business/business.service'
-import { BaseIdParams } from 'src/common/util/types/params.type'
+import {
+  BaseIdParams,
+  CreateCategoryParams,
+  GenerateCategoryTreeParams,
+} from 'src/common/util/types/params.type'
+import { ApiResponse } from 'src/common/util/types/responses.type'
 
 @Injectable()
 @UseGuards(JwtAuthGuard)
@@ -26,9 +31,11 @@ export default class CategoryService {
     private readonly businessService: BusinessService,
   ) {}
 
-  generateCategoryTree(allCategories: Category[]) {
+  generateCategoryTree({
+    categories,
+  }: GenerateCategoryTreeParams): CategoryTreeNode[] {
     const categoryMap = new Map<string, CategoryTreeNode>()
-    allCategories.forEach((category) => {
+    categories.forEach((category) => {
       categoryMap.set(category.id, {
         id: category.id,
         name: category.name,
@@ -40,7 +47,7 @@ export default class CategoryService {
       })
     })
 
-    allCategories.forEach((category) => {
+    categories.forEach((category) => {
       if (category.parentId && categoryMap.has(category.parentId)) {
         const parentCategory = categoryMap.get(category.parentId)
         parentCategory.children.push(categoryMap.get(category.id))
@@ -56,9 +63,8 @@ export default class CategoryService {
   }
 
   async createCategory(
-    createCategoryDto: CreateCategoryDto,
-    verified: boolean,
-  ) {
+    createCategoryDto: CreateCategoryDto & CreateCategoryParams,
+  ): Promise<ApiResponse> {
     const previesCategory = await this.prismaService.category.findFirst({
       where: { name: createCategoryDto.name.toLocaleLowerCase().trim() },
     })
@@ -86,7 +92,6 @@ export default class CategoryService {
       data: {
         name: createCategoryDto.name.toLocaleLowerCase().trim(), // changing name for search
         ...createCategoryDto,
-        verified,
       },
     })
 
@@ -106,7 +111,7 @@ export default class CategoryService {
     price,
     parentId,
     verified,
-  }: UpdateCategoryDto) {
+  }: UpdateCategoryDto): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
@@ -141,7 +146,10 @@ export default class CategoryService {
     }
   }
 
-  async updateCategoryImage({ id }: UpdateCategoryImageDto, image: string) {
+  async updateCategoryImage({
+    id,
+    imageUrl,
+  }: UpdateCategoryImageDto & ImageUrlParams): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
@@ -153,7 +161,7 @@ export default class CategoryService {
         id,
       },
       data: {
-        image,
+        image: imageUrl,
       },
     })
     return {
@@ -165,7 +173,7 @@ export default class CategoryService {
     }
   }
 
-  async verifyCategory(id: string) {
+  async verifyCategory({ id }: BaseIdParams) {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
@@ -189,19 +197,19 @@ export default class CategoryService {
     }
   }
 
-  async getCategories() {
+  async getCategories(): Promise<ApiResponse> {
     const allCategories = await this.prismaService.category.findMany()
     return {
       status: 'success',
       message: 'categories fetched',
-      data: this.generateCategoryTree(allCategories),
+      data: this.generateCategoryTree({ categories: allCategories }),
     }
   }
-  async getCategoryBusiness({ id }: BaseIdParams) {
+  async getCategoryBusiness({ id }: BaseIdParams): Promise<ApiResponse> {
     return this.businessService.getCategoryBusinesses({ categoryId: id })
   }
 
-  async deleteCategory(id: string) {
+  async deleteCategory({ id }: BaseIdParams): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
@@ -235,14 +243,14 @@ export default class CategoryService {
     return {
       status: 'success',
       message: 'Category verified  successfully',
-      data: this.generateCategoryTree(updatedCategories),
+      data: this.generateCategoryTree({ categories: updatedCategories }),
     }
   }
 
   async updateParentCategory({
     parentId,
     childrenId,
-  }: UpdateParentCategoryDto) {
+  }: UpdateParentCategoryDto): Promise<ApiResponse> {
     const parentCategory = await this.prismaService.category.findFirst({
       where: { id: parentId },
     })
@@ -263,7 +271,7 @@ export default class CategoryService {
     return {
       status: 'success',
       message: 'Category updated  successfully',
-      data: this.generateCategoryTree(updatedCategories),
+      data: this.generateCategoryTree({ categories: updatedCategories }),
     }
   }
 }
