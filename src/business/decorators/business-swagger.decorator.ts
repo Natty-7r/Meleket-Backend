@@ -114,20 +114,6 @@ export const SearchBusinessSwaggerDefinition = () =>
     ApiQuery({ description: 'search key', name: 'searchKey' }),
   )
 
-export const SearchBusinessByAddressSwaggerDefinition = () =>
-  applyDecorators(
-    ApiOperation({ description: 'Search business by name U description' }),
-    ApiResponse({
-      description: 'Business for name | description .key fetched successfully',
-      type: [BusinessResponse],
-    }),
-    ApiNotFoundResponse({
-      description: 'not business found for name | description .key',
-    }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiQuery({ description: 'business address', name: 'address' }),
-  )
-
 export const GetBusinessSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ description: 'Get all businesses' }),

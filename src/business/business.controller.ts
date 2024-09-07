@@ -23,8 +23,6 @@ import {
   GetCategoryBusinesses,
   SearchBusiness,
   GetBusinesses,
-  GetUserBusinesses,
-  SearchBusinessByAddress,
   DeleteBusinessService,
   CreateBusinessAddress,
   UpdateBusinessAddress,
@@ -38,12 +36,12 @@ import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessAddressDto from './dto/create-business-address.dto'
 import UpdateBusinessAddressDto from './dto/update-business-address.dto'
 
-@ApiTags('Business')
-@Controller('business')
+@ApiTags('Businesses')
+@Controller('businesses')
 export default class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
-  @Post('create-business')
+  @Post()
   @CreateBusiness()
   async createBusiness(
     @Body() createBusinessDto: CreateBusinessDto,
@@ -57,7 +55,7 @@ export default class BusinessController {
     })
   }
 
-  @Put('update-business-image')
+  @Put('/image')
   @UpdateBusinessImage()
   async updateBusinessImage(
     @Param('id') id: string,
@@ -71,7 +69,7 @@ export default class BusinessController {
     })
   }
 
-  @Put('update-buinesss')
+  @Put()
   @UpdateBusiness()
   async updateBusiness(
     @Body() updateBusinessDto: UpdateBusinessDto,
@@ -84,7 +82,7 @@ export default class BusinessController {
   }
 
   // service related
-  @Post('add-business')
+  @Post('services')
   @AddBusinessService()
   async addBusinessService(
     @Body() createBusinessServiceDto: CreateBusinessServiceDto,
@@ -98,7 +96,7 @@ export default class BusinessController {
     })
   }
 
-  @Put('update-business-service-image')
+  @Put('services/image')
   @UpdateBusinessServiceImage()
   async updateBusinessServiceImage(
     @Param('id') id: string,
@@ -112,7 +110,7 @@ export default class BusinessController {
     })
   }
 
-  @Put('update-services')
+  @Put('services')
   @UpdateBusinessServices()
   async updateBusinessServices(
     @Body() updateBusinessServiceDto: UpdateBusinessServiceDtos,
@@ -123,53 +121,18 @@ export default class BusinessController {
       userId: user.id,
     })
   }
-  @Delete()
+  @Delete('services/:id')
   @DeleteBusinessService()
-  deleteService(
-    @Param('id') id: string,
-    @Param('businessId') businessId: string,
-    @User() { id: userId }: USER,
-  ) {
+  deleteService(@Param('id') id: string, @User() { id: userId }: USER) {
     return this.businessService.deleteBusinessServices({
       userId,
       id,
-      businessId,
     })
-  }
-
-  @Get('user')
-  @GetUserBusinesses()
-  getUserBusiness() {
-    return this.businessService.getAllBusiness()
-  }
-
-  @Get('all')
-  @GetBusinesses()
-  getAllBusiness() {
-    return this.businessService.getAllBusiness()
-  }
-
-  @Get('category')
-  @GetCategoryBusinesses()
-  getCategoryBusiness(@Param('categoryrId') categoryId: string) {
-    return this.businessService.getCategoryBusiness({ categoryId })
-  }
-
-  @Get('search')
-  @SearchBusiness()
-  searchBusiness(@Query('searchKey') searchKey: string) {
-    return this.businessService.searchBusiness({ searchKey })
-  }
-
-  @Get('search')
-  @SearchBusinessByAddress()
-  searchBusinessByAddress(@Query('address') address: string) {
-    return this.businessService.searchBusinessBYAddress({ address })
   }
 
   // business address
 
-  @Post('create-address')
+  @Post('address')
   @CreateBusinessAddress()
   createBusinessAddress(
     @Body() createBusinessAddressDto: CreateBusinessAddressDto,
@@ -180,7 +143,7 @@ export default class BusinessController {
       userId: user.id,
     })
   }
-  @Put('update-address')
+  @Put('address')
   @UpdateBusinessAddress()
   updateBusinessAddress(
     @Body() updateBusinessAddressDto: UpdateBusinessAddressDto,
@@ -191,7 +154,7 @@ export default class BusinessController {
       userId: user.id,
     })
   }
-  @Delete('delete-address/:addressId')
+  @Delete('address/:addressId')
   @DeleteBusinessAddress()
   deleteBusinessAddress(
     @Request() req: any,
@@ -202,5 +165,23 @@ export default class BusinessController {
       id: addressId,
       userId: user?.id,
     })
+  }
+
+  @Get('all')
+  @GetBusinesses()
+  getAllBusiness() {
+    return this.businessService.getAllBusiness()
+  }
+
+  @Get('/category')
+  @GetCategoryBusinesses()
+  getCategoryBusiness(@Param('categoryrId') categoryId: string) {
+    return this.businessService.getCategoryBusiness({ categoryId })
+  }
+
+  @Get('search')
+  @SearchBusiness()
+  searchBusiness(@Query('searchKey') searchKey: string) {
+    return this.businessService.searchBusiness({ searchKey })
   }
 }

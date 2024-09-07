@@ -11,7 +11,6 @@ import {
   SearchBusinessSwaggerDefinition,
   GetBusinessSwaggerDefinition,
   GetBussinesDetailSwaggerDefinition,
-  SearchBusinessByAddressSwaggerDefinition,
   DeleteBusinessServiceSwaggerDefinition,
   CreateBusinessAddressSwaggerDefinition,
   UpdateBusinessAddressSwaggerDefinition,
@@ -116,9 +115,6 @@ export const GetCategoryBusinesses = () =>
 export const SearchBusiness = () =>
   applyDecorators(Public(), SearchBusinessSwaggerDefinition())
 
-export const SearchBusinessByAddress = () =>
-  applyDecorators(Public(), SearchBusinessByAddressSwaggerDefinition())
-
 // business address related
 
 export const CreateBusinessAddress = () =>
@@ -128,4 +124,4 @@ export const UpdateBusinessAddress = () =>
   applyDecorators(ClientRole(), UpdateBusinessAddressSwaggerDefinition())
 
 export const DeleteBusinessAddress = () =>
-  applyDecorators(DeleteBusinessAddressSwaggerDefinition())
+  applyDecorators(ClientRole(), DeleteBusinessAddressSwaggerDefinition())

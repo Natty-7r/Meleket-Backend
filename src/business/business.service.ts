@@ -1,4 +1,3 @@
-
 import { tolowercaseCustom } from './../common/util/helpers/string-util'
 import {
   BadRequestException,
@@ -49,7 +48,7 @@ export default class BusinessService {
 
   // helper methods
 
-// Private method to verify the business ID by querying the database.
+  // Private method to verify the business ID by querying the database.
   // Throws a BadRequestException if the business is not found.
   async #verifiyBusinessId({ id }: VerifyBusinessIdParams): Promise<Business> {
     const business = await this.prismaService.business.findFirst({
@@ -60,7 +59,7 @@ export default class BusinessService {
   }
 
   // Private method to check if the user is the owner of the business.
-  // This ensures that only the owner can modify the business. 
+  // This ensures that only the owner can modify the business.
   // Throws a ForbiddenException if the user is not the owner.
   async #checkOwner({
     userId,
@@ -108,15 +107,20 @@ export default class BusinessService {
                 country: { contains: tolowercaseCustom(country) },
                 city: { contains: tolowercaseCustom(city) },
                 state: { contains: tolowercaseCustom(state) },
-                streetAddress: { contains: tolowercaseCustom(streetAddress || '') },
-                specificLocation: { contains: tolowercaseCustom(specificLocation || '') },
+                streetAddress: {
+                  contains: tolowercaseCustom(streetAddress || ''),
+                },
+                specificLocation: {
+                  contains: tolowercaseCustom(specificLocation || ''),
+                },
               },
             ],
           },
         },
       },
     })
-    if (business) throw new ConflictException('The address is already registered')
+    if (business)
+      throw new ConflictException('The address is already registered')
     return true
   }
 
@@ -130,7 +134,8 @@ export default class BusinessService {
     const service = await this.prismaService.bussinessService.findFirst({
       where: { businessId, name: name.toLowerCase().trim() },
     })
-    if (service) throw new ConflictException('Service name exists in the business')
+    if (service)
+      throw new ConflictException('Service name exists in the business')
     return service
   }
 
@@ -160,8 +165,8 @@ export default class BusinessService {
 
   async createBusiness(
     createBusinessDto: CreateBusinessDto & CreateBusinessParams,
-  ) {
-    await this.#checkBusinessName({ name: createBusinessDto.name }): Promise<ApiResponse> 
+  ): Promise<ApiResponse> {
+    await this.#checkBusinessName({ name: createBusinessDto.name })
 
     const businessMainImage = createBusinessDto.mainImage
       ? { image: createBusinessDto.mainImage }
@@ -279,6 +284,7 @@ export default class BusinessService {
     imageUrl,
     userId,
   }: UpdateBusinessImageParams): Promise<ApiResponse> {
+    await this.#verifyBusinessServiceId({ id })
     await this.#checkOwner({ userId, businessId: id })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
@@ -301,6 +307,8 @@ export default class BusinessService {
     businessId,
     userId,
   }: UpdateBusinessServiceDto & UserIdParams): Promise<ApiResponse> {
+    for (const { id } of services) await this.#verifyBusinessServiceId({ id })
+
     for (const { id, description, name, specifications } of services) {
       await this.#checkOwner({ userId, businessId: businessId })
       const businessService = await this.#verifyBusinessServiceId({ id })
@@ -328,16 +336,11 @@ export default class BusinessService {
   }
   async deleteBusinessServices({
     id,
-    businessId,
+
     userId,
   }: DeleteBusinessServicesParams): Promise<BareApiResponse> {
+    const { businessId } = await this.#verifyBusinessServiceId({ id })
     await this.#checkOwner({ businessId, userId })
-
-    const service = await this.prismaService.bussinessService.findFirst({
-      where: { id, businessId },
-    })
-    if (!service)
-      throw new BadRequestException('Invalid business or service Id')
 
     await this.prismaService.bussinessService.delete({
       where: {
@@ -348,7 +351,6 @@ export default class BusinessService {
     return {
       status: 'success',
       message: 'Buisness services deleted successfully',
-      data: null,
     }
   }
 
@@ -446,12 +448,21 @@ export default class BusinessService {
     return {
       status: 'success',
       message: 'Buisness address deleted successfully',
-      data: null,
     }
   }
 
   // fetch related
 
+  async getUserBusiness({ userId }: UserIdParams): Promise<ApiResponse> {
+    const business = await this.prismaService.business.findMany({
+      where: { ownerId: userId },
+    })
+    return {
+      status: 'success',
+      message: 'User buisness fetched successfully',
+      data: business,
+    }
+  }
   async getAllBusiness(): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany()
     return {
@@ -548,6 +559,31 @@ export default class BusinessService {
               contains: searchKey.toLowerCase().trim(),
             },
           },
+          {
+            address: {
+              some: {
+                OR: [
+                  {
+                    city: {
+                      contains: searchKey,
+                    },
+                    country: {
+                      contains: searchKey,
+                    },
+                    specificLocation: {
+                      contains: searchKey,
+                    },
+                    state: {
+                      contains: searchKey,
+                    },
+                    streetAddress: {
+                      contains: searchKey,
+                    },
+                  },
+                ],
+              },
+            },
+          },
         ],
       },
     })
@@ -556,45 +592,6 @@ export default class BusinessService {
     return {
       status: 'success',
       message: `buisness for ${searchKey} key fetched successfully`,
-      data: business,
-    }
-  }
-
-  async searchBusinessBYAddress({
-    address,
-  }: SearchBusinessByAddressParams): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany({
-      where: {
-        address: {
-          some: {
-            OR: [
-              {
-                city: {
-                  contains: address,
-                },
-                country: {
-                  contains: address,
-                },
-                specificLocation: {
-                  contains: address,
-                },
-                state: {
-                  contains: address,
-                },
-                streetAddress: {
-                  contains: address,
-                },
-              },
-            ],
-          },
-        },
-      },
-    })
-    if (!business || business.length == 0)
-      throw new NotFoundException(`no buisness for name:${address} location  `)
-    return {
-      status: 'success',
-      message: `buisness for ${address} location fetched successfully`,
       data: business,
     }
   }

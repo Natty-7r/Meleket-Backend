@@ -115,7 +115,6 @@ export type UpdateBusinessServiceImageParams = {
 
 export type DeleteBusinessServicesParams = {
   id: string
-  businessId: string
   userId: string
 }
 
