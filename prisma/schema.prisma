@@ -30,8 +30,6 @@ enum UserType {
   SUPER_ADMIN
 }
 
-
-
 enum OTPType {
   VERIFICATION
   RESET
@@ -92,7 +90,7 @@ model Admin {
   lastName       String
   email          String      @unique
   password       String
-  userType       UserType     @default(ADMIN)
+  userType       UserType    @default(ADMIN)
   status         AdminStatus @default(CREATED)
   inactiveReason String?     @default("new account")
   createdAat     DateTime    @default(now()) @map("created_at")
@@ -129,17 +127,18 @@ model Category {
 }
 
 model Business {
-  id          String @id @default(uuid())
-  userId      String
-  categoryId  String
-  name        String
-  description String
-  templateId  String
-  owner       User   @relation("UserOwnsBusiness", fields: [userId], references: [id]) // New relation
+  id           String @id @default(uuid())
+  ownerId      String
+  categoryId   String
+  name         String
+  description  String
+  templateId   String
+  mainImageUrl String
+  owner        User   @relation("UserOwnsBusiness", fields: [ownerId], references: [id]) // New relation
 
-  services        BussinesService[]
-  address         BusinessAddress[]
-  businessContact BusinessContact?
+  services BussinessService[]
+  address  BusinessAddress[]
+  contact  BusinessContact?
 
   followers  User[]                  @relation("UserFollowsBusiness")
   visibility BusinessVisiblityStatus @default(CREATED)
@@ -154,7 +153,7 @@ model Business {
   updatedAt DateTime @default(now())
 }
 
-model BussinesService {
+model BussinessService {
   id             String  @id @default(uuid())
   businessId     String
   name           String
@@ -174,7 +173,7 @@ model BusinessAddress {
   country          String
   state            String
   city             String
-  streetAddress    String
+  streetAddress    String?
   specificLocation String? // Additional detail for specific location (e.g., suite number, building)
 
   business Business @relation(fields: [businessId], references: [id])

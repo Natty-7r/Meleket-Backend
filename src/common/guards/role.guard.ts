@@ -2,7 +2,7 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { UserType } from '@prisma/client'
 import { ROLES_KEY } from '../util/constants'
-import { RequestWithUser } from '../util/types'
+import { RequestWithUser } from '../util/types/base.type'
 
 // role guard based on user type
 @Injectable()

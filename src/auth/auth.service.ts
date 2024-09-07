@@ -11,7 +11,7 @@ import PrismaService from 'src/prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { OTPType, UserType, Admin } from '@prisma/client'
-import { SignUpType, USER } from 'src/common/util/types'
+import { SignUpType, USER } from 'src/common/util/types/base.type'
 import { generateOTP } from 'src/common/util/helpers/numbers'
 import MessageService from 'src/message/message.service'
 import { ConfigService } from '@nestjs/config'
@@ -84,7 +84,7 @@ export default class AuthService {
       })
 
       this.messageService.setStrategy(this.emailStrategy)
-      await this.messageService.sendOTP({
+      this.messageService.sendOTP({
         otp: otpCode,
         otpType: 'VERIFICATION',
         firstName,
@@ -358,7 +358,6 @@ export default class AuthService {
     type: OTPType
     userId: string
   }) {
-    console.log(type, userId)
     const otpRecord = await this.prismaService.oTP.findFirst({
       where: { type, userId },
     })

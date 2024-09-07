@@ -11,7 +11,7 @@ import {
   UpdateCategoryImageCategorySwaggerDefinition,
   UpdateCategorySwaggerDefinition,
   VerifyCategorySwaggerDefinition,
-} from './swagger-definition.decorator'
+} from './category-swagger.decorator'
 
 export const ApiEndpointDecorator = (...optionalDecorators: Function[]) =>
   applyDecorators(...(optionalDecorators as any))

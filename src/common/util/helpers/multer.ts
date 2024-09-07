@@ -2,10 +2,18 @@ import { BadRequestException } from '@nestjs/common'
 import { Request } from 'express'
 import { diskStorage } from 'multer'
 import { extname } from 'path'
-import { FileType, MulterFilterConfig, MulterStorageConfig } from '../types'
+import {
+  FileType,
+  MulterFilterConfig,
+  MulterStorageConfig,
+} from '../types/base.type'
 import { changeSpaceByHypen } from './string-util'
 
-export const multerFilter = ({ fileType, maxSize = 5 }: MulterFilterConfig) => {
+export const multerFilter = ({
+  fileType,
+  maxSize = 5,
+  optional,
+}: MulterFilterConfig) => {
   const mimeTypes: { [key in FileType]: string[] } = {
     image: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
     pdf: ['application/pdf'],
@@ -20,7 +28,7 @@ export const multerFilter = ({ fileType, maxSize = 5 }: MulterFilterConfig) => {
 
   return (req: Request, file: Express.Multer.File, callback: any) => {
     // Ensure the file is an file format
-    if (!file) {
+    if (!file && !optional) {
       return callback(new BadRequestException('File cannot be empty!'), false)
     }
 

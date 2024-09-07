@@ -4,6 +4,9 @@
 /build
 /prisma/migrations
 
+#  prisma migrations
+/prisma/migrations
+
 # Logs
 logs
 *.log

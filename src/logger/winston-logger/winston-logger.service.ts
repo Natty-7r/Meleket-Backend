@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import * as Winston from 'winston'
 import * as DailyRotateFile from 'winston-daily-rotate-file'
-import { LoggerType } from 'src/common/util/types'
+import { LoggerType } from 'src/common/util/types/base.type'
 import LoggerStrategy from './interfaces/logger-strategy.interface'
 
 @Injectable()

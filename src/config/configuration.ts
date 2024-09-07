@@ -1,4 +1,4 @@
-import { Config } from 'src/common/util/types'
+import { Config } from 'src/common/util/types/base.type'
 
 export default (): Config => ({
   server: {

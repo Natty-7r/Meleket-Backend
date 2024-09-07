@@ -1,11 +1,11 @@
 import {
-  SendAccountCreationParam,
-  SendMessageParam,
-  SendOTPParam,
-} from '../../common/util/types'
+  SendAccountCreationParams,
+  SendMessageParams,
+  SendOTPParams,
+} from '../../common/util/types/params.type'
 
 export default interface MessageStrategy {
-  sendOTP(params: SendOTPParam): Promise<void>
-  sendMessage(params: SendMessageParam): Promise<void>
-  sendAccountCreationMessage(params: SendAccountCreationParam): Promise<void>
+  sendOTP(params: SendOTPParams): Promise<void>
+  sendMessage(params: SendMessageParams): Promise<void>
+  sendAccountCreationMessage(params: SendAccountCreationParams): Promise<void>
 }

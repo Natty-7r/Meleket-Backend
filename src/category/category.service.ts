@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
-import { CategoryTreeNode } from 'src/common/util/types'
+import { CategoryTreeNode } from 'src/common/util/types/base.type'
 import { Category } from '@prisma/client'
 import UpdateCategoryDto from './dto/update-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'

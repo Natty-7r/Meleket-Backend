@@ -1,11 +1,6 @@
 import { Request } from 'express'
 import { Admin, OTPType, User } from '@prisma/client'
 
-export type ExceptionResponse = {
-  message: string
-  property: string
-}
-
 export type Module = {
   id: number
   name: string
@@ -49,6 +44,7 @@ export type FileType = 'image' | 'pdf' | 'txt' | 'doc'
 export type MulterFilterConfig = {
   fileType: FileType
   maxSize: number // in MB
+  optional?: boolean
 }
 
 export interface CategoryTreeNode {
@@ -112,32 +108,4 @@ export interface Config {
     email: string
     password: string
   }
-}
-
-export interface SendSMSParam {
-  smsAddress: string
-  smsBody: string
-}
-
-export interface SendEmailParam {
-  address: string
-  subject: string
-  body: string
-}
-
-export interface SendMessageParam {
-  address: string
-  subject: string
-  body: string
-}
-export interface SendOTPParam {
-  address: string
-  firstName: string
-  otp: string
-  otpType: OTPType
-}
-export interface SendAccountCreationParam {
-  address: string
-  firstName: string
-  password: string
 }

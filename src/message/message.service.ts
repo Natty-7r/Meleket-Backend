@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import {
-  SendAccountCreationParam,
-  SendMessageParam,
-  SendOTPParam,
-} from 'src/common/util/types'
+  SendAccountCreationParams,
+  SendMessageParams,
+  SendOTPParams,
+} from 'src/common/util/types/params.type'
 import MessageStrategy from './interfaces/message-strategry.interface'
 
 @Injectable()
@@ -14,21 +14,21 @@ export default class MessageService implements MessageStrategy {
     this.strategy = strategy
   }
 
-  async sendOTP(params: SendOTPParam) {
+  async sendOTP(params: SendOTPParams) {
     if (!this.strategy) {
       throw new Error('No strategy set')
     }
     return this.strategy.sendOTP(params)
   }
 
-  async sendAccountCreationMessage(params: SendAccountCreationParam) {
+  async sendAccountCreationMessage(params: SendAccountCreationParams) {
     if (!this.strategy) {
       throw new Error('No strategy set')
     }
     return this.strategy.sendAccountCreationMessage(params)
   }
 
-  async sendMessage(params: SendMessageParam): Promise<void> {
+  async sendMessage(params: SendMessageParams): Promise<void> {
     if (!this.strategy) {
       throw new Error('No strategy set')
     }

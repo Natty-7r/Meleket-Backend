@@ -1,5 +1,5 @@
 import { basename } from 'path'
-import { StackTraceInfo } from '../types'
+import { StackTraceInfo } from '../types/base.type'
 
 export default function parseStackTrace(stack: string): StackTraceInfo {
   const lines = stack.split('\n')

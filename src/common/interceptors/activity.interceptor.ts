@@ -55,7 +55,6 @@ export default class ActivityInterceptor implements NestInterceptor {
             request.originalUrl == '/'
           )
         ) {
-          console.log(request.originalUrl)
           this.logger.log('', { ...activityLog })
         }
       }),

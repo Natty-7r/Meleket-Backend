@@ -1,4 +1,4 @@
-import { LoggerOption, LoggerType } from 'src/common/util/types'
+import { LoggerOption, LoggerType } from 'src/common/util/types/base.type'
 import LoggerStrategy from '../interfaces/logger-strategy.interface'
 
 export default class ActivityLoggerStrategry implements LoggerStrategy {
