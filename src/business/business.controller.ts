@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Request,
   UploadedFile,
 } from '@nestjs/common'
 import CreateBusinessDto from './dto/create-business.dto'
@@ -27,6 +28,7 @@ import {
   DeleteBusinessService,
   CreateBusinessAddress,
   UpdateBusinessAddress,
+  DeleteBusinessAddress,
 } from './decorators/business-endpoint.decorator'
 import { USER } from 'src/common/util/types'
 import User from 'src/common/decorators/user.decorator'
@@ -187,18 +189,17 @@ export default class BusinessController {
       user.id,
     )
   }
-
-  @Put('delete-address')
-  @UpdateBusinessAddress()
+  @Delete('delete-address/:addressId')
+  @DeleteBusinessAddress()
   deleteBusinessAddress(
-    @Param('businessId') businessId: string,
+    @Request() req: any,
     @Param('addressId') addressId: string,
     @User() user: USER,
   ) {
+    console.log(addressId)
     return this.businessService.deleteBusinessAddress({
-      businessId,
-      addressId,
-      userId: user.id,
+      id: addressId,
+      userId: user?.id,
     })
   }
 }

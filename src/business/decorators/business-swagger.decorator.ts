@@ -190,6 +190,5 @@ export const DeleteBusinessAddressSwaggerDefinition = () =>
     }),
     ApiBadRequestResponse({ description: 'Invalid address Id' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiParam({ description: 'bussines Id', name: 'businessId' }),
-    ApiParam({ description: 'service Id', name: 'serviceId' }),
+    ApiParam({ description: 'address Id', name: 'id' }),
   )

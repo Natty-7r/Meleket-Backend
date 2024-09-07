@@ -136,7 +136,7 @@ model Business {
   mainImageUrl String
   owner        User   @relation("UserOwnsBusiness", fields: [ownerId], references: [id]) // New relation
 
-  services BussinesService[]
+  services BussinessService[]
   address  BusinessAddress[]
   contact  BusinessContact?
 
@@ -153,7 +153,7 @@ model Business {
   updatedAt DateTime @default(now())
 }
 
-model BussinesService {
+model BussinessService {
   id             String  @id @default(uuid())
   businessId     String
   name           String

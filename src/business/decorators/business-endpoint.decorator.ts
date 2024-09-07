@@ -128,4 +128,4 @@ export const UpdateBusinessAddress = () =>
   applyDecorators(ClientRole(), UpdateBusinessAddressSwaggerDefinition())
 
 export const DeleteBusinessAddress = () =>
-  applyDecorators(ClientRole(), DeleteBusinessAddressSwaggerDefinition())
+  applyDecorators(DeleteBusinessAddressSwaggerDefinition())

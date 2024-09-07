@@ -13,19 +13,34 @@ import CreateBusinessServiceDto from './dto/create-business-service.dto'
 import UpdateBusinessServiceDto from './dto/update-business-service.dto'
 import CreateBusinessAddressDto from './dto/create-business-address.dto'
 import UpdateBusinessAddressDto from './dto/update-business-address.dto'
+import {
+  Business,
+  BusinessAddress,
+  BussinessService as BussinesServiceModelType,
+} from '@prisma/client'
 
 @Injectable()
 export default class BusinessService {
   constructor(private readonly prismaService: PrismaService) {}
 
   // helper methods
+
+  async #verifiyBusinessId(id: string): Promise<Business> {
+    const business = await this.prismaService.business.findFirst({
+      where: { id },
+    })
+    if (!business) throw new BadRequestException('Invalid business ID')
+    return business
+  }
   async #checkOwner({
     userId,
     businessId,
   }: {
     userId: string
     businessId: string
-  }) {
+  }): Promise<Business> {
+    // verify the bussiness id first
+    await this.#verifiyBusinessId(businessId)
     const business = await this.prismaService.business.findFirst({
       where: { ownerId: userId, id: businessId },
     })
@@ -33,18 +48,11 @@ export default class BusinessService {
       throw new ForbiddenException('Only the owner can manipute business')
     return business
   }
-  async #checkBusinessName(name: string) {
+  async #checkBusinessName(name: string): Promise<Business> {
     const business = await this.prismaService.business.findFirst({
       where: { name: name.toLowerCase().trim() },
     })
     if (business) throw new ConflictException('Business name  is taken')
-    return business
-  }
-  async #verifiyBusinessId(id: string) {
-    const business = await this.prismaService.business.findFirst({
-      where: { id },
-    })
-    if (!business) throw new BadRequestException('Invalid business ID')
     return business
   }
 
@@ -62,7 +70,7 @@ export default class BusinessService {
     city: string
     streetAddress?: string
     specificLocation?: string
-  }) {
+  }): Promise<boolean> {
     const business = await this.prismaService.business.findFirst({
       where: {
         id: businessId,
@@ -91,7 +99,8 @@ export default class BusinessService {
         },
       },
     })
-    if (business) throw new ConflictException('the address already regisred ')
+    if (business) throw new ConflictException('the address already registered ')
+    return true
   }
 
   async #checkBusinessServiceName({
@@ -100,20 +109,30 @@ export default class BusinessService {
   }: {
     name: string
     businessId: string
-  }) {
-    const business = await this.prismaService.bussinesService.findFirst({
+  }): Promise<BussinesServiceModelType> {
+    const service = await this.prismaService.bussinessService.findFirst({
       where: { businessId, name: name.toLowerCase().trim() },
     })
-    if (business)
+    if (service)
       throw new ConflictException('Service name exist in the business')
-    return business
+    return service
   }
-  async #checkBusinessServiceId(id: string) {
-    const business = await this.prismaService.bussinesService.findFirst({
+  async #verifyBusinessServiceId(
+    id: string,
+  ): Promise<BussinesServiceModelType> {
+    const service = await this.prismaService.bussinessService.findFirst({
       where: { id },
     })
-    if (business) throw new ConflictException('Invalid  business Service ID')
-    return business
+    if (service) throw new NotFoundException('Invalid  business Service ID')
+    return service
+  }
+
+  async #verifyBusinessAddressId(id: string): Promise<BusinessAddress> {
+    const address = await this.prismaService.businessAddress.findFirst({
+      where: { id },
+    })
+    if (!address) throw new NotFoundException('Invalid  business Address ID')
+    return address
   }
 
   async createBusiness(
@@ -211,13 +230,12 @@ export default class BusinessService {
     imageUrl?: string,
   ) {
     await this.#checkOwner({ userId, businessId })
-    await this.#verifiyBusinessId(businessId)
     await this.#checkBusinessServiceName({
       businessId,
       name,
     })
 
-    const buinessService = await this.prismaService.bussinesService.create({
+    const buinessService = await this.prismaService.bussinessService.create({
       data: {
         name: name.toLowerCase().trim(),
         businessId,
@@ -244,11 +262,11 @@ export default class BusinessService {
     imageUrl: string
     userId: string
   }) {
-    await this.#checkBusinessServiceId(id)
+    await this.#verifyBusinessServiceId(id)
     await this.#checkOwner({ userId, businessId: id })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
-    const updatedBusiness = await this.prismaService.bussinesService.update({
+    const updatedBusiness = await this.prismaService.bussinessService.update({
       where: { id },
       data: { image: imageUrl },
     })
@@ -268,8 +286,8 @@ export default class BusinessService {
   ) {
     for (const { id, description, name, specifications } of services) {
       await this.#checkOwner({ userId, businessId: businessId })
-      const businessService = await this.#checkBusinessServiceId(id)
-      await this.prismaService.bussinesService.update({
+      const businessService = await this.#verifyBusinessServiceId(id)
+      await this.prismaService.bussinessService.update({
         where: { id },
         data: {
           name: name.toLowerCase().trim() || businessService.description,
@@ -302,13 +320,13 @@ export default class BusinessService {
   }) {
     await this.#checkOwner({ businessId, userId })
 
-    const service = await this.prismaService.bussinesService.findFirst({
+    const service = await this.prismaService.bussinessService.findFirst({
       where: { id, businessId },
     })
     if (!service)
       throw new BadRequestException('Invalid business or service Id')
 
-    await this.prismaService.bussinesService.delete({
+    await this.prismaService.bussinessService.delete({
       where: {
         businessId,
         id: id,
@@ -367,7 +385,6 @@ export default class BusinessService {
   async updateBusinessAddress(
     {
       addressId,
-      businessId,
       city,
       country,
       state,
@@ -376,42 +393,40 @@ export default class BusinessService {
     }: UpdateBusinessAddressDto,
     userId: string,
   ) {
+    const { businessId } = await this.#verifyBusinessAddressId(addressId)
     await this.#checkOwner({
-      businessId,
       userId,
+      businessId,
     })
 
-    const buinessAddress = await this.prismaService.businessAddress.update({
-      where: { id: businessId },
-      data: {
-        country: country && tolowercaseCustom(country),
-        state: state && tolowercaseCustom(state),
-        city: city && tolowercaseCustom(city),
-        streetAddress: streetAddress && tolowercaseCustom(streetAddress),
-        specificLocation:
-          specificLocation && tolowercaseCustom(specificLocation),
-      },
-    })
+    const updatedBuinessAddress =
+      await this.prismaService.businessAddress.update({
+        where: { id: addressId, businessId },
+        data: {
+          country: country && tolowercaseCustom(country),
+          state: state && tolowercaseCustom(state),
+          city: city && tolowercaseCustom(city),
+          streetAddress: streetAddress && tolowercaseCustom(streetAddress),
+          specificLocation:
+            specificLocation && tolowercaseCustom(specificLocation),
+        },
+      })
     return {
       status: 'success',
       message: 'Buisness address updated successfully',
       data: {
-        ...buinessAddress,
+        ...updatedBuinessAddress,
       },
     }
   }
-  async deleteBusinessAddress({
-    addressId,
-    businessId,
-    userId,
-  }: {
-    addressId: string
-    businessId: string
-    userId: string
-  }) {
-    await this.#checkOwner({ businessId, userId })
+  async deleteBusinessAddress({ id, userId }: { id: string; userId: string }) {
+    const { businessId } = await this.#verifyBusinessAddressId(id)
+    await this.#checkOwner({
+      userId,
+      businessId,
+    })
     await this.prismaService.businessAddress.delete({
-      where: { id: addressId },
+      where: { id },
     })
 
     return {
