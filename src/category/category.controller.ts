@@ -36,7 +36,7 @@ export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @CreateCategory()
-  @Post('create-category')
+  @Post()
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
     @UploadedFile() file: Express.Multer.File,
@@ -53,13 +53,13 @@ export default class CategoryController {
   }
 
   @UpdateCategory()
-  @Put('update-category')
+  @Put()
   updateCategory(@Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoryService.updateCategory(updateCategoryDto)
   }
 
   @UpdateCategoryImage()
-  @Put('update-category-image')
+  @Put('/image')
   updateCategoryImage(
     @Body() updateCategoryImageDto: UpdateCategoryImageDto,
     @UploadedFile() file: Express.Multer.File,
@@ -71,9 +71,17 @@ export default class CategoryController {
   }
 
   @VerifyCategory()
-  @Put('verify-category')
+  @Put(':id/status')
   verifyCategory(@Param('id') id: string) {
     return this.categoryService.verifyCategory(id)
+  }
+
+  @UpdateCategoryParent()
+  @Put('/parent')
+  updateParentCategory(
+    @Body() updateParentCategoryDto: UpdateParentCategoryDto,
+  ) {
+    return this.categoryService.updateParentCategory(updateParentCategoryDto)
   }
 
   @GetCategories()
@@ -81,18 +89,15 @@ export default class CategoryController {
   getCategories() {
     return this.categoryService.getCategories()
   }
-
-  @DeleteCategory()
-  @Delete('delete')
-  deleteCategory(@Param('id') id: string) {
-    return this.categoryService.deleteCategory(id)
+  @GetCategories()
+  @Get('/business/:id')
+  getCategoryBusiness() {
+    return this.categoryService.getCategories()
   }
 
-  @UpdateCategoryParent()
-  @Put('update-parent')
-  updateParentCategory(
-    @Body() updateParentCategoryDto: UpdateParentCategoryDto,
-  ) {
-    return this.categoryService.updateParentCategory(updateParentCategoryDto)
+  @DeleteCategory()
+  @Delete(':id')
+  deleteCategory(@Param('id') id: string) {
+    return this.categoryService.deleteCategory(id)
   }
 }
