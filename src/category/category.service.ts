@@ -12,7 +12,6 @@ import { CategoryTreeNode } from 'src/common/util/types/base.type'
 import UpdateCategoryDto from './dto/update-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import CreateCategoryDto from './dto/create-category.dto'
-import UpdateCategoryImageDto from './dto/update-category-image.dto '
 import BusinessService from 'src/business/business.service'
 import {
   BaseIdParams,
@@ -149,7 +148,7 @@ export default class CategoryService {
   async updateCategoryImage({
     id,
     imageUrl,
-  }: UpdateCategoryImageDto & ImageUrlParams): Promise<ApiResponse> {
+  }: BaseIdParams & ImageUrlParams): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })

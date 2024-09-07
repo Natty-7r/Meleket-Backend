@@ -7,6 +7,7 @@ import {
   ApiConflictResponse,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiParam,
 } from '@nestjs/swagger'
 import CategoryTreeResponse from '../responses/category-tree.response'
 
@@ -71,6 +72,7 @@ export const UpdateCategorySwaggerDefinition = () =>
     'Category  updated succefully',
     ApiNotFoundResponse({ description: 'Invalid category id  ' }),
     ApiBadRequestResponse({ description: 'Invalid parent id' }),
+    ApiParam({ description: 'Category ID', name: 'id' }),
   )
 
 export const UpdateCategoryImageCategorySwaggerDefinition = (

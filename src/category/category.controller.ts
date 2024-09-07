@@ -28,7 +28,6 @@ import {
   VerifyCategory,
 } from './decorators/category-api-endpoint.decorator'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
-import UpdateCategoryImageDto from './dto/update-category-image.dto '
 
 @ApiTags('Category')
 @Controller('category')
@@ -58,13 +57,13 @@ export default class CategoryController {
   }
 
   @UpdateCategoryImage()
-  @Put('/image')
+  @Put(':id/image')
   updateCategoryImage(
-    @Body() updateCategoryImageDto: UpdateCategoryImageDto,
+    @Param('id:') id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.categoryService.updateCategoryImage({
-      ...updateCategoryImageDto,
+      id,
       imageUrl: file.path,
     })
   }
