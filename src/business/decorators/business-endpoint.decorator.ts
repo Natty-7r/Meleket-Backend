@@ -7,7 +7,6 @@ import {
   AddBusinessServiceSwaggerDefinition,
   UpdateBusinessServiceImageSwaggerDefinition,
   UpdateBusinessServiceSwaggerDefinition,
-  GetCategoryBusinessSwaggerDefinition,
   SearchBusinessSwaggerDefinition,
   GetBusinessSwaggerDefinition,
   GetBussinesDetailSwaggerDefinition,
@@ -108,9 +107,6 @@ export const GetUserBusinesses = () =>
 
 export const GetBusinessDetail = () =>
   applyDecorators(Public(), GetBussinesDetailSwaggerDefinition())
-
-export const GetCategoryBusinesses = () =>
-  applyDecorators(Public(), GetCategoryBusinessSwaggerDefinition())
 
 export const SearchBusiness = () =>
   applyDecorators(Public(), SearchBusinessSwaggerDefinition())

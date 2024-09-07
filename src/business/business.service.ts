@@ -37,7 +37,7 @@ import {
   CategoryIdParams,
   DeleteBusinessAddressParams,
   DeleteBusinessServicesParams,
-  ImageUrlParams,
+  OptionalImageUrlParams,
   SearchBusinessByAddressParams,
   SearchBusinessParams,
   UserIdParams,
@@ -254,7 +254,7 @@ export default class BusinessService {
     imageUrl,
   }: CreateBusinessServiceDto &
     UserIdParams &
-    ImageUrlParams): Promise<ApiResponse> {
+    OptionalImageUrlParams): Promise<ApiResponse> {
     await this.#checkOwner({ userId, businessId })
     await this.#checkBusinessServiceName({
       businessId,
@@ -526,7 +526,7 @@ export default class BusinessService {
     }
   }
 
-  async getCategoryBusiness({
+  async getCategoryBusinesses({
     categoryId,
   }: CategoryIdParams): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
