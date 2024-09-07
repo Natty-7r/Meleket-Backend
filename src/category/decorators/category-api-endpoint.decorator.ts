@@ -12,9 +12,18 @@ import {
   UpdateCategorySwaggerDefinition,
   VerifyCategorySwaggerDefinition,
 } from './category-swagger.decorator'
+import { GetCategoryBusinessSwaggerDefinition } from 'src/business/decorators/business-swagger.decorator'
+import { ApiUnauthorizedResponse } from '@nestjs/swagger'
+import Public from 'src/common/decorators/public.decorator'
 
 export const ApiEndpointDecorator = (...optionalDecorators: Function[]) =>
   applyDecorators(...(optionalDecorators as any))
+
+const AdminRole = () =>
+  applyDecorators(
+    Roles('ADMIN', 'SUPER_ADMIN'),
+    ApiUnauthorizedResponse({ description: 'Only owner can manupulate' }),
+  )
 
 export const CreateCategory = () =>
   ApiEndpointDecorator(
@@ -29,7 +38,7 @@ export const CreateCategory = () =>
 
 export const UpdateCategory = () =>
   ApiEndpointDecorator(
-    Roles('ADMIN', 'SUPER_ADMIN'),
+    AdminRole(),
     UpdateCategorySwaggerDefinition,
     UseInterceptors(
       FileInterceptor('image', {
@@ -39,7 +48,7 @@ export const UpdateCategory = () =>
   )
 export const UpdateCategoryImage = () =>
   ApiEndpointDecorator(
-    Roles('ADMIN', 'SUPER_ADMIN'),
+    AdminRole(),
     UpdateCategoryImageCategorySwaggerDefinition,
     UseInterceptors(
       FileInterceptor('image', {
@@ -50,25 +59,19 @@ export const UpdateCategoryImage = () =>
   )
 
 export const VerifyCategory = () =>
-  ApiEndpointDecorator(
-    Roles('ADMIN', 'SUPER_ADMIN'),
-    VerifyCategorySwaggerDefinition,
-  )
+  ApiEndpointDecorator(AdminRole(), VerifyCategorySwaggerDefinition)
 export const GetCategories = () =>
   ApiEndpointDecorator(
-    Roles('ADMIN', 'SUPER_ADMIN'),
+    AdminRole(),
     CategoryTreeSwaggerDefinition(
       'Get all categories',
       'Categories fetched successfully',
     ),
   )
 export const DeleteCategory = () =>
-  ApiEndpointDecorator(
-    Roles('ADMIN', 'SUPER_ADMIN'),
-    DeleteCategorySwaggerDefinition(),
-  )
+  ApiEndpointDecorator(AdminRole(), DeleteCategorySwaggerDefinition())
 export const UpdateCategoryParent = () =>
-  ApiEndpointDecorator(
-    Roles('ADMIN', 'SUPER_ADMIN'),
-    UpdateCategoryParentSwaggerDefinition(),
-  )
+  ApiEndpointDecorator(AdminRole(), UpdateCategoryParentSwaggerDefinition())
+
+export const GetCategoryBusinesses = () =>
+  applyDecorators(Public(), GetCategoryBusinessSwaggerDefinition())

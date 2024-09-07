@@ -13,13 +13,18 @@ import UpdateCategoryDto from './dto/update-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import CreateCategoryDto from './dto/create-category.dto'
 import UpdateCategoryImageDto from './dto/update-category-image.dto '
+import BusinessService from 'src/business/business.service'
+import { BaseIdParams } from 'src/common/util/types/params.type'
 
 @Injectable()
 @UseGuards(JwtAuthGuard)
 export default class CategoryService {
   categoryTree: CategoryTreeNode[]
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly businessService: BusinessService,
+  ) {}
 
   generateCategoryTree(allCategories: Category[]) {
     const categoryMap = new Map<string, CategoryTreeNode>()
@@ -191,6 +196,9 @@ export default class CategoryService {
       message: 'categories fetched',
       data: this.generateCategoryTree(allCategories),
     }
+  }
+  async getCategoryBusiness({ id }: BaseIdParams) {
+    return this.businessService.getCategoryBusinesses({ categoryId: id })
   }
 
   async deleteCategory(id: string) {

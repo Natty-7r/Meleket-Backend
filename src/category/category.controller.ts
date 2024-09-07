@@ -21,6 +21,7 @@ import {
   CreateCategory,
   DeleteCategory,
   GetCategories,
+  GetCategoryBusinesses,
   UpdateCategory,
   UpdateCategoryImage,
   UpdateCategoryParent,
@@ -89,7 +90,7 @@ export default class CategoryController {
   getCategories() {
     return this.categoryService.getCategories()
   }
-  @GetCategories()
+  @GetCategoryBusinesses()
   @Get('/business/:id')
   getCategoryBusiness() {
     return this.categoryService.getCategories()
