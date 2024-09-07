@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import {
-  SendAccountCreationParam,
-  SendEmailParam,
-  SendMessageParam,
-  SendOTPParam,
-} from 'src/common/util/types'
+  SendAccountCreationParams,
+  SendEmailParams,
+  SendMessageParams,
+  SendOTPParams,
+} from 'src/common/util/types/params.type'
 import {
   generateAccountCreationEmailMessage,
   generateResetEmailOTPMessage,
@@ -29,7 +29,7 @@ export default class EmailStrategy implements MessageStrategy {
     this.activityrLogger.configure(new ActivityLoggerStrategry())
   }
 
-  async #sendEmail({ address, subject, body }: SendEmailParam) {
+  async #sendEmail({ address, subject, body }: SendEmailParams) {
     try {
       const message = await this.mailerService.sendMail({
         sender: this.configService.get<string>('email.sender'),
@@ -51,14 +51,14 @@ export default class EmailStrategy implements MessageStrategy {
     }
   }
 
-  async sendMessage(params: SendMessageParam): Promise<void> {}
+  async sendMessage(params: SendMessageParams): Promise<void> {}
 
   async sendOTP({
     otp,
     otpType,
     firstName,
     address,
-  }: SendOTPParam): Promise<void> {
+  }: SendOTPParams): Promise<void> {
     const emailBody =
       otpType === 'VERIFICATION'
         ? generateVerifyEmailOTPMessage({ firstName, otp })
@@ -78,7 +78,7 @@ export default class EmailStrategy implements MessageStrategy {
     firstName,
     address,
     password,
-  }: SendAccountCreationParam): Promise<void> {
+  }: SendAccountCreationParams): Promise<void> {
     const emailBody = generateAccountCreationEmailMessage({
       firstName,
       password,

@@ -13,7 +13,7 @@ import { ApiTags } from '@nestjs/swagger'
 
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import User from 'src/common/decorators/user.decorator'
-import { USER } from 'src/common/util/types'
+import { USER } from 'src/common/util/types/base.type'
 import CreateCategoryDto from './dto/create-category.dto'
 import CategoryService from './category.service'
 import UpdateCategoryDto from './dto/update-category.dto'

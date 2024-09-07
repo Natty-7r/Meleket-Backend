@@ -30,7 +30,7 @@ import {
   UpdateBusinessAddress,
   DeleteBusinessAddress,
 } from './decorators/business-endpoint.decorator'
-import { USER } from 'src/common/util/types'
+import { USER } from 'src/common/util/types/base.type'
 import User from 'src/common/decorators/user.decorator'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
 import UpdateBusinessServiceDtos from './dto/update-business-service.dto'
@@ -50,11 +50,11 @@ export default class BusinessController {
     @User() user: USER,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.businessService.createBusiness(
-      { ...createBusinessDto },
-      user.id,
-      file?.path || undefined,
-    )
+    return this.businessService.createBusiness({
+      ...createBusinessDto,
+      userId: user.id,
+      mainImage: file?.path || undefined,
+    })
   }
 
   @Put('update-business-image')
@@ -77,7 +77,10 @@ export default class BusinessController {
     @Body() updateBusinessDto: UpdateBusinessDto,
     @User() user: USER,
   ) {
-    return this.businessService.updateBusiness(updateBusinessDto, user.id)
+    return this.businessService.updateBusiness({
+      ...updateBusinessDto,
+      userId: user.id,
+    })
   }
 
   // service related
@@ -88,11 +91,11 @@ export default class BusinessController {
     @User() user: USER,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.businessService.addBussinessService(
-      { ...createBusinessServiceDto },
-      user.id,
-      file?.path || undefined,
-    )
+    return this.businessService.addBussinessService({
+      ...createBusinessServiceDto,
+      imageUrl: file?.path || undefined,
+      userId: user.id,
+    })
   }
 
   @Put('update-business-service-image')
@@ -115,11 +118,10 @@ export default class BusinessController {
     @Body() updateBusinessServiceDto: UpdateBusinessServiceDtos,
     @User() user: USER,
   ) {
-    return this.businessService.updateBusinessServices(
-      updateBusinessServiceDto,
-
-      user.id,
-    )
+    return this.businessService.updateBusinessServices({
+      ...updateBusinessServiceDto,
+      userId: user.id,
+    })
   }
   @Delete()
   @DeleteBusinessService()
@@ -156,13 +158,13 @@ export default class BusinessController {
   @Get('search')
   @SearchBusiness()
   searchBusiness(@Query('searchKey') searchKey: string) {
-    return this.businessService.searchBusiness(searchKey)
+    return this.businessService.searchBusiness({ searchKey })
   }
 
   @Get('search')
   @SearchBusinessByAddress()
   searchBusinessByAddress(@Query('address') address: string) {
-    return this.businessService.searchBusinessBYAddress(address)
+    return this.businessService.searchBusinessBYAddress({ address })
   }
 
   // business address
@@ -173,10 +175,10 @@ export default class BusinessController {
     @Body() createBusinessAddressDto: CreateBusinessAddressDto,
     @User() user: USER,
   ) {
-    return this.businessService.createBusinessAddress(
-      createBusinessAddressDto,
-      user.id,
-    )
+    return this.businessService.createBusinessAddress({
+      ...createBusinessAddressDto,
+      userId: user.id,
+    })
   }
   @Put('update-address')
   @UpdateBusinessAddress()
@@ -184,10 +186,10 @@ export default class BusinessController {
     @Body() updateBusinessAddressDto: UpdateBusinessAddressDto,
     @User() user: USER,
   ) {
-    return this.businessService.updateBusinessAddress(
-      updateBusinessAddressDto,
-      user.id,
-    )
+    return this.businessService.updateBusinessAddress({
+      ...updateBusinessAddressDto,
+      userId: user.id,
+    })
   }
   @Delete('delete-address/:addressId')
   @DeleteBusinessAddress()
@@ -196,7 +198,6 @@ export default class BusinessController {
     @Param('addressId') addressId: string,
     @User() user: USER,
   ) {
-    console.log(addressId)
     return this.businessService.deleteBusinessAddress({
       id: addressId,
       userId: user?.id,

@@ -2,7 +2,11 @@ import { BadRequestException } from '@nestjs/common'
 import { Request } from 'express'
 import { diskStorage } from 'multer'
 import { extname } from 'path'
-import { FileType, MulterFilterConfig, MulterStorageConfig } from '../types'
+import {
+  FileType,
+  MulterFilterConfig,
+  MulterStorageConfig,
+} from '../types/base.type'
 import { changeSpaceByHypen } from './string-util'
 
 export const multerFilter = ({

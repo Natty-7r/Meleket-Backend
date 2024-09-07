@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { TwilioService } from 'nestjs-twilio'
 import { ConfigService } from '@nestjs/config'
 import {
-  SendAccountCreationParam,
-  SendMessageParam,
-  SendOTPParam,
-  SendSMSParam,
-} from 'src/common/util/types'
+  SendAccountCreationParams,
+  SendMessageParams,
+  SendOTPParams,
+  SendSMSParams,
+} from 'src/common/util/types/params.type'
 import {
   generateResetSMSOTPMessage,
   generateVerifySMSOTPMessage,
@@ -28,7 +28,7 @@ export default class SmsStrategy implements MessageStrategy {
     this.activityrLogger.configure(new ActivityLoggerStrategry())
   }
 
-  async #sendSMS({ smsBody, smsAddress, subject }: SendSMSParam) {
+  async #sendSMS({ smsBody, smsAddress, subject }: SendSMSParams) {
     try {
       const message = await this.twilioService.client.messages.create({
         from: this.configService.get<string>('twilio.smsSender'),
@@ -52,14 +52,14 @@ export default class SmsStrategy implements MessageStrategy {
     }
   }
 
-  async sendMessage(messageParams: SendMessageParam): Promise<void> {}
+  async sendMessage(messageParams: SendMessageParams): Promise<void> {}
 
   async sendOTP({
     otp,
     otpType,
     firstName,
     address,
-  }: SendOTPParam): Promise<void> {
+  }: SendOTPParams): Promise<void> {
     const smsBody =
       otpType === 'VERIFICATION'
         ? generateVerifySMSOTPMessage({ firstName, otp })
@@ -76,6 +76,6 @@ export default class SmsStrategy implements MessageStrategy {
   }
 
   async sendAccountCreationMessage(
-    params: SendAccountCreationParam,
+    params: SendAccountCreationParams,
   ): Promise<void> {}
 }

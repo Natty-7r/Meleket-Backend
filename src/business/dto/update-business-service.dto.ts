@@ -45,7 +45,7 @@ export class UpdateBusinessServiceDto {
   specifications?: JSON
 }
 
-export default class UpdateBusinessServiceDtos {
+export default class UpdateBusinessesServiceDto {
   @ApiProperty({
     description: 'List of services to be updated',
     type: [UpdateBusinessServiceDto],
