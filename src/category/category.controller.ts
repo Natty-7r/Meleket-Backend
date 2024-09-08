@@ -44,7 +44,7 @@ export default class CategoryController {
   ) {
     return this.categoryService.createCategory({
       ...createCategoryDto,
-      image: file?.path || 'uploads/category/category.png',
+      imageUrl: file?.path || 'uploads/category/category.png',
       price: createCategoryDto?.price || 50,
       verified: user.userType !== 'CLIENT_USER',
     })

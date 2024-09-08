@@ -61,9 +61,10 @@ export default class CategoryService {
     return categoryTree
   }
 
-  async createCategory(
-    createCategoryDto: CreateCategoryDto & CreateCategoryParams,
-  ): Promise<ApiResponse> {
+  async createCategory({
+    imageUrl,
+    ...createCategoryDto
+  }: CreateCategoryDto & CreateCategoryParams): Promise<ApiResponse> {
     const previesCategory = await this.prismaService.category.findFirst({
       where: { name: createCategoryDto.name.toLocaleLowerCase().trim() },
     })
@@ -91,6 +92,7 @@ export default class CategoryService {
       data: {
         name: createCategoryDto.name.toLocaleLowerCase().trim(), // changing name for search
         ...createCategoryDto,
+        image: imageUrl,
       },
     })
 

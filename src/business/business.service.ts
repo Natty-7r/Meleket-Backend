@@ -254,7 +254,7 @@ export default class BusinessService {
     imageUrl,
   }: CreateBusinessServiceDto &
     UserIdParams &
-    OptionalImageUrlParams): Promise<ApiResponse> {
+    ImageUrlParams): Promise<ApiResponse> {
     await this.#checkOwner({ userId, businessId })
     await this.#checkBusinessServiceName({
       businessId,
@@ -542,25 +542,7 @@ export default class BusinessService {
     }
   }
 
-
-  async getCategoryBusinesses({
-    categoryId,
-  }: CategoryIdParams): Promise<ApiResponse> {
-    const category = await this.prismaService.category.findFirst({
-      where: { id: categoryId },
-    })
-    if (!category) throw new NotFoundException('Invalid category id ')
-    const business = await this.prismaService.business.findMany({
-      where: { categoryId },
-    })
-    return {
-      status: 'success',
-      message: `${category.name}  buisness fetched successfully`,
-      data: business,
-    }
-  }
-
-  async searchBusiness({
+  async searchBusinesses({
     searchKey,
   }: SearchBusinessParams): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany({
