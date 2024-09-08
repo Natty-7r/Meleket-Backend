@@ -320,7 +320,7 @@ export default class AuthService {
     }
   }
 
-  async verifyUser({ email, otp: otpCode }: VerifyUserDto) {
+  async verifyAccount({ email, otp: otpCode }: VerifyUserDto) {
     const user = await this.prismaService.user.findFirst({
       where: { email },
     })

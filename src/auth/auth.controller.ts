@@ -7,6 +7,7 @@ import {
   UseGuards,
   Put,
   Param,
+  Delete,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { RequestWithUser, SignUpType } from 'src/common/util/types/base.type'
@@ -16,7 +17,6 @@ import AuthService from './auth.service'
 import LocalAuthGuard from './guards/local-auth.guard'
 import GoogleOAuthGuard from './guards/google-auth.guard'
 import {
-  VerifyUserDto,
   VerifyOTPDto,
   CreateOTPDto,
   CreateAccountDto,
@@ -38,6 +38,7 @@ import {
   VerifyOTP,
   VerifyUser,
 } from './decorators/auth-api-endpoint.decorator'
+import VerifyAccountDto from './dto/verify-user.dto'
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -45,7 +46,7 @@ export default class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @CreateAdminAccount()
-  @Post('/create-user-account')
+  @Post('/account')
   createUserAccount(@Body() createAccountDto: CreateAccountDto) {
     return this.authService.createUserAccount(
       createAccountDto,
@@ -54,7 +55,7 @@ export default class AuthController {
   }
 
   @CreateUserAccount()
-  @Post('/create-admin-account')
+  @Post('/admin-account')
   createAdminAccount(@Body() createAdminDto: CreateAdminDto) {
     return this.authService.createAdminAccount(createAdminDto)
   }
@@ -79,43 +80,43 @@ export default class AuthController {
   }
 
   @RequestOTP()
-  @Post('request-otp')
+  @Post('/otp')
   requestOTP(@Body() createOTPDto: CreateOTPDto) {
     return this.authService.requestOTP(createOTPDto)
   }
 
   @VerifyOTP()
-  @Put('verify-otp')
+  @Put('/otp')
   verifyOTP(@Body() verifyOTPDto: VerifyOTPDto) {
     return this.authService.verifyOTP(verifyOTPDto)
   }
 
   @VerifyUser()
-  @Put('verify-user')
-  verifyUser(@Body() verifyUserDto: VerifyUserDto) {
-    return this.authService.verifyUser(verifyUserDto)
+  @Put('/account')
+  verifyAccount(@Body() verifyAccountDto: VerifyAccountDto) {
+    return this.authService.verifyAccount(verifyAccountDto)
   }
 
   @UpdatePassword()
-  @Put('update-password')
+  @Put('/password')
   updatePassword(@Body() updatePasswordDto: UpdatePasswordDto) {
     return this.authService.updatePassword(updatePasswordDto)
   }
 
   @GetAdmins()
-  @Get('admins')
+  @Get('/admins')
   getAdmins() {
     return this.authService.getAdmins()
   }
 
   @UpdateAdminStatus()
-  @Put('update-admin-status')
+  @Put('/admins/status')
   updateAdminStatus(@Body() updateAdminStatusDto: UpdateAdminStatusDto) {
     return this.authService.updateAdminStatus(updateAdminStatusDto)
   }
 
   @DeleteAdminAccount()
-  @Put('delete-admin-account')
+  @Delete('/admins/:id')
   deleteAdminAccount(@Param('id') id: string) {
     return this.authService.deleteAdminAccount(id)
   }
