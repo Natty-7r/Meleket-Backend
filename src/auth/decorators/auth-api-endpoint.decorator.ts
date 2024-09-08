@@ -14,37 +14,30 @@ import {
 } from './auth-swagger-definition.decorator'
 import Public from 'src/common/decorators/public.decorator'
 
-const ApiEndpointDecorator = (...optionalDecorators: Function[]) =>
-  applyDecorators(...(optionalDecorators as any))
-
 export const CreateAdminAccount = () =>
-  ApiEndpointDecorator(Roles('SUPER_ADMIN'), CreateAdminSwaggerDefinition)
+  applyDecorators(Roles('SUPER_ADMIN'), CreateAdminSwaggerDefinition())
 
 export const DeleteAdminAccount = () =>
-  ApiEndpointDecorator(
-    Roles('SUPER_ADMIN'),
-    DeleteAdminAccountSwaggerDefinition,
-  )
+  applyDecorators(Roles('SUPER_ADMIN'), DeleteAdminAccountSwaggerDefinition)
 export const UpdateAdminStatus = () =>
-  ApiEndpointDecorator(Roles('SUPER_ADMIN'), UpdateAdminStatusSwaggerDefinition)
+  applyDecorators(Roles('SUPER_ADMIN'), UpdateAdminStatusSwaggerDefinition())
 
 export const GetAdmins = () =>
-  ApiEndpointDecorator(Roles('SUPER_ADMIN'), GetAdminsSwaggerDefinition)
+  applyDecorators(Roles('SUPER_ADMIN'), GetAdminsSwaggerDefinition())
 
-export const SignIn = () =>
-  ApiEndpointDecorator(Public, SignInSwaggerDefinition)
+export const SignIn = () => applyDecorators(Public(), SignInSwaggerDefinition())
 
 export const CreateUserAccount = () =>
-  ApiEndpointDecorator(Public, CreateUserAccountSwaggerDefinition)
+  applyDecorators(Public(), CreateUserAccountSwaggerDefinition())
 
 export const UpdatePassword = () =>
-  ApiEndpointDecorator(Public, UpdatePasswordSwaggerDefinition)
+  applyDecorators(Public(), UpdatePasswordSwaggerDefinition())
 
 export const RequestOTP = () =>
-  ApiEndpointDecorator(Public, RequestOTPSwaggerDefinition)
+  applyDecorators(Public(), RequestOTPSwaggerDefinition())
 
 export const VerifyOTP = () =>
-  ApiEndpointDecorator(Public, VerifyOTPSwaggerDefinition)
+  applyDecorators(Public(), VerifyOTPSwaggerDefinition())
 
 export const VerifyUser = () =>
-  ApiEndpointDecorator(Public, VerifyUserSwaggerDefinition)
+  applyDecorators(Public(), VerifyUserSwaggerDefinition())

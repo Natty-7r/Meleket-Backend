@@ -45,8 +45,8 @@ import VerifyAccountDto from './dto/verify-user.dto'
 export default class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @CreateAdminAccount()
-  @Post('/account')
+  @CreateUserAccount()
+  @Post('/user-accounts')
   createUserAccount(@Body() createAccountDto: CreateAccountDto) {
     return this.authService.createUserAccount(
       createAccountDto,
@@ -54,8 +54,8 @@ export default class AuthController {
     )
   }
 
-  @CreateUserAccount()
-  @Post('/admin-account')
+  @CreateAdminAccount()
+  @Post('/admin-accounts')
   createAdminAccount(@Body() createAdminDto: CreateAdminDto) {
     return this.authService.createAdminAccount(createAdminDto)
   }
@@ -92,7 +92,7 @@ export default class AuthController {
   }
 
   @VerifyUser()
-  @Put('/account')
+  @Put('/accounts')
   verifyAccount(@Body() verifyAccountDto: VerifyAccountDto) {
     return this.authService.verifyAccount(verifyAccountDto)
   }
