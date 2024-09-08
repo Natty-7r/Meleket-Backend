@@ -3,6 +3,7 @@ import {
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
@@ -23,6 +24,7 @@ export const AddReviewSwaggerDefinition = () =>
       description: 'User can only add one review for a business',
     }),
     ApiBadRequestResponse({ description: 'Invalid business ID' }),
+    ApiForbiddenResponse({ description: 'Owner cannot add review' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
   )
 export const UpdateReviewSwaggerDefinition = () =>

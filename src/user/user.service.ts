@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
@@ -24,8 +25,11 @@ export default class UserService {
     businessId,
     review: reviewText,
   }: AddReviewDto & UserIdParams): Promise<ApiResponse> {
-    await this.businessSevice.verifiyBusinessId({ id: businessId })
-
+    const business = await this.businessSevice.verifiyBusinessId({
+      id: businessId,
+    })
+    if (business.ownerId === userId)
+      throw new ForbiddenException('Owner cannot add review ')
     let review = await this.prismaService.review.findFirst({
       where: {
         businessId,
