@@ -1,6 +1,6 @@
 // business.service.params.ts
 
-import { OTPType } from '@prisma/client'
+import { Category, OTPType } from '@prisma/client'
 
 export type SendSMSParams = {
   smsAddress: string
@@ -48,6 +48,9 @@ export type CategoryIdParams = {
   categoryId: string
 }
 export type ImageUrlParams = {
+  imageUrl?: string
+}
+export type OptionalImageUrlParams = {
   imageUrl?: string
 }
 export type BaseIdParams = {
@@ -146,4 +149,15 @@ export type SearchBusinessParams = {
 
 export type SearchBusinessByAddressParams = {
   address: string
+}
+
+/**
+ *
+ * Category related params
+ */
+export type CreateCategoryParams = ImageUrlParams & {
+  verified: boolean
+}
+export type GenerateCategoryTreeParams = ImageUrlParams & {
+  categories: Category[]
 }

@@ -154,15 +154,15 @@ export default class BusinessController {
       userId: user.id,
     })
   }
-  @Delete('address/:addressId')
+  @Delete('address/:id')
   @DeleteBusinessAddress()
   deleteBusinessAddress(
     @Request() req: any,
-    @Param('addressId') addressId: string,
+    @Param('id') id: string,
     @User() user: USER,
   ) {
     return this.businessService.deleteBusinessAddress({
-      id: addressId,
+      id,
       userId: user?.id,
     })
   }
@@ -170,18 +170,18 @@ export default class BusinessController {
   @Get('all')
   @GetBusinesses()
   getAllBusiness() {
-    return this.businessService.getAllBusiness()
+    return this.businessService.getAllBusinesses()
   }
 
   @Get('/category')
   @GetCategoryBusinesses()
   getCategoryBusiness(@Param('categoryrId') categoryId: string) {
-    return this.businessService.getCategoryBusiness({ categoryId })
+    return this.businessService.getCategoryBusinesses({ categoryId })
   }
 
   @Get('search')
   @SearchBusiness()
   searchBusiness(@Query('searchKey') searchKey: string) {
-    return this.businessService.searchBusiness({ searchKey })
+    return this.businessService.searchBusinesses({ searchKey })
   }
 }
