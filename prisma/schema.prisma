@@ -199,35 +199,7 @@ model BusinessContact {
   updatedAt DateTime @default(now())
 }
 
-model Package {
-  id          String      @id @default(uuid())
-  businessId  String
-  packageType PackageType
-  startDate   DateTime
-  endDate     DateTime
-  expired     Boolean
 
-  business Business @relation(fields: [businessId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
-
-model Bill {
-  id            String   @id @default(uuid())
-  businessId    String
-  userId        String
-  date          DateTime
-  amount        Float
-  paymentMethod String
-  reference     String
-
-  business Business @relation(fields: [businessId], references: [id])
-  user     User     @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
 
 model Review {
   id         String @id @default(uuid())
@@ -264,6 +236,35 @@ model Story {
 
   businessId String
   business   Business @relation(fields: [businessId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Package {
+  id          String      @id @default(uuid())
+  businessId  String
+  packageType PackageType
+  startDate   DateTime
+  endDate     DateTime
+  expired     Boolean
+
+  business Business @relation(fields: [businessId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+model Bill {
+  id            String   @id @default(uuid())
+  businessId    String
+  userId        String
+  date          DateTime
+  amount        Float
+  paymentMethod String
+  reference     String
+
+  business Business @relation(fields: [businessId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())

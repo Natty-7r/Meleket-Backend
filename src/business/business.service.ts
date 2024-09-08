@@ -496,6 +496,14 @@ export default class BusinessService {
       data: business,
     }
   }
+  async getAllBusinesses(): Promise<ApiResponse> {
+    const business = await this.prismaService.business.findMany()
+    return {
+      status: 'success',
+      message: 'All buisness fetched successfully',
+      data: business,
+    }
+  }
   async getUserBusinesses({ userId }: UserIdParams): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany({
       where: { ownerId: userId },
@@ -503,14 +511,6 @@ export default class BusinessService {
     return {
       status: 'success',
       message: 'User buisness fetched successfully',
-      data: business,
-    }
-  }
-  async getAllBusinesses(): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany()
-    return {
-      status: 'success',
-      message: 'All buisness fetched successfully',
       data: business,
     }
   }

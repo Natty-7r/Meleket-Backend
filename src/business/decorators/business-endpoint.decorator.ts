@@ -17,7 +17,9 @@ import {
   UpdateBusinessContactSwaggerDefinition,
 } from './business-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
-import muluterStorage, { multerFilter } from 'src/common/util/helpers/multer'
+import muluterStorage, {
+  multerFilter,
+} from 'src/common/util/helpers/multer.helper'
 import { ApiForbiddenResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
 
