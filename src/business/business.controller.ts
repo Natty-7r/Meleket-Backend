@@ -20,7 +20,6 @@ import {
   UpdateBusinessImage,
   UpdateBusinessServices,
   UpdateBusinessServiceImage,
-  GetCategoryBusinesses,
   SearchBusiness,
   GetBusinesses,
   DeleteBusinessService,
@@ -171,12 +170,6 @@ export default class BusinessController {
   @GetBusinesses()
   getAllBusiness() {
     return this.businessService.getAllBusinesses()
-  }
-
-  @Get('/category')
-  @GetCategoryBusinesses()
-  getCategoryBusiness(@Param('categoryrId') categoryId: string) {
-    return this.businessService.getCategoryBusinesses({ categoryId })
   }
 
   @Get('search')
