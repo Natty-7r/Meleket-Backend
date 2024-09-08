@@ -37,7 +37,7 @@ import {
   CategoryIdParams,
   DeleteBusinessAddressParams,
   DeleteBusinessServicesParams,
-  OptionalImageUrlParams,
+  ImageUrlParams,
   SearchBusinessByAddressParams,
   SearchBusinessParams,
   UserIdParams,
@@ -453,7 +453,23 @@ export default class BusinessService {
 
   // fetch related
 
-  async getUserBusiness({ userId }: UserIdParams): Promise<ApiResponse> {
+  async getCategoryBusinesses({
+    categoryId,
+  }: CategoryIdParams): Promise<ApiResponse> {
+    const category = await this.prismaService.category.findFirst({
+      where: { id: categoryId },
+    })
+    if (!category) throw new NotFoundException('Invalid category id ')
+    const business = await this.prismaService.business.findMany({
+      where: { categoryId },
+    })
+    return {
+      status: 'success',
+      message: `${category.name}  buisness fetched successfully`,
+      data: business,
+    }
+  }
+  async getUserBusinesses({ userId }: UserIdParams): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany({
       where: { ownerId: userId },
     })
@@ -463,7 +479,7 @@ export default class BusinessService {
       data: business,
     }
   }
-  async getAllBusiness(): Promise<ApiResponse> {
+  async getAllBusinesses(): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany()
     return {
       status: 'success',
@@ -525,6 +541,7 @@ export default class BusinessService {
       data: businessDetail,
     }
   }
+
 
   async getCategoryBusinesses({
     categoryId,

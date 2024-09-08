@@ -50,6 +50,8 @@ export type CategoryIdParams = {
 export type OptionalImageUrlParams = {
   imageUrl?: string
 }
+
+
 export type ImageUrlParams = {
   imageUrl: string
 }
@@ -157,6 +159,11 @@ export type SearchBusinessByAddressParams = {
  * Category related params
  */
 
-export type GenerateCategoryTreeParams = { categories: Category[] }
+export type CreateCategoryParams = ImageUrlParams & {
+  verified: boolean
+}
+export type GenerateCategoryTreeParams = ImageUrlParams & {
+  categories: Category[]
+}
 
-export type CreateCategoryParams = { verified: boolean }
+
