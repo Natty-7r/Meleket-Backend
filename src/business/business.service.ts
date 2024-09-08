@@ -50,7 +50,7 @@ export default class BusinessService {
 
   // Private method to verify the business ID by querying the database.
   // Throws a BadRequestException if the business is not found.
-  async #verifiyBusinessId({ id }: VerifyBusinessIdParams): Promise<Business> {
+  async verifiyBusinessId({ id }: VerifyBusinessIdParams): Promise<Business> {
     const business = await this.prismaService.business.findFirst({
       where: { id },
     })
@@ -65,7 +65,7 @@ export default class BusinessService {
     userId,
     businessId,
   }: CheckOwnerParams): Promise<Business> {
-    await this.#verifiyBusinessId({ id: businessId }) // Verify the business ID
+    await this.verifiyBusinessId({ id: businessId }) // Verify the business ID
     const business = await this.prismaService.business.findFirst({
       where: { ownerId: userId, id: businessId },
     })

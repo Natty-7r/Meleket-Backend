@@ -1,0 +1,21 @@
+import { ApiResponseProperty } from '@nestjs/swagger'
+
+export default class ReviewResponse {
+  @ApiResponseProperty({ example: '8ada29bb-5c51-4dd9-9819-4fb5175dd5ac' })
+  id: string
+
+  @ApiResponseProperty({ example: 'abebe kebede' })
+  user: string
+
+  @ApiResponseProperty({ example: 'business_uuid' })
+  businessId: string
+
+  @ApiResponseProperty({ example: 'Great service and friendly staff!' })
+  review: string
+
+  @ApiResponseProperty({ example: '2024-09-08T12:34:56.789Z' })
+  createdAt: Date
+
+  @ApiResponseProperty({ example: '2024-09-08T12:34:56.789Z' })
+  updatedAt: Date
+}
