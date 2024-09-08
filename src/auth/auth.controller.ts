@@ -118,6 +118,6 @@ export default class AuthController {
   @DeleteAdminAccount()
   @Delete('/admins/:id')
   deleteAdminAccount(@Param('id') id: string) {
-    return this.authService.deleteAdminAccount(id)
+    return this.authService.deleteAdminAccount({ id })
   }
 }

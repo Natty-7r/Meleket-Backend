@@ -27,6 +27,7 @@ import CreateOTPDto from './dto/create-otp.dto'
 import VerifyUserDto from './dto/verify-user.dto'
 import SmsStrategy from '../message/strategies/sms.strategy'
 import UpdatePasswordDto from './dto/update-passowrd.dto'
+import { BaseIdParams } from 'src/common/util/types/params.type'
 
 @Injectable()
 export default class AuthService {
@@ -444,7 +445,7 @@ export default class AuthService {
     }
   }
 
-  async deleteAdminAccount(id: string) {
+  async deleteAdminAccount({ id }: BaseIdParams) {
     const admin = await this.prismaService.admin.findUnique({
       where: { id },
     })
