@@ -1,4 +1,8 @@
-import { ImageUrlParams } from './../common/util/types/params.type'
+import {
+  CreateCategoryParams,
+  GenerateCategoryTreeParams,
+  OptionalImageUrlParams,
+} from './../common/util/types/params.type'
 import {
   BadRequestException,
   ConflictException,
@@ -13,11 +17,7 @@ import UpdateCategoryDto from './dto/update-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import CreateCategoryDto from './dto/create-category.dto'
 import BusinessService from 'src/business/business.service'
-import {
-  BaseIdParams,
-  CreateCategoryParams,
-  GenerateCategoryTreeParams,
-} from 'src/common/util/types/params.type'
+import { BaseIdParams } from 'src/common/util/types/params.type'
 import { ApiResponse } from 'src/common/util/types/responses.type'
 
 @Injectable()
@@ -148,7 +148,7 @@ export default class CategoryService {
   async updateCategoryImage({
     id,
     imageUrl,
-  }: BaseIdParams & ImageUrlParams): Promise<ApiResponse> {
+  }: BaseIdParams & OptionalImageUrlParams): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })

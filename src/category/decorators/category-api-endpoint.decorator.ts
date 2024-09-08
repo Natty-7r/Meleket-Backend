@@ -4,20 +4,17 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/util/helpers/multer'
 import Roles from 'src/common/decorators/roles.decorator'
 import {
-  CategoryTreeSwaggerDefinition,
   CreateCategorySwaggerDefinition,
   DeleteCategorySwaggerDefinition,
   UpdateCategoryParentSwaggerDefinition,
-  UpdateCategoryImageCategorySwaggerDefinition,
+  UpdateCategoryImageSwaggerDefinition,
   UpdateCategorySwaggerDefinition,
   VerifyCategorySwaggerDefinition,
+  GetCategoriesSwaggerDefinition,
 } from './category-swagger.decorator'
 import { GetCategoryBusinessSwaggerDefinition } from 'src/business/decorators/business-swagger.decorator'
 import { ApiUnauthorizedResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
-
-export const ApiEndpointDecorator = (...optionalDecorators: Function[]) =>
-  applyDecorators(...(optionalDecorators as any))
 
 const AdminRole = () =>
   applyDecorators(
@@ -26,8 +23,8 @@ const AdminRole = () =>
   )
 
 export const CreateCategory = () =>
-  ApiEndpointDecorator(
-    CreateCategorySwaggerDefinition,
+  applyDecorators(
+    CreateCategorySwaggerDefinition(),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
@@ -37,9 +34,9 @@ export const CreateCategory = () =>
   )
 
 export const UpdateCategory = () =>
-  ApiEndpointDecorator(
+  applyDecorators(
     AdminRole(),
-    UpdateCategorySwaggerDefinition,
+    UpdateCategorySwaggerDefinition(),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
@@ -47,9 +44,9 @@ export const UpdateCategory = () =>
     ),
   )
 export const UpdateCategoryImage = () =>
-  ApiEndpointDecorator(
+  applyDecorators(
     AdminRole(),
-    UpdateCategoryImageCategorySwaggerDefinition,
+    UpdateCategoryImageSwaggerDefinition(),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
@@ -59,19 +56,16 @@ export const UpdateCategoryImage = () =>
   )
 
 export const VerifyCategory = () =>
-  ApiEndpointDecorator(AdminRole(), VerifyCategorySwaggerDefinition)
+  applyDecorators(AdminRole(), VerifyCategorySwaggerDefinition())
+
 export const GetCategories = () =>
-  ApiEndpointDecorator(
-    AdminRole(),
-    CategoryTreeSwaggerDefinition(
-      'Get all categories',
-      'Categories fetched successfully',
-    ),
-  )
+  applyDecorators(AdminRole(), GetCategoriesSwaggerDefinition())
+
 export const DeleteCategory = () =>
-  ApiEndpointDecorator(AdminRole(), DeleteCategorySwaggerDefinition())
+  applyDecorators(AdminRole(), DeleteCategorySwaggerDefinition())
+
 export const UpdateCategoryParent = () =>
-  ApiEndpointDecorator(AdminRole(), UpdateCategoryParentSwaggerDefinition())
+  applyDecorators(AdminRole(), UpdateCategoryParentSwaggerDefinition())
 
 export const GetCategoryBusinesses = () =>
   applyDecorators(Public(), GetCategoryBusinessSwaggerDefinition())
