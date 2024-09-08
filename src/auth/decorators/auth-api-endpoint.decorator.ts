@@ -14,6 +14,9 @@ import {
 } from './auth-swagger-definition.decorator'
 import Public from 'src/common/decorators/public.decorator'
 
+export const CreateUserAccount = () =>
+  applyDecorators(Public(), CreateUserAccountSwaggerDefinition())
+
 export const CreateAdminAccount = () =>
   applyDecorators(Roles('SUPER_ADMIN'), CreateAdminSwaggerDefinition())
 
@@ -26,9 +29,6 @@ export const GetAdmins = () =>
   applyDecorators(Roles('SUPER_ADMIN'), GetAdminsSwaggerDefinition())
 
 export const SignIn = () => applyDecorators(Public(), SignInSwaggerDefinition())
-
-export const CreateUserAccount = () =>
-  applyDecorators(Public(), CreateUserAccountSwaggerDefinition())
 
 export const UpdatePassword = () =>
   applyDecorators(Public(), UpdatePasswordSwaggerDefinition())

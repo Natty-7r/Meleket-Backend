@@ -26,6 +26,7 @@ import {
   CreateBusinessAddress,
   UpdateBusinessAddress,
   DeleteBusinessAddress,
+  UpdateBusinessContact,
 } from './decorators/business-endpoint.decorator'
 import { USER } from 'src/common/util/types/base.type'
 import User from 'src/common/decorators/user.decorator'
@@ -34,6 +35,7 @@ import UpdateBusinessServiceDtos from './dto/update-business-service.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessAddressDto from './dto/create-business-address.dto'
 import UpdateBusinessAddressDto from './dto/update-business-address.dto'
+import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 
 @ApiTags('Businesses')
 @Controller('businesses')
@@ -163,6 +165,18 @@ export default class BusinessController {
     return this.businessService.deleteBusinessAddress({
       id,
       userId: user?.id,
+    })
+  }
+
+  @Put('contact')
+  @UpdateBusinessContact()
+  updateBusinessContact(
+    @Body() updateBusinessContactDto: UpdateBusinessContactDto,
+    @User() user: USER,
+  ) {
+    return this.businessService.updateBusinessContact({
+      ...updateBusinessContactDto,
+      userId: user.id,
     })
   }
 

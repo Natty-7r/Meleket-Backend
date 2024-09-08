@@ -38,10 +38,10 @@ import {
   DeleteBusinessAddressParams,
   DeleteBusinessServicesParams,
   ImageUrlParams,
-  SearchBusinessByAddressParams,
   SearchBusinessParams,
   UserIdParams,
 } from './../common/util/types/params.type'
+import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 @Injectable()
 export default class BusinessService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -186,6 +186,7 @@ export default class BusinessService {
         ownerId: createBusinessDto.userId,
         name: createBusinessDto.name.toLowerCase().trim(),
         description: createBusinessDto.description.toLowerCase().trim(),
+        contact: {},
       },
     })
 
@@ -451,6 +452,32 @@ export default class BusinessService {
     }
   }
 
+  // bussiness contact related
+
+  async updateBusinessContact({
+    businessId,
+    userId,
+    ...updateBusinessContactDto
+  }: UpdateBusinessContactDto & UserIdParams): Promise<ApiResponse> {
+    const b = await this.#checkOwner({
+      userId,
+      businessId,
+    })
+    const updatedBuinessContact =
+      await this.prismaService.businessContact.update({
+        where: { businessId },
+        data: {
+          ...updateBusinessContactDto,
+        },
+      })
+    return {
+      status: 'success',
+      message: 'Buisness contact updated successfully',
+      data: {
+        ...updatedBuinessContact,
+      },
+    }
+  }
   // fetch related
 
   async getCategoryBusinesses({

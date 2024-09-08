@@ -14,6 +14,7 @@ import {
   CreateBusinessAddressSwaggerDefinition,
   UpdateBusinessAddressSwaggerDefinition,
   DeleteBusinessAddressSwaggerDefinition,
+  UpdateBusinessContactSwaggerDefinition,
 } from './business-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/util/helpers/multer'
@@ -121,3 +122,8 @@ export const UpdateBusinessAddress = () =>
 
 export const DeleteBusinessAddress = () =>
   applyDecorators(ClientRole(), DeleteBusinessAddressSwaggerDefinition())
+
+// bussiness contact
+
+export const UpdateBusinessContact = () =>
+  applyDecorators(ClientRole(), UpdateBusinessContactSwaggerDefinition())

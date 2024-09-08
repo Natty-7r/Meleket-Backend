@@ -178,3 +178,16 @@ export const DeleteBusinessAddressSwaggerDefinition = () =>
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
     ApiParam({ description: 'address Id', name: 'id' }),
   )
+
+// business contact
+
+export const UpdateBusinessContactSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Update business contact info' }),
+    ApiResponse({
+      description: 'Business contact updated successfully',
+      type: BusinessAddressResponse,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid business Id' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
