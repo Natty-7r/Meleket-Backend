@@ -1,4 +1,3 @@
-import { tolowercaseCustom } from './../common/util/helpers/string-util'
 import {
   BadRequestException,
   ConflictException,
@@ -50,7 +49,17 @@ export default class BusinessService {
 
   // Private method to verify the business ID by querying the database.
   // Throws a BadRequestException if the business is not found.
-  async #verifiyBusinessId({ id }: VerifyBusinessIdParams): Promise<Business> {
+
+  async #checkUserProfileLevele({ userId }: UserIdParams): Promise<boolean> {
+    const user = await this.prismaService.user.findFirst({
+      where: { id: userId },
+    })
+
+    if (user.profileLevel !== 'VERIFIED')
+      throw new ForbiddenException('Unverfied user cannot create business ')
+    return true
+  }
+  async verifiyBusinessId({ id }: VerifyBusinessIdParams): Promise<Business> {
     const business = await this.prismaService.business.findFirst({
       where: { id },
     })
@@ -65,7 +74,7 @@ export default class BusinessService {
     userId,
     businessId,
   }: CheckOwnerParams): Promise<Business> {
-    await this.#verifiyBusinessId({ id: businessId }) // Verify the business ID
+    await this.verifiyBusinessId({ id: businessId }) // Verify the business ID
     const business = await this.prismaService.business.findFirst({
       where: { ownerId: userId, id: businessId },
     })
@@ -80,7 +89,12 @@ export default class BusinessService {
     name,
   }: CheckBusinessNameParams): Promise<Business> {
     const business = await this.prismaService.business.findFirst({
-      where: { name: name.toLowerCase().trim() },
+      where: {
+        name: {
+          equals: name,
+          mode: 'insensitive',
+        },
+      },
     })
     if (business) throw new ConflictException('Business name is taken')
     return business
@@ -104,14 +118,16 @@ export default class BusinessService {
           some: {
             OR: [
               {
-                country: { contains: tolowercaseCustom(country) },
-                city: { contains: tolowercaseCustom(city) },
-                state: { contains: tolowercaseCustom(state) },
+                country: { contains: country, mode: 'insensitive' },
+                city: { contains: city, mode: 'insensitive' },
+                state: { contains: state, mode: 'insensitive' },
                 streetAddress: {
-                  contains: tolowercaseCustom(streetAddress || ''),
+                  contains: streetAddress || '',
+                  mode: 'insensitive',
                 },
                 specificLocation: {
-                  contains: tolowercaseCustom(specificLocation || ''),
+                  contains: specificLocation || '',
+                  mode: 'insensitive',
                 },
               },
             ],
@@ -132,7 +148,19 @@ export default class BusinessService {
     name,
   }: CheckBusinessServiceNameParams): Promise<BussinesServiceModelType> {
     const service = await this.prismaService.bussinessService.findFirst({
-      where: { businessId, name: name.toLowerCase().trim() },
+      where: {
+        AND: [
+          {
+            businessId,
+          },
+          {
+            name: {
+              equals: name,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
     })
     if (service)
       throw new ConflictException('Service name exists in the business')
@@ -163,9 +191,40 @@ export default class BusinessService {
     return address
   }
 
-  async createBusiness(
-    createBusinessDto: CreateBusinessDto & CreateBusinessParams,
-  ): Promise<ApiResponse> {
+  async calculateRatingSummary({ id }: BaseIdParams) {
+    const ratings = await this.prismaService.rating.findMany({
+      where: {
+        businessId: id,
+      },
+    })
+
+    const averageRating =
+      ratings.reduce((sum, rating) => {
+        return sum + rating.rateValue
+      }, 0.0) / ratings.length
+
+    const ratingSummary = {
+      1: ratings.filter((rating) => rating.rateValue === 1).length,
+      2: ratings.filter((rating) => rating.rateValue === 2).length,
+      3: ratings.filter((rating) => rating.rateValue === 3).length,
+      4: ratings.filter((rating) => rating.rateValue === 4).length,
+      5: ratings.filter((rating) => rating.rateValue === 5).length,
+    }
+
+    return await this.prismaService.business.update({
+      where: { id },
+      data: {
+        averageRating,
+        ratingSummary: JSON.stringify(ratingSummary),
+      },
+    })
+  }
+
+  async createBusiness({
+    userId,
+    ...createBusinessDto
+  }: CreateBusinessDto & CreateBusinessParams): Promise<ApiResponse> {
+    await this.#checkUserProfileLevele({ userId })
     await this.#checkBusinessName({ name: createBusinessDto.name })
 
     const businessMainImage = createBusinessDto.mainImage
@@ -183,10 +242,18 @@ export default class BusinessService {
       data: {
         ...createBusinessDto,
         mainImageUrl: businessMainImage.image,
-        ownerId: createBusinessDto.userId,
-        name: createBusinessDto.name.toLowerCase().trim(),
-        description: createBusinessDto.description.toLowerCase().trim(),
+        ownerId: userId,
+        name: createBusinessDto.name,
+        description: createBusinessDto.description,
         contact: {},
+        averageRating: 0,
+        ratingSummary: JSON.stringify({
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+        }),
       },
     })
 
@@ -230,8 +297,8 @@ export default class BusinessService {
     const updatedBusiness = await this.prismaService.business.update({
       where: { id },
       data: {
-        name: name.toLowerCase().trim() || business.name,
-        description: description.toLowerCase().trim() || business.description,
+        name: name || business.name,
+        description: description || business.description,
       },
     })
 
@@ -264,9 +331,9 @@ export default class BusinessService {
 
     const buinessService = await this.prismaService.bussinessService.create({
       data: {
-        name: name.toLowerCase().trim(),
+        name: name,
         businessId,
-        description: description.toLowerCase().trim(),
+        description: description,
         specifications: specifications as any,
         image: imageUrl,
       },
@@ -316,9 +383,8 @@ export default class BusinessService {
       await this.prismaService.bussinessService.update({
         where: { id },
         data: {
-          name: name.toLowerCase().trim() || businessService.description,
-          description:
-            description.toLowerCase().trim() || businessService.description,
+          name: name || businessService.description,
+          description: description || businessService.description,
           specifications:
             specifications || (businessService.specifications as any),
         },
@@ -337,7 +403,6 @@ export default class BusinessService {
   }
   async deleteBusinessServices({
     id,
-
     userId,
   }: DeleteBusinessServicesParams): Promise<BareApiResponse> {
     const { businessId } = await this.#verifyBusinessServiceId({ id })
@@ -381,11 +446,11 @@ export default class BusinessService {
     const buinessAddress = await this.prismaService.businessAddress.create({
       data: {
         businessId,
-        country: tolowercaseCustom(country),
-        state: tolowercaseCustom(state),
-        city: tolowercaseCustom(city),
-        streetAddress: tolowercaseCustom(streetAddress) || undefined,
-        specificLocation: tolowercaseCustom(specificLocation) || undefined,
+        country: country,
+        state: state,
+        city: city,
+        streetAddress: streetAddress || undefined,
+        specificLocation: specificLocation || undefined,
       },
     })
     return {
@@ -417,12 +482,11 @@ export default class BusinessService {
       await this.prismaService.businessAddress.update({
         where: { id: addressId, businessId },
         data: {
-          country: country && tolowercaseCustom(country),
-          state: state && tolowercaseCustom(state),
-          city: city && tolowercaseCustom(city),
-          streetAddress: streetAddress && tolowercaseCustom(streetAddress),
-          specificLocation:
-            specificLocation && tolowercaseCustom(specificLocation),
+          country: country && country,
+          state: state && state,
+          city: city && city,
+          streetAddress: streetAddress && streetAddress,
+          specificLocation: specificLocation && specificLocation,
         },
       })
     return {
@@ -496,6 +560,14 @@ export default class BusinessService {
       data: business,
     }
   }
+  async getAllBusinesses(): Promise<ApiResponse> {
+    const business = await this.prismaService.business.findMany()
+    return {
+      status: 'success',
+      message: 'All buisness fetched successfully',
+      data: business,
+    }
+  }
   async getUserBusinesses({ userId }: UserIdParams): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany({
       where: { ownerId: userId },
@@ -503,14 +575,6 @@ export default class BusinessService {
     return {
       status: 'success',
       message: 'User buisness fetched successfully',
-      data: business,
-    }
-  }
-  async getAllBusinesses(): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany()
-    return {
-      status: 'success',
-      message: 'All buisness fetched successfully',
       data: business,
     }
   }
@@ -526,12 +590,16 @@ export default class BusinessService {
           },
         },
         ratings: true,
-        reviews: true,
+        reviews: {
+          take: 10,
+          orderBy: [{ createdAt: 'desc' }],
+        },
         address: true,
         contact: true,
         services: true,
       },
     })
+
     return {
       status: 'success',
       message: 'All buisness fetched successfully',
@@ -577,12 +645,14 @@ export default class BusinessService {
         OR: [
           {
             name: {
-              contains: searchKey.toLowerCase().trim(),
+              contains: searchKey,
+              mode: 'insensitive',
             },
           },
           {
             description: {
-              contains: searchKey.toLowerCase().trim(),
+              contains: searchKey,
+              mode: 'insensitive',
             },
           },
           {
@@ -592,18 +662,23 @@ export default class BusinessService {
                   {
                     city: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                     country: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                     specificLocation: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                     state: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                     streetAddress: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                   },
                 ],

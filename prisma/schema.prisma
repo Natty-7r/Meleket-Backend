@@ -127,27 +127,29 @@ model Category {
 }
 
 model Business {
-  id           String @id @default(uuid())
+  id           String                  @id @default(uuid())
   ownerId      String
   categoryId   String
   name         String
   description  String
   templateId   String
   mainImageUrl String
-  owner        User   @relation("UserOwnsBusiness", fields: [ownerId], references: [id]) // New relation
+  owner        User                    @relation("UserOwnsBusiness", fields: [ownerId], references: [id]) // New relation
+  visibility   BusinessVisiblityStatus @default(CREATED)
 
   services BussinessService[]
   address  BusinessAddress[]
   contact  BusinessContact?
 
-  followers  User[]                  @relation("UserFollowsBusiness")
-  visibility BusinessVisiblityStatus @default(CREATED)
-  category   Category                @relation(fields: [categoryId], references: [id])
-  packages   Package[]
-  reviews    Review[]
-  ratings    Rating[]
-  bills      Bill[]
-  stories    Story[]
+  category      Category  @relation(fields: [categoryId], references: [id])
+  followers     User[]    @relation("UserFollowsBusiness")
+  packages      Package[]
+  reviews       Review[]
+  ratings       Rating[]
+  ratingSummary Json
+  averageRating Float
+  bills         Bill[]
+  stories       Story[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -199,6 +201,46 @@ model BusinessContact {
   updatedAt DateTime @default(now())
 }
 
+model Review {
+  id         String @id @default(uuid())
+  userId     String
+  businessId String
+  review     String
+
+  user     User     @relation(fields: [userId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Rating {
+  id         String @id @default(uuid())
+  userId     String
+  businessId String
+  rateValue     Int
+
+  user     User     @relation(fields: [userId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Story {
+  id          String           @id @default(uuid())
+  postDate    DateTime
+  contentType StoryContentType
+  text        String
+  image       String?
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
 model Package {
   id          String      @id @default(uuid())
   businessId  String
@@ -224,46 +266,6 @@ model Bill {
 
   business Business @relation(fields: [businessId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
-
-model Review {
-  id         String @id @default(uuid())
-  userId     String
-  businessId String
-  review     String
-
-  user     User     @relation(fields: [userId], references: [id])
-  business Business @relation(fields: [businessId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
-
-model Rating {
-  id         String @id @default(uuid())
-  userId     String
-  businessId String
-  rating     Int
-
-  user     User     @relation(fields: [userId], references: [id])
-  business Business @relation(fields: [businessId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
-
-model Story {
-  id          String           @id @default(uuid())
-  postDate    DateTime
-  contentType StoryContentType
-  text        String
-  image       String?
-
-  businessId String
-  business   Business @relation(fields: [businessId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())

@@ -13,6 +13,7 @@ import CategoryModule from './category/category.module'
 import configuration from './config/configuration'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
+import UserModule from './user/user.module'
 import BusinessModule from './business/business.module'
 
 @Module({
@@ -31,6 +32,7 @@ import BusinessModule from './business/business.module'
     AuthModule,
     MessageModule,
     BusinessModule,
+    UserModule,
   ],
 
   providers: [
