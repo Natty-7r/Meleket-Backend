@@ -229,7 +229,6 @@ model Rating {
 
 model Story {
   id          String           @id @default(uuid())
-  postDate    DateTime
   contentType StoryContentType
   text        String
   image       String?
