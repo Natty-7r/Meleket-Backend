@@ -218,7 +218,7 @@ model Rating {
   id         String @id @default(uuid())
   userId     String
   businessId String
-  rating     Int
+  rateValue     Int
 
   user     User     @relation(fields: [userId], references: [id])
   business Business @relation(fields: [businessId], references: [id])
