@@ -11,7 +11,8 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger'
-import ReviewResponse from '../responses/review-respone'
+import ReviewResponse from '../responses/review-response'
+import RatingResponse from '../responses/rating.response'
 
 export const AddReviewSwaggerDefinition = () =>
   applyDecorators(
@@ -48,4 +49,18 @@ export const DeleteReviewSwaggerDefinition = () =>
     ApiNotFoundResponse({ description: 'Review not found ' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
     ApiParam({ name: 'id', description: 'review ID' }),
+  )
+
+// rating related
+
+export const AddRatingSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Rate a bussines' }),
+    ApiCreatedResponse({
+      description: 'Rate addedsuccessfully',
+      type: RatingResponse,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid business ID' }),
+    ApiForbiddenResponse({ description: 'Owner cannot rate own business  ' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
   )

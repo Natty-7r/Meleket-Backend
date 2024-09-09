@@ -1,6 +1,7 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
 import Roles from 'src/common/decorators/roles.decorator'
 import {
+  AddRatingSwaggerDefinition,
   AddReviewSwaggerDefinition,
   DeleteReviewSwaggerDefinition,
   UpdateReviewSwaggerDefinition,
@@ -23,3 +24,6 @@ export const UpdateReview = () =>
 
 export const DeleteReview = () =>
   applyDecorators(ClientRole(), DeleteReviewSwaggerDefinition())
+
+export const AddRating = () =>
+  applyDecorators(ClientRole(), AddRatingSwaggerDefinition())

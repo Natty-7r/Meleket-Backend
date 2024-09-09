@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -10,6 +9,8 @@ import AddReviewDto from './dto/add-review.dto'
 import { BaseIdParams, UserIdParams } from 'src/common/util/types/params.type'
 import BusinessService from 'src/business/business.service'
 import { ApiResponse } from 'src/common/util/types/responses.type'
+import AddRatingDto from './dto/add-rating.dto'
+import EditReviewDto from './dto/edit-review.dto'
 
 @Injectable()
 export default class UserService {
@@ -51,21 +52,22 @@ export default class UserService {
 
   async updateReview({
     userId,
-    businessId,
+    id,
     review: reviewText,
-  }: AddReviewDto & UserIdParams): Promise<ApiResponse> {
-    await this.businessSevice.verifiyBusinessId({ id: businessId })
-
+  }: EditReviewDto & UserIdParams): Promise<ApiResponse> {
     let review = await this.prismaService.review.findFirst({
       where: {
-        businessId,
+        id,
         userId,
       },
     })
 
     if (!review) throw new NotFoundException('Required review not found ')
-    review = await this.prismaService.review.create({
-      data: { userId, businessId, review: reviewText },
+    review = await this.prismaService.review.update({
+      where: {
+        id: review.id,
+      },
+      data: { review: reviewText },
     })
     return {
       status: 'success',
@@ -92,6 +94,39 @@ export default class UserService {
       status: 'success',
       message: `review deleted    successfully`,
       data: review,
+    }
+  }
+  // Rating related
+  async addRating({
+    userId,
+    businessId,
+    rateValue,
+  }: AddRatingDto & UserIdParams): Promise<ApiResponse> {
+    const business = await this.businessSevice.verifiyBusinessId({
+      id: businessId,
+    })
+    if (business.ownerId === userId)
+      throw new ForbiddenException('Owner cannot rate own business  ')
+    let rating = await this.prismaService.rating.findFirst({
+      where: {
+        businessId,
+        userId,
+      },
+    })
+
+    if (rating)
+      rating = await this.prismaService.rating.update({
+        where: { id: rating.id },
+        data: { rateValue },
+      })
+    rating = await this.prismaService.rating.create({
+      data: { userId, businessId, rateValue },
+    })
+    this.businessSevice.calculateRatingSummary({ id: businessId })
+    return {
+      status: 'success',
+      message: `Rating added successfully`,
+      data: rating,
     }
   }
 }

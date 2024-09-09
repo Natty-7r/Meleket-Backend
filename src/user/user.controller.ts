@@ -4,11 +4,14 @@ import { USER } from 'src/common/util/types/base.type'
 import User from 'src/common/decorators/user.decorator'
 import AddReviewDto from './dto/add-review.dto'
 import {
+  AddRating,
   AddReveiw,
   DeleteReview,
   UpdateReview,
 } from './decorators/user-endpoint.decorator'
 import { ApiTags } from '@nestjs/swagger'
+import EditReviewDto from './dto/edit-review.dto'
+import AddRatingDto from './dto/add-rating.dto'
 
 @ApiTags('User')
 @Controller('user')
@@ -26,9 +29,9 @@ export default class UserController {
 
   @Put('review')
   @UpdateReview()
-  updateReview(@Body() addReviewDto: AddReviewDto, @User() user: USER) {
+  updateReview(@Body() editReviewDto: EditReviewDto, @User() user: USER) {
     return this.userService.updateReview({
-      ...addReviewDto,
+      ...editReviewDto,
       userId: user.id,
     })
   }
@@ -37,6 +40,14 @@ export default class UserController {
   deleteReview(@Param('id') id: string, @User() user: USER) {
     return this.userService.deleteReview({
       id,
+      userId: user.id,
+    })
+  }
+  @AddRating()
+  @Post('rating')
+  addRaging(@Body() addRatingDto: AddRatingDto, @User() user: USER) {
+    return this.userService.addRating({
+      ...addRatingDto,
       userId: user.id,
     })
   }
