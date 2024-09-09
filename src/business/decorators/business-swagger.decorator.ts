@@ -4,6 +4,7 @@ import {
   ApiConflictResponse,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
@@ -15,6 +16,7 @@ import BusinessResponse from '../responses/business.response'
 import BusinessServicerResponse from '../responses/business-service.response'
 import BusinessDetailResponse from '../responses/business-detail.response'
 import BusinessAddressResponse from '../responses/business-address.response'
+import StoryResponse from '../responses/story.response'
 
 export const CreateBusinessSwaggerDefinition = () =>
   applyDecorators(
@@ -190,4 +192,62 @@ export const UpdateBusinessContactSwaggerDefinition = () =>
     }),
     ApiBadRequestResponse({ description: 'Invalid business Id' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+
+//story related
+export const AddStorySwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Add  story ' }),
+    ApiCreatedResponse({
+      description: 'story  added successfully',
+      type: StoryResponse,
+    }),
+    ApiForbiddenResponse({ description: 'Only allowed for business owner ' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiConsumes('image'),
+  )
+export const UpdatedStorySwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Update  story ' }),
+    ApiCreatedResponse({
+      description: 'story updated successfully',
+      type: StoryResponse,
+    }),
+    ApiForbiddenResponse({ description: 'Only allowed for business owner ' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiConsumes('image'),
+  )
+
+export const DeleteStorySwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Delte story ' }),
+    ApiCreatedResponse({
+      description: 'story deleted successfully',
+      type: String,
+    }),
+    ApiForbiddenResponse({ description: 'Only allowed for business owner ' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiConsumes('image'),
+  )
+
+export const GetAllStoriesSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Fetch stories ' }),
+    ApiCreatedResponse({
+      description: 'stories fetched successfully',
+      type: Array<StoryResponse>,
+    }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiConsumes('image'),
+  )
+
+export const GetBusinessStoriesSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Fetch business stories ' }),
+    ApiCreatedResponse({
+      description: 'Business stories fetched successfully',
+      type: Array<StoryResponse>,
+    }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiParam({ name: 'bussinessId', description: 'bussiness id ' }),
   )

@@ -16,6 +16,7 @@ import {
   Business,
   BusinessAddress,
   BussinessService as BussinesServiceModelType,
+  Story,
 } from '@prisma/client'
 import {
   ApiResponse,
@@ -31,7 +32,6 @@ import {
   VerifyBusinessAddressIdParams,
   VerifyBusinessIdParams,
   VerifyBusinessServiceIdParams,
-  BaseIdParams,
   BusinessIdParams,
   CategoryIdParams,
   DeleteBusinessAddressParams,
@@ -41,6 +41,10 @@ import {
   UserIdParams,
 } from './../common/util/types/params.type'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
+import CreateStoryDto from './dto/create-story.dto'
+import { validateStory } from 'src/common/util/validators/business.validator'
+import UpdateStoryDto from './dto/update-store.dto'
+import { BaseIdParams } from '../common/util/types/params.type'
 @Injectable()
 export default class BusinessService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -189,6 +193,14 @@ export default class BusinessService {
     })
     if (!address) throw new NotFoundException('Invalid business Address ID')
     return address
+  }
+
+  async #verifyBusinessStoryId({ id }: BaseIdParams): Promise<Story> {
+    const story = await this.prismaService.story.findFirst({
+      where: { id },
+    })
+    if (!story) throw new NotFoundException('Invalid story ID')
+    return story
   }
 
   async calculateRatingSummary({ id }: BaseIdParams) {
@@ -822,6 +834,91 @@ export default class BusinessService {
       status: 'success',
       message: 'followed  buisness feteched successfully',
       data: businesses,
+    }
+  }
+  // story related
+
+  async addStory({
+    businessId,
+    userId,
+    ...createStoryDto
+  }: CreateStoryDto & UserIdParams): Promise<ApiResponse> {
+    await this.#checkOwner({
+      userId,
+      businessId,
+    })
+    validateStory({ ...createStoryDto, businessId })
+    const story = await this.prismaService.story.create({
+      data: {
+        businessId,
+        ...createStoryDto,
+      },
+    })
+
+    return {
+      status: 'success',
+      message: 'story added successfully',
+      data: story,
+    }
+  }
+  async updateStory({
+    userId,
+    id,
+    ...createStoryDto
+  }: UpdateStoryDto & UserIdParams): Promise<ApiResponse> {
+    let story = await this.#verifyBusinessStoryId({
+      id,
+    })
+    await this.#checkOwner({ businessId: story.businessId, userId })
+    story = await this.prismaService.story.update({
+      where: { id },
+      data: {
+        ...createStoryDto,
+      },
+    })
+
+    return {
+      status: 'success',
+      message: 'story updated  successfully',
+      data: story,
+    }
+  }
+  async deleteStory({
+    userId,
+    id,
+  }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
+    let story = await this.#verifyBusinessStoryId({
+      id,
+    })
+    await this.#checkOwner({ businessId: story.businessId, userId })
+
+    story = await this.prismaService.story.delete({
+      where: { id },
+    })
+    return {
+      status: 'success',
+      message: 'story deleted  successfully',
+    }
+  }
+  async getStories(): Promise<ApiResponse> {
+    const stories = await this.prismaService.story.findMany({
+      orderBy: [{ createdAt: 'desc' }],
+    })
+    return {
+      status: 'success',
+      message: 'story fetched  successfully',
+      data: stories,
+    }
+  }
+  async getBusinessStories({ id }: BaseIdParams): Promise<ApiResponse> {
+    const stories = await this.prismaService.story.findMany({
+      where: { id },
+      orderBy: [{ createdAt: 'desc' }],
+    })
+    return {
+      status: 'success',
+      message: 'story fetched  successfully',
+      data: stories,
     }
   }
 }
