@@ -6,9 +6,16 @@ import {
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import AddReviewDto from './dto/add-review.dto'
-import { BaseIdParams, UserIdParams } from 'src/common/util/types/params.type'
+import {
+  BaseIdParams,
+  BusinessIdParams,
+  UserIdParams,
+} from 'src/common/util/types/params.type'
 import BusinessService from 'src/business/business.service'
-import { ApiResponse } from 'src/common/util/types/responses.type'
+import {
+  ApiResponse,
+  BareApiResponse,
+} from 'src/common/util/types/responses.type'
 import AddRatingDto from './dto/add-rating.dto'
 import EditReviewDto from './dto/edit-review.dto'
 
@@ -144,5 +151,21 @@ export default class UserService {
       message: `Rating added successfully`,
       data: rating,
     }
+  }
+  // following
+  async followBussiness({
+    id,
+    businessId,
+  }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
+    return this.businessSevice.addFollower({ id: businessId, userId: id })
+  }
+  async unFollowBussiness({
+    id,
+    businessId,
+  }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
+    return this.businessSevice.removeFollower({ id: businessId, userId: id })
+  }
+  async getFollowedBussiness({ id }: BaseIdParams): Promise<ApiResponse> {
+    return this.businessSevice.getFollowerBusiness({ userId: id })
   }
 }
