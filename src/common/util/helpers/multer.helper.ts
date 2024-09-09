@@ -14,6 +14,7 @@ export const multerFilter = ({
   maxSize = 5,
   optional,
 }: MulterFilterConfig) => {
+  console.log(fileType)
   const mimeTypes: { [key in FileType]: string[] } = {
     image: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
     pdf: ['application/pdf'],
