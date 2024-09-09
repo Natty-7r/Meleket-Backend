@@ -19,6 +19,18 @@ export default class UserService {
     private readonly businessSevice: BusinessService,
   ) {}
 
+  // helpers
+
+  async #checkProfileLevel({ id }: BaseIdParams) {
+    const user = await this.prismaService.user.findFirst({
+      where: { id },
+    })
+
+    if (user.profileLevel !== 'VERIFIED')
+      throw new ForbiddenException('Not allowed for unverfied user   ')
+    return true
+  }
+
   // Review related
 
   async addReview({
@@ -102,6 +114,7 @@ export default class UserService {
     businessId,
     rateValue,
   }: AddRatingDto & UserIdParams): Promise<ApiResponse> {
+    await this.#checkProfileLevel({ id: userId })
     const business = await this.businessSevice.verifiyBusinessId({
       id: businessId,
     })

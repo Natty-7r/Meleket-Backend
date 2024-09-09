@@ -49,6 +49,16 @@ export default class BusinessService {
 
   // Private method to verify the business ID by querying the database.
   // Throws a BadRequestException if the business is not found.
+
+  async #checkUserProfileLevele({ userId }: UserIdParams): Promise<boolean> {
+    const user = await this.prismaService.user.findFirst({
+      where: { id: userId },
+    })
+
+    if (user.profileLevel !== 'VERIFIED')
+      throw new ForbiddenException('Unverfied user cannot create business ')
+    return true
+  }
   async verifiyBusinessId({ id }: VerifyBusinessIdParams): Promise<Business> {
     const business = await this.prismaService.business.findFirst({
       where: { id },
@@ -210,9 +220,11 @@ export default class BusinessService {
     })
   }
 
-  async createBusiness(
-    createBusinessDto: CreateBusinessDto & CreateBusinessParams,
-  ): Promise<ApiResponse> {
+  async createBusiness({
+    userId,
+    ...createBusinessDto
+  }: CreateBusinessDto & CreateBusinessParams): Promise<ApiResponse> {
+    await this.#checkUserProfileLevele({ userId })
     await this.#checkBusinessName({ name: createBusinessDto.name })
 
     const businessMainImage = createBusinessDto.mainImage
@@ -230,7 +242,7 @@ export default class BusinessService {
       data: {
         ...createBusinessDto,
         mainImageUrl: businessMainImage.image,
-        ownerId: createBusinessDto.userId,
+        ownerId: userId,
         name: createBusinessDto.name,
         description: createBusinessDto.description,
         contact: {},
@@ -391,7 +403,6 @@ export default class BusinessService {
   }
   async deleteBusinessServices({
     id,
-
     userId,
   }: DeleteBusinessServicesParams): Promise<BareApiResponse> {
     const { businessId } = await this.#verifyBusinessServiceId({ id })
