@@ -20,7 +20,7 @@ export default class UserService {
 
   // Review related
 
-  async addRevivew({
+  async addReview({
     userId,
     businessId,
     review: reviewText,
@@ -49,7 +49,7 @@ export default class UserService {
     }
   }
 
-  async updateRevivew({
+  async updateReview({
     userId,
     businessId,
     review: reviewText,

@@ -18,7 +18,7 @@ export default class UserController {
   @Post('review')
   @AddReveiw()
   addReview(@Body() addReviewDto: AddReviewDto, @User() user: USER) {
-    return this.userService.addRevivew({
+    return this.userService.addReview({
       ...addReviewDto,
       userId: user.id,
     })
@@ -27,7 +27,7 @@ export default class UserController {
   @Put('review')
   @UpdateReview()
   updateReview(@Body() addReviewDto: AddReviewDto, @User() user: USER) {
-    return this.userService.updateRevivew({
+    return this.userService.updateReview({
       ...addReviewDto,
       userId: user.id,
     })
