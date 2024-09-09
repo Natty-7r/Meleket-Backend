@@ -4,6 +4,9 @@ import {
   AddRatingSwaggerDefinition,
   AddReviewSwaggerDefinition,
   DeleteReviewSwaggerDefinition,
+  FollowBusinessSwaggerDefinition,
+  FollowedBusinessSwaggerDefinition,
+  UnFollowBusinessSwaggerDefinition,
   UpdateReviewSwaggerDefinition,
 } from './user-swagger.decorator'
 import { ApiForbiddenResponse } from '@nestjs/swagger'
@@ -27,3 +30,14 @@ export const DeleteReview = () =>
 
 export const AddRating = () =>
   applyDecorators(ClientRole(), AddRatingSwaggerDefinition())
+
+// follow related
+
+export const FollowBusiness = () =>
+  applyDecorators(ClientRole(), FollowBusinessSwaggerDefinition())
+
+export const UnFollowBusiness = () =>
+  applyDecorators(ClientRole(), UnFollowBusinessSwaggerDefinition())
+
+export const FollowedBusinesses = () =>
+  applyDecorators(ClientRole(), FollowedBusinessSwaggerDefinition())

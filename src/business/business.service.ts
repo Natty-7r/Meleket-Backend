@@ -561,7 +561,25 @@ export default class BusinessService {
     }
   }
   async getAllBusinesses(): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany()
+    const business = await this.prismaService.business.findMany({
+      select: {
+        name: true,
+        mainImageUrl: true,
+        description: true,
+        averageRating: true,
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            reviews: true,
+            followers: true,
+          },
+        },
+      },
+    })
     return {
       status: 'success',
       message: 'All buisness fetched successfully',
@@ -571,6 +589,23 @@ export default class BusinessService {
   async getUserBusinesses({ userId }: UserIdParams): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany({
       where: { ownerId: userId },
+      select: {
+        name: true,
+        mainImageUrl: true,
+        description: true,
+        averageRating: true,
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            reviews: true,
+            followers: true,
+          },
+        },
+      },
     })
     return {
       status: 'success',
@@ -583,14 +618,12 @@ export default class BusinessService {
     const businessDetail = await this.prismaService.business.findFirst({
       where: { id },
       select: {
-        followers: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
         ratings: true,
         reviews: {
+          take: 10,
+          orderBy: [{ createdAt: 'desc' }],
+        },
+        followers: {
           take: 10,
           orderBy: [{ createdAt: 'desc' }],
         },
@@ -687,6 +720,23 @@ export default class BusinessService {
           },
         ],
       },
+      select: {
+        name: true,
+        mainImageUrl: true,
+        description: true,
+        averageRating: true,
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            reviews: true,
+            followers: true,
+          },
+        },
+      },
     })
     if (!business || business.length == 0)
       throw new NotFoundException(`no buisness for  ${searchKey} key `)
@@ -694,6 +744,84 @@ export default class BusinessService {
       status: 'success',
       message: `buisness for ${searchKey} key fetched successfully`,
       data: business,
+    }
+  }
+  // follow related
+  async addFollower({
+    id,
+    userId,
+  }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
+    await this.verifiyBusinessId({ id })
+
+    await this.prismaService.business.update({
+      where: { id },
+      data: {
+        followers: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    })
+
+    return {
+      status: 'success',
+      message: 'User followed buisness  successfully',
+    }
+  }
+  async removeFollower({
+    id,
+    userId,
+  }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
+    await this.verifiyBusinessId({ id })
+
+    await this.prismaService.business.update({
+      where: { id },
+      data: {
+        followers: {
+          disconnect: {
+            id: userId,
+          },
+        },
+      },
+    })
+
+    return {
+      status: 'success',
+      message: 'User unfollowed buisness successfully',
+    }
+  }
+  async getFollowerBusiness({ userId }: UserIdParams): Promise<ApiResponse> {
+    const businesses = await this.prismaService.business.findMany({
+      where: {
+        followers: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+      select: {
+        name: true,
+        mainImageUrl: true,
+        description: true,
+        averageRating: true,
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            reviews: true,
+            followers: true,
+          },
+        },
+      },
+    })
+    return {
+      status: 'success',
+      message: 'followed  buisness feteched successfully',
+      data: businesses,
     }
   }
 }

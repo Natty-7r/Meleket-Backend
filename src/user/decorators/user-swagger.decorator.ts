@@ -57,10 +57,45 @@ export const AddRatingSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ description: 'Rate a bussines' }),
     ApiCreatedResponse({
-      description: 'Rate addedsuccessfully',
+      description: 'Rate added successfully',
       type: RatingResponse,
     }),
     ApiBadRequestResponse({ description: 'Invalid business ID' }),
     ApiForbiddenResponse({ description: 'Owner cannot rate own business  ' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+
+// follow related
+export const FollowBusinessSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Follow a bussines' }),
+    ApiCreatedResponse({
+      description: 'Bussiness followed successfully ',
+      type: String,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid business ID' }),
+    ApiForbiddenResponse({
+      description: 'Owner cannot follow  own business  ',
+    }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+
+export const UnFollowBusinessSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Unfollow a bussines' }),
+    ApiCreatedResponse({
+      description: 'Bussiness Unfollowed successfully ',
+      type: String,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid business ID' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+export const FollowedBusinessSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Get followed bussinesses' }),
+    ApiCreatedResponse({
+      description: 'Followed bussiness fetched successfully ',
+      type: String,
+    }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
   )

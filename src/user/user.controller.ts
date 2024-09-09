@@ -7,6 +7,8 @@ import {
   AddRating,
   AddReveiw,
   DeleteReview,
+  FollowBusiness,
+  UnFollowBusiness,
   UpdateReview,
 } from './decorators/user-endpoint.decorator'
 import { ApiTags } from '@nestjs/swagger'
@@ -50,5 +52,29 @@ export default class UserController {
       ...addRatingDto,
       userId: user.id,
     })
+  }
+
+  @Post('following-businesses')
+  @FollowBusiness()
+  followBusiness(@Param('businessId') businessId: string, @User() user: USER) {
+    return this.userService.followBussiness({ id: user.id, businessId })
+  }
+
+  @Delete('following-businesses')
+  @UnFollowBusiness()
+  unFollowBusiness(
+    @Param('businessId') businessId: string,
+    @User() user: USER,
+  ) {
+    return this.userService.unFollowBussiness({ id: user.id, businessId })
+  }
+
+  @Delete('following-business')
+  @UnFollowBusiness()
+  getFollowedBusiness(
+    @Param('businessId') businessId: string,
+    @User() user: USER,
+  ) {
+    return this.userService.getFollowedBussiness({ id: user.id })
   }
 }
