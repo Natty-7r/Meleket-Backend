@@ -181,6 +181,35 @@ export default class BusinessService {
     return address
   }
 
+  async calculateRatingSummary({ id }: BaseIdParams) {
+    const ratings = await this.prismaService.rating.findMany({
+      where: {
+        businessId: id,
+      },
+    })
+
+    const averageRating =
+      ratings.reduce((sum, rating) => {
+        return sum + rating.rateValue
+      }, 0.0) / ratings.length
+
+    const ratingSummary = {
+      1: ratings.filter((rating) => rating.rateValue === 1).length,
+      2: ratings.filter((rating) => rating.rateValue === 2).length,
+      3: ratings.filter((rating) => rating.rateValue === 3).length,
+      4: ratings.filter((rating) => rating.rateValue === 4).length,
+      5: ratings.filter((rating) => rating.rateValue === 5).length,
+    }
+
+    return await this.prismaService.business.update({
+      where: { id },
+      data: {
+        averageRating,
+        ratingSummary: JSON.stringify(ratingSummary),
+      },
+    })
+  }
+
   async createBusiness(
     createBusinessDto: CreateBusinessDto & CreateBusinessParams,
   ): Promise<ApiResponse> {
@@ -206,7 +235,13 @@ export default class BusinessService {
         description: createBusinessDto.description,
         contact: {},
         averageRating: 0,
-        ratingSummary: JSON.parse(''),
+        ratingSummary: JSON.stringify({
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+        }),
       },
     })
 
