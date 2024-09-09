@@ -1,4 +1,3 @@
-import { tolowercaseCustom } from './../common/util/helpers/string-util'
 import {
   BadRequestException,
   ConflictException,
@@ -80,7 +79,12 @@ export default class BusinessService {
     name,
   }: CheckBusinessNameParams): Promise<Business> {
     const business = await this.prismaService.business.findFirst({
-      where: { name: name.toLowerCase().trim() },
+      where: {
+        name: {
+          equals: name,
+          mode: 'insensitive',
+        },
+      },
     })
     if (business) throw new ConflictException('Business name is taken')
     return business
@@ -104,14 +108,16 @@ export default class BusinessService {
           some: {
             OR: [
               {
-                country: { contains: tolowercaseCustom(country) },
-                city: { contains: tolowercaseCustom(city) },
-                state: { contains: tolowercaseCustom(state) },
+                country: { contains: country, mode: 'insensitive' },
+                city: { contains: city, mode: 'insensitive' },
+                state: { contains: state, mode: 'insensitive' },
                 streetAddress: {
-                  contains: tolowercaseCustom(streetAddress || ''),
+                  contains: streetAddress || '',
+                  mode: 'insensitive',
                 },
                 specificLocation: {
-                  contains: tolowercaseCustom(specificLocation || ''),
+                  contains: specificLocation || '',
+                  mode: 'insensitive',
                 },
               },
             ],
@@ -132,7 +138,19 @@ export default class BusinessService {
     name,
   }: CheckBusinessServiceNameParams): Promise<BussinesServiceModelType> {
     const service = await this.prismaService.bussinessService.findFirst({
-      where: { businessId, name: name.toLowerCase().trim() },
+      where: {
+        AND: [
+          {
+            businessId,
+          },
+          {
+            name: {
+              equals: name,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
     })
     if (service)
       throw new ConflictException('Service name exists in the business')
@@ -184,9 +202,11 @@ export default class BusinessService {
         ...createBusinessDto,
         mainImageUrl: businessMainImage.image,
         ownerId: createBusinessDto.userId,
-        name: createBusinessDto.name.toLowerCase().trim(),
-        description: createBusinessDto.description.toLowerCase().trim(),
+        name: createBusinessDto.name,
+        description: createBusinessDto.description,
         contact: {},
+        averageRating: 0,
+        ratingSummary: JSON.parse(''),
       },
     })
 
@@ -230,8 +250,8 @@ export default class BusinessService {
     const updatedBusiness = await this.prismaService.business.update({
       where: { id },
       data: {
-        name: name.toLowerCase().trim() || business.name,
-        description: description.toLowerCase().trim() || business.description,
+        name: name || business.name,
+        description: description || business.description,
       },
     })
 
@@ -264,9 +284,9 @@ export default class BusinessService {
 
     const buinessService = await this.prismaService.bussinessService.create({
       data: {
-        name: name.toLowerCase().trim(),
+        name: name,
         businessId,
-        description: description.toLowerCase().trim(),
+        description: description,
         specifications: specifications as any,
         image: imageUrl,
       },
@@ -316,9 +336,8 @@ export default class BusinessService {
       await this.prismaService.bussinessService.update({
         where: { id },
         data: {
-          name: name.toLowerCase().trim() || businessService.description,
-          description:
-            description.toLowerCase().trim() || businessService.description,
+          name: name || businessService.description,
+          description: description || businessService.description,
           specifications:
             specifications || (businessService.specifications as any),
         },
@@ -381,11 +400,11 @@ export default class BusinessService {
     const buinessAddress = await this.prismaService.businessAddress.create({
       data: {
         businessId,
-        country: tolowercaseCustom(country),
-        state: tolowercaseCustom(state),
-        city: tolowercaseCustom(city),
-        streetAddress: tolowercaseCustom(streetAddress) || undefined,
-        specificLocation: tolowercaseCustom(specificLocation) || undefined,
+        country: country,
+        state: state,
+        city: city,
+        streetAddress: streetAddress || undefined,
+        specificLocation: specificLocation || undefined,
       },
     })
     return {
@@ -417,12 +436,11 @@ export default class BusinessService {
       await this.prismaService.businessAddress.update({
         where: { id: addressId, businessId },
         data: {
-          country: country && tolowercaseCustom(country),
-          state: state && tolowercaseCustom(state),
-          city: city && tolowercaseCustom(city),
-          streetAddress: streetAddress && tolowercaseCustom(streetAddress),
-          specificLocation:
-            specificLocation && tolowercaseCustom(specificLocation),
+          country: country && country,
+          state: state && state,
+          city: city && city,
+          streetAddress: streetAddress && streetAddress,
+          specificLocation: specificLocation && specificLocation,
         },
       })
     return {
@@ -526,12 +544,16 @@ export default class BusinessService {
           },
         },
         ratings: true,
-        reviews: true,
+        reviews: {
+          take: 10,
+          orderBy: [{ createdAt: 'desc' }],
+        },
         address: true,
         contact: true,
         services: true,
       },
     })
+
     return {
       status: 'success',
       message: 'All buisness fetched successfully',
@@ -577,12 +599,14 @@ export default class BusinessService {
         OR: [
           {
             name: {
-              contains: searchKey.toLowerCase().trim(),
+              contains: searchKey,
+              mode: 'insensitive',
             },
           },
           {
             description: {
-              contains: searchKey.toLowerCase().trim(),
+              contains: searchKey,
+              mode: 'insensitive',
             },
           },
           {
@@ -592,18 +616,23 @@ export default class BusinessService {
                   {
                     city: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                     country: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                     specificLocation: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                     state: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                     streetAddress: {
                       contains: searchKey,
+                      mode: 'insensitive',
                     },
                   },
                 ],
