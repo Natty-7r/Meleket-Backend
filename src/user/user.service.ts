@@ -38,6 +38,7 @@ export default class UserService {
     businessId,
     review: reviewText,
   }: AddReviewDto & UserIdParams): Promise<ApiResponse> {
+    await this.#checkProfileLevel({ id: userId })
     const business = await this.businessSevice.verifiyBusinessId({
       id: businessId,
     })
@@ -67,6 +68,7 @@ export default class UserService {
     id,
     review: reviewText,
   }: EditReviewDto & UserIdParams): Promise<ApiResponse> {
+    await this.#checkProfileLevel({ id: userId })
     let review = await this.prismaService.review.findFirst({
       where: {
         id,
@@ -91,6 +93,7 @@ export default class UserService {
     userId,
     id,
   }: BaseIdParams & UserIdParams): Promise<ApiResponse> {
+    await this.#checkProfileLevel({ id: userId })
     let review = await this.prismaService.review.findFirst({
       where: {
         id,
