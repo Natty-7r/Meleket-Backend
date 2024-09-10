@@ -8,6 +8,7 @@ import {
   FollowBusinessSwaggerDefinition,
   FollowedBusinessSwaggerDefinition,
   UnFollowBusinessSwaggerDefinition,
+  GetFollowedBusinessSwaggerDefinition,
   UpdateProfileSwaggerDefinition,
   UpdateReviewSwaggerDefinition,
   ViewStorySwaggerDefinition,
@@ -45,6 +46,9 @@ export const FollowBusiness = () =>
 
 export const UnFollowBusiness = () =>
   applyDecorators(ClientRole(), UnFollowBusinessSwaggerDefinition())
+
+export const GetFollowedBusiness = () =>
+  applyDecorators(ClientRole(), GetFollowedBusinessSwaggerDefinition())
 
 export const FollowedBusinesses = () =>
   applyDecorators(ClientRole(), FollowedBusinessSwaggerDefinition())

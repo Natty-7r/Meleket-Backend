@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Put,
@@ -18,6 +19,7 @@ import {
   AddReveiw,
   DeleteReview,
   FollowBusiness,
+  GetFollowedBusiness,
   UnFollowBusiness,
   UpdateProfile,
   UpdateReview,
@@ -111,8 +113,8 @@ export default class UserController {
     return this.userService.unFollowBussiness({ id: user.id, businessId })
   }
 
-  @Delete('following-business')
-  @UnFollowBusiness()
+  @Get('following-business')
+  @GetFollowedBusiness()
   getFollowedBusiness(@User() user: USER) {
     return this.userService.getFollowedBussiness({ id: user.id })
   }

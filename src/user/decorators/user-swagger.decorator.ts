@@ -96,6 +96,15 @@ export const UnFollowBusinessSwaggerDefinition = () =>
     ApiBadRequestResponse({ description: 'Invalid business ID' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
   )
+export const GetFollowedBusinessSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Get Followed  bussines' }),
+    ApiCreatedResponse({
+      description: 'Followed Bussiness Unfollowed successfully ',
+      type: String,
+    }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
 export const FollowedBusinessSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ description: 'Get followed bussinesses' }),
