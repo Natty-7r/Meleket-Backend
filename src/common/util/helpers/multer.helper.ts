@@ -14,7 +14,6 @@ export const multerFilter = ({
   maxSize = 5,
   optional,
 }: MulterFilterConfig) => {
-  console.log(fileType)
   const mimeTypes: { [key in FileType]: string[] } = {
     image: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
     pdf: ['application/pdf'],
@@ -29,7 +28,9 @@ export const multerFilter = ({
 
   return (req: Request, file: Express.Multer.File, callback: any) => {
     // Ensure the file is an file format
-    if (!file && !optional) {
+
+    console.log(fileType, optional, file)
+    if (!optional && !file) {
       return callback(new BadRequestException('File cannot be empty!'), false)
     }
 
@@ -41,11 +42,7 @@ export const multerFilter = ({
     }
     // Ensure the file is not empty
 
-    if (!file.size) {
-      return callback(new BadRequestException('File cannot be empty!'), false)
-    }
-
-    if (file.size > maxSize * 1024 * 1024) {
+    if (file?.size > maxSize * 1024 * 1024) {
       return callback(
         new BadRequestException(`File cannot be exceed ${maxSize} MB.`),
         false,

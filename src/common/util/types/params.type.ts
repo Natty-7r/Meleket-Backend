@@ -164,3 +164,11 @@ export type CreateCategoryParams = OptionalImageUrlParams & {
 export type GenerateCategoryTreeParams = {
   categories: Category[]
 }
+
+/**
+ * File relted
+ */
+
+export type BaseFilePathParams = {
+  filePath: string
+}
