@@ -64,7 +64,8 @@ export default class UserService {
     let profile = await this.prismaService.profile.findFirst({
       where: { userId },
     })
-    if (profile) return this.updateProfile({ userId, ...addProfileDto })
+    if (profile)
+      return this.updateProfile({ userId, ...addProfileDto, birthDate })
     const age = validateAge(birthDate)
     profile = await this.prismaService.profile.create({
       data: {
