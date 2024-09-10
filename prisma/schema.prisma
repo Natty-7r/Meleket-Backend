@@ -52,6 +52,11 @@ enum StoryContentType {
   BOTH
 }
 
+enum Sex {
+  MALE
+  FEMALE
+}
+
 model User {
   id                String           @id @default(uuid())
   firstName         String
@@ -98,12 +103,13 @@ model Admin {
 }
 
 model Profile {
-  id             String  @id @default(uuid())
-  age            Int
-  sex            String
+  id             String   @id @default(uuid())
+  age            Int?
+  birthDate      DateTime
+  sex            Sex
   profilePicture String?
-  userId         String  @unique
-  user           User    @relation(fields: [userId], references: [id])
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -218,7 +224,7 @@ model Rating {
   id         String @id @default(uuid())
   userId     String
   businessId String
-  rateValue     Int
+  rateValue  Int
 
   user     User     @relation(fields: [userId], references: [id])
   business Business @relation(fields: [businessId], references: [id])

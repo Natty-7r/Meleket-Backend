@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -18,6 +19,10 @@ import {
 } from 'src/common/util/types/responses.type'
 import AddRatingDto from './dto/add-rating.dto'
 import EditReviewDto from './dto/edit-review.dto'
+import AddProfileDto from './dto/add-profile.dto'
+import UpdateProfileDto from './dto/update-profile.dto'
+import { validateAge } from 'src/common/util/helpers/validator.helper'
+import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 
 @Injectable()
 export default class UserService {
@@ -28,6 +33,14 @@ export default class UserService {
 
   // helpers
 
+  async #checkUserId({ id }: BaseIdParams) {
+    const user = await this.prismaService.user.findFirst({
+      where: { id },
+    })
+
+    if (!user) throw new ForbiddenException('User not found')
+    return true
+  }
   async #checkProfileLevel({ id }: BaseIdParams) {
     const user = await this.prismaService.user.findFirst({
       where: { id },
@@ -36,6 +49,67 @@ export default class UserService {
     if (user.profileLevel !== 'VERIFIED')
       throw new ForbiddenException('Not allowed for unverfied user   ')
     return true
+  }
+
+  // profile related
+
+  async addProfile({
+    userId,
+    birthDate,
+    ...addProfileDto
+  }: AddProfileDto & UserIdParams): Promise<ApiResponse> {
+    await this.#checkUserId({ id: userId })
+    let profile = await this.prismaService.profile.findFirst({
+      where: { userId },
+    })
+    if (profile) return this.updateProfile({ userId, ...addProfileDto })
+    const age = validateAge(birthDate)
+    profile = await this.prismaService.profile.create({
+      data: {
+        userId: userId,
+        birthDate,
+        age,
+        ...addProfileDto,
+      },
+    })
+    return {
+      status: 'success',
+      message: `profile added  successfully`,
+      data: profile,
+    }
+  }
+
+  async updateProfile({
+    userId,
+    birthDate,
+    ...updateProfileDto
+  }: UpdateProfileDto & UserIdParams): Promise<ApiResponse> {
+    let oldProfilePicturePath = undefined
+    await this.#checkUserId({ id: userId })
+
+    let profile = await this.prismaService.profile.findFirst({
+      where: { userId },
+    })
+    if (!profile) throw new BadRequestException('No profile added')
+    const age = validateAge(birthDate)
+    if (updateProfileDto.profilePicture)
+      oldProfilePicturePath = profile.profilePicture
+    profile = await this.prismaService.profile.update({
+      where: { userId },
+      data: {
+        ...updateProfileDto,
+        birthDate,
+        age,
+      },
+    })
+    console.log(oldProfilePicturePath)
+    if (oldProfilePicturePath)
+      deleteFileAsync({ filePath: oldProfilePicturePath })
+    return {
+      status: 'success',
+      message: `profile updated  successfully`,
+      data: profile,
+    }
   }
 
   // Review related

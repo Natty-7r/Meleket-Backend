@@ -19,6 +19,7 @@ import CreateCategoryDto from './dto/create-category.dto'
 import BusinessService from 'src/business/business.service'
 import { BaseIdParams } from 'src/common/util/types/params.type'
 import { ApiResponse } from 'src/common/util/types/responses.type'
+import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 
 @Injectable()
 @UseGuards(JwtAuthGuard)
@@ -165,6 +166,7 @@ export default class CategoryService {
         image: imageUrl,
       },
     })
+    deleteFileAsync({ filePath: category.image })
     return {
       status: 'success',
       message: 'Category updated  successfully',
