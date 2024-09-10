@@ -9,7 +9,7 @@ export default class AddProfileDto {
   })
   @IsDateString()
   @IsOptional()
-  birthDate: Date
+  birthDate?: Date
 
   @ApiPropertyOptional({
     description: 'Sex of the user',
@@ -17,7 +17,7 @@ export default class AddProfileDto {
   })
   @IsString()
   @IsOptional()
-  sex: SEX
+  sex?: SEX
 
   @ApiPropertyOptional({
     description: 'Profile picture URL',
@@ -34,7 +34,7 @@ export default class AddProfileDto {
   })
   @IsString()
   @IsOptional()
-  country: string
+  country?: string
 
   @ApiPropertyOptional({
     description: 'City of the user',
@@ -42,7 +42,7 @@ export default class AddProfileDto {
   })
   @IsString()
   @IsOptional()
-  city: string
+  city?: string
 
   @ApiProperty({
     description: 'Street address of the user',
