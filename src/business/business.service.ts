@@ -870,16 +870,20 @@ export default class BusinessService {
     id,
     ...createStoryDto
   }: UpdateStoryDto & UserIdParams): Promise<ApiResponse> {
+    let oldImageUrl = undefined
     let story = await this.#verifyBusinessStoryId({
       id,
     })
     await this.#checkOwner({ businessId: story.businessId, userId })
+    if (createStoryDto.image) oldImageUrl = story.image
     story = await this.prismaService.story.update({
       where: { id },
       data: {
         ...createStoryDto,
       },
     })
+
+    if (oldImageUrl) deleteFileAsync({ filePath: oldImageUrl })
 
     return {
       status: 'success',
