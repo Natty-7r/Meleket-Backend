@@ -111,6 +111,12 @@ model Profile {
   birthDate      DateTime
   sex            Sex
   profilePicture String?
+  country        String
+  city             String
+  streetAddress    String?
+  specificLocation String?
+
+
   userId         String   @unique
   user           User     @relation(fields: [userId], references: [id])
 
@@ -252,6 +258,7 @@ model Story {
   // New relation to UserStoryView
   userViews UserStoryView[]
 }
+
 
 model UserStoryView {
   id       String   @id @default(uuid())
