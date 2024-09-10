@@ -22,6 +22,7 @@ import EditReviewDto from './dto/edit-review.dto'
 import AddProfileDto from './dto/add-profile.dto'
 import UpdateProfileDto from './dto/update-profile.dto'
 import { validateAge } from 'src/common/util/helpers/validator.helper'
+import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 
 @Injectable()
 export default class UserService {
@@ -83,6 +84,7 @@ export default class UserService {
     birthDate,
     ...updateProfileDto
   }: UpdateProfileDto & UserIdParams): Promise<ApiResponse> {
+    let oldProfilePicturePath = undefined
     await this.#checkUserId({ id: userId })
 
     let profile = await this.prismaService.profile.findFirst({
@@ -90,6 +92,8 @@ export default class UserService {
     })
     if (!profile) throw new BadRequestException('No profile added')
     const age = validateAge(birthDate)
+    if (updateProfileDto.profilePicture)
+      oldProfilePicturePath = profile.profilePicture
     profile = await this.prismaService.profile.update({
       where: { userId },
       data: {
@@ -98,6 +102,9 @@ export default class UserService {
         age,
       },
     })
+    console.log(oldProfilePicturePath)
+    if (oldProfilePicturePath)
+      deleteFileAsync({ filePath: oldProfilePicturePath })
     return {
       status: 'success',
       message: `profile updated  successfully`,

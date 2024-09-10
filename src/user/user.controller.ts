@@ -36,9 +36,8 @@ export default class UserController {
   async addProfile(
     @Body() addProfileDto: AddProfileDto,
     @User() user: USER,
-    @UploadedFile('profilePicture') file?: Express.Multer.File,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    console.log(addProfileDto)
     return this.userService.addProfile({
       ...addProfileDto,
       userId: user.id,
@@ -51,7 +50,7 @@ export default class UserController {
   async updateProfile(
     @Body() addProfileDto: AddProfileDto,
     @User() user: USER,
-    @UploadedFile('profilePicture') file?: Express.Multer.File,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
     return this.userService.updateProfile({
       ...addProfileDto,
