@@ -870,10 +870,12 @@ export default class BusinessService {
     id,
     ...createStoryDto
   }: UpdateStoryDto & UserIdParams): Promise<ApiResponse> {
+    console.log(id, createStoryDto)
     let oldImageUrl = undefined
     let story = await this.#verifyBusinessStoryId({
       id,
     })
+    console.log(story)
     await this.#checkOwner({ businessId: story.businessId, userId })
     if (createStoryDto.image) oldImageUrl = story.image
     story = await this.prismaService.story.update({
@@ -918,9 +920,11 @@ export default class BusinessService {
       data: stories,
     }
   }
-  async getBusinessStories({ id }: BaseIdParams): Promise<ApiResponse> {
+  async getBusinessStories({
+    businessId,
+  }: BusinessIdParams): Promise<ApiResponse> {
     const stories = await this.prismaService.story.findMany({
-      where: { id },
+      where: { businessId },
       orderBy: [{ createdAt: 'desc' }],
     })
     return {

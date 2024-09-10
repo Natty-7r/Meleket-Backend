@@ -228,23 +228,26 @@ export default class BusinessController {
     })
   }
 
-  @Delete('stories')
+  @Delete('stories/:id')
   @DeleteStory()
   async deleteStory(@Param('id') id: string, @User() user: USER) {
-    return this.businessService.updateStory({
+    return this.businessService.deleteStory({
       userId: user.id,
       id,
     })
   }
 
   @Get('stories')
-  @GetBusinessStories()
-  async fetchAllStories(@Param('id') id: string, @User() user: USER) {
-    return this.businessService.getBusinessStories({ id })
-  }
-  @Get('stories:id')
   @GetAllStories()
-  async getStories(@Param('id') id: string, @User() user: USER) {
+  async fetchAllStories() {
     return this.businessService.getStories()
+  }
+  @Get('stories/:businessId')
+  @GetBusinessStories()
+  async getStories(
+    @Param('businessId') businessId: string,
+    @User() user: USER,
+  ) {
+    return this.businessService.getBusinessStories({ businessId })
   }
 }

@@ -238,7 +238,6 @@ export const GetAllStoriesSwaggerDefinition = () =>
       type: Array<StoryResponse>,
     }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
   )
 
 export const GetBusinessStoriesSwaggerDefinition = () =>

@@ -170,7 +170,7 @@ export const DeleteStory = () =>
   applyDecorators(ClientRole(), DeleteStorySwaggerDefinition())
 
 export const GetAllStories = () =>
-  applyDecorators(ClientRole(), GetAllStoriesSwaggerDefinition())
+  applyDecorators(Public(), GetAllStoriesSwaggerDefinition())
 
 export const GetBusinessStories = () =>
-  applyDecorators(ClientRole(), GetBusinessStoriesSwaggerDefinition())
+  applyDecorators(Public(), GetBusinessStoriesSwaggerDefinition())

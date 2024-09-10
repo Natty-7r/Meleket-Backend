@@ -16,7 +16,7 @@ export default class CreateBusinessDto {
     example: 'category_uuid',
     description: 'ID of the category the business belongs to',
   })
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   categoryId: string
 
@@ -34,7 +34,7 @@ export default class CreateBusinessDto {
     example: 'template_uuid',
     description: 'ID of the template used by the business',
   })
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   templateId: string
 }

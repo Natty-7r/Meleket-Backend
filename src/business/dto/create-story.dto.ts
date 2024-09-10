@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import {
-  IsString,
-  IsNotEmpty,
-  IsEnum,
-  IsOptional,
-  IsUUID,
-} from 'class-validator'
+import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator'
 import { StoryContentType } from '@prisma/client' // Adjust import based on your setup
 
 export default class CreateStoryDto {
@@ -13,7 +7,7 @@ export default class CreateStoryDto {
     description: 'Unique identifier for the business associated with the story',
     example: '550e8400-e29b-41d4-a716-446655440001',
   })
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   businessId: string
 
