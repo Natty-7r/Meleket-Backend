@@ -21,6 +21,7 @@ import {
   UnFollowBusiness,
   UpdateProfile,
   UpdateReview,
+  ViewStory,
 } from './decorators/user-endpoint.decorator'
 import EditReviewDto from './dto/edit-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
@@ -112,10 +113,13 @@ export default class UserController {
 
   @Delete('following-business')
   @UnFollowBusiness()
-  getFollowedBusiness(
-    @Param('businessId') businessId: string,
-    @User() user: USER,
-  ) {
+  getFollowedBusiness(@User() user: USER) {
     return this.userService.getFollowedBussiness({ id: user.id })
+  }
+
+  @Put('story/:storyId')
+  @ViewStory()
+  viewStory(@Param('storyId') storyId: string, @User() user: USER) {
+    return this.userService.viewStory({ userId: user.id, storyId })
   }
 }

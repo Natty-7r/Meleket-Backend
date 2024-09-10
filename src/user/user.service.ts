@@ -9,6 +9,7 @@ import PrismaService from 'src/prisma/prisma.service'
 import {
   BaseIdParams,
   BusinessIdParams,
+  StoryIdParams,
   UserIdParams,
 } from 'src/common/util/types/params.type'
 import BusinessService from 'src/business/business.service'
@@ -246,5 +247,36 @@ export default class UserService {
 
   async getFollowedBussiness({ id }: BaseIdParams): Promise<ApiResponse> {
     return this.businessSevice.getFollowerBusiness({ userId: id })
+  }
+
+  async viewStory({
+    storyId,
+    userId,
+  }: StoryIdParams & UserIdParams): Promise<BareApiResponse> {
+    let userStoryView = await this.prismaService.userStoryView.findUnique({
+      where: {
+        /* eslint-disable */
+        userId_storyId: {
+          userId,
+          storyId,
+        },
+        /* eslint-disable */
+      },
+    })
+
+    if (!userStoryView) {
+      userStoryView = await this.prismaService.userStoryView.create({
+        data: {
+          userId,
+          storyId,
+        },
+      })
+      await this.businessSevice.updateStoryViewCount({ storyId })
+    }
+
+    return {
+      status: 'success',
+      message: `User added as veiw for story successfully`,
+    }
   }
 }

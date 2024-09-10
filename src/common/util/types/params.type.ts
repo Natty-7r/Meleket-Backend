@@ -40,6 +40,9 @@ export type BaseNameParams = {
 export type UserIdParams = {
   userId: string
 }
+export type OptionalUserIdParams = {
+  userId?: string
+}
 
 export type BusinessIdParams = {
   businessId: string
@@ -57,6 +60,10 @@ export type ImageUrlParams = {
 
 export type BaseIdParams = {
   id: string
+}
+
+export type StoryIdParams = {
+  storyId: string
 }
 
 /** *

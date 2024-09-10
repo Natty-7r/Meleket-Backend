@@ -58,23 +58,26 @@ enum Sex {
 }
 
 model User {
-  id                String           @id @default(uuid())
-  firstName         String
-  lastName          String
-  email             String           @unique
-  phoneNumber       String?
-  profileLevel      UserProfileLevel @default(CREATED)
-  userType          UserType         @default(CLIENT_USER)
-  password          String
-  profile           Profile?
-  reviews           Review[]
-  ratings           Rating[]
-  bills             Bill[]
-  businesses        Business[]       @relation("UserOwnsBusiness")
-  followedBussiness Business[]       @relation("UserFollowsBusiness")
+  id                 String           @id @default(uuid())
+  firstName          String
+  lastName           String
+  email              String           @unique
+  phoneNumber        String?
+  profileLevel       UserProfileLevel @default(CREATED)
+  userType           UserType         @default(CLIENT_USER)
+  password           String
+  profile            Profile?
+  reviews            Review[]
+  ratings            Rating[]
+  bills              Bill[]
+  businesses         Business[]       @relation("UserOwnsBusiness")
+  followedBusinesses Business[]       @relation("UserFollowsBusiness")
 
   createdAt         DateTime @default(now())
-  passwordUpdatedAt DateTime @default(now())
+  passwordUpdatedAt DateTime @updatedAt
+
+  // New relation to UserStoryView
+  storyViews UserStoryView[]
 }
 
 model OTP {
@@ -238,12 +241,28 @@ model Story {
   contentType StoryContentType
   text        String?
   image       String?
+  viewCount   Int              @default(0) // Total number of views
 
   businessId String
   business   Business @relation(fields: [businessId], references: [id])
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // New relation to UserStoryView
+  userViews UserStoryView[]
+}
+
+model UserStoryView {
+  id       String   @id @default(uuid())
+  userId   String
+  storyId  String
+  viewedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  story Story @relation(fields: [storyId], references: [id])
+
+  @@unique([userId, storyId]) // Ensures that each user can view a story only once
 }
 
 model Package {
