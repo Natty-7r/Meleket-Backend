@@ -27,6 +27,11 @@ import {
   UpdateBusinessAddress,
   DeleteBusinessAddress,
   UpdateBusinessContact,
+  AddStory,
+  UpdateStory,
+  DeleteStory,
+  GetBusinessStories,
+  GetAllStories,
 } from './decorators/business-endpoint.decorator'
 import { USER } from 'src/common/util/types/base.type'
 import User from 'src/common/decorators/user.decorator'
@@ -36,6 +41,8 @@ import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessAddressDto from './dto/create-business-address.dto'
 import UpdateBusinessAddressDto from './dto/update-business-address.dto'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
+import CreateStoryDto from './dto/create-story.dto'
+import UpdateStoryDto from './dto/update-store.dto'
 
 @ApiTags('Businesses')
 @Controller('businesses')
@@ -190,5 +197,54 @@ export default class BusinessController {
   @SearchBusiness()
   searchBusiness(@Query('searchKey') searchKey: string) {
     return this.businessService.searchBusinesses({ searchKey })
+  }
+
+  // story related
+
+  @Post('stories')
+  @AddStory()
+  async AddStory(
+    @Body() createStoryDto: CreateStoryDto,
+    @User() user: USER,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.businessService.addStory({
+      ...createStoryDto,
+      userId: user.id,
+      image: file?.path || undefined,
+    })
+  }
+  @Put('stories')
+  @UpdateStory()
+  async updateStory(
+    @Body() updateStoryDto: UpdateStoryDto,
+    @User() user: USER,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.businessService.updateStory({
+      ...updateStoryDto,
+      userId: user.id,
+      image: file?.path || undefined,
+    })
+  }
+
+  @Delete('stories')
+  @DeleteStory()
+  async deleteStory(@Param('id') id: string, @User() user: USER) {
+    return this.businessService.updateStory({
+      userId: user.id,
+      id,
+    })
+  }
+
+  @Get('stories')
+  @GetBusinessStories()
+  async fetchAllStories(@Param('id') id: string, @User() user: USER) {
+    return this.businessService.getBusinessStories({ id })
+  }
+  @Get('stories:id')
+  @GetAllStories()
+  async getStories(@Param('id') id: string, @User() user: USER) {
+    return this.businessService.getStories()
   }
 }

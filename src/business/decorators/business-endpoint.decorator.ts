@@ -15,6 +15,10 @@ import {
   UpdateBusinessAddressSwaggerDefinition,
   DeleteBusinessAddressSwaggerDefinition,
   UpdateBusinessContactSwaggerDefinition,
+  AddStorySwaggerDefinition,
+  DeleteStorySwaggerDefinition,
+  GetAllStoriesSwaggerDefinition,
+  GetBusinessStoriesSwaggerDefinition,
 } from './business-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, {
@@ -129,3 +133,44 @@ export const DeleteBusinessAddress = () =>
 
 export const UpdateBusinessContact = () =>
   applyDecorators(ClientRole(), UpdateBusinessContactSwaggerDefinition())
+
+// story related
+
+export const AddStory = () =>
+  applyDecorators(
+    ClientRole(),
+    UseInterceptors(
+      FileInterceptor('image', {
+        storage: muluterStorage({ folder: 'story', filePrefix: 's' }),
+        fileFilter: multerFilter({
+          fileType: 'image',
+          maxSize: 5,
+          optional: true,
+        }),
+      }),
+    ),
+    AddStorySwaggerDefinition(),
+  )
+export const UpdateStory = () =>
+  applyDecorators(
+    ClientRole(),
+    UseInterceptors(
+      FileInterceptor('image', {
+        storage: muluterStorage({ folder: 'story', filePrefix: 's' }),
+        fileFilter: multerFilter({
+          fileType: 'image',
+          maxSize: 5,
+          optional: true,
+        }),
+      }),
+    ),
+    AddStorySwaggerDefinition(),
+  )
+export const DeleteStory = () =>
+  applyDecorators(ClientRole(), DeleteStorySwaggerDefinition())
+
+export const GetAllStories = () =>
+  applyDecorators(ClientRole(), GetAllStoriesSwaggerDefinition())
+
+export const GetBusinessStories = () =>
+  applyDecorators(ClientRole(), GetBusinessStoriesSwaggerDefinition())
