@@ -271,16 +271,15 @@ export default class BusinessService {
     imageUrl,
     userId,
   }: UpdateBusinessImageParams): Promise<ApiResponse> {
-    let oldImageUrl = undefined
     const business = await this.#checkOwner({ userId, businessId: id })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
-    if (imageUrl) oldImageUrl = business.mainImageUrl
+
     const updatedBusiness = await this.prismaService.business.update({
       where: { id },
       data: { mainImageUrl: imageUrl },
     })
-    deleteFileAsync({ filePath: oldImageUrl })
+    deleteFileAsync({ filePath: business.mainImageUrl })
     return {
       status: 'success',
       message: 'Buisness image updated successfully',
@@ -355,15 +354,15 @@ export default class BusinessService {
     imageUrl,
     userId,
   }: UpdateBusinessImageParams): Promise<ApiResponse> {
-    await this.#verifyBusinessServiceId({ id })
     await this.#checkOwner({ userId, businessId: id })
+    const service = await this.#verifyBusinessServiceId({ id })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
     const updatedBusiness = await this.prismaService.bussinessService.update({
       where: { id },
       data: { image: imageUrl },
     })
-
+    deleteFileAsync({ filePath: service.image })
     return {
       status: 'success',
       message: 'Buisness image updated successfully',
