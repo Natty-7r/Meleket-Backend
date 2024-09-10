@@ -1,6 +1,6 @@
 // business.service.params.ts
 
-import { Category, OTPType } from '@prisma/client'
+import { Category, OTPType, StoryContentType } from '@prisma/client'
 
 export type SendSMSParams = {
   smsAddress: string
@@ -171,4 +171,14 @@ export type GenerateCategoryTreeParams = {
 
 export type BaseFilePathParams = {
   filePath: string
+}
+
+/**
+ * Validation params
+ */
+
+export type ValidateStory = {
+  contentType: StoryContentType
+  text?: string
+  image?: string
 }

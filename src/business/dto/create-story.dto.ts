@@ -26,8 +26,8 @@ export default class CreateStoryDto {
     required: true,
   })
   @IsString()
-  @IsNotEmpty()
-  text: string
+  @IsOptional()
+  text?: string
 
   @ApiPropertyOptional({
     description: 'Optional image URL for the story',

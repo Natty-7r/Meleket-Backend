@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { IsString, IsEnum, IsOptional } from 'class-validator'
+import { IsString, IsEnum, IsOptional, IsNotEmpty } from 'class-validator'
 import { StoryContentType } from '@prisma/client' // Adjust import based on your setup
 
 export default class UpdateStoryDto {
@@ -9,8 +9,8 @@ export default class UpdateStoryDto {
     enum: StoryContentType,
   })
   @IsEnum(StoryContentType)
-  @IsOptional()
-  contentType?: StoryContentType
+  @IsNotEmpty()
+  contentType: StoryContentType
 
   @ApiPropertyOptional({
     description: 'Text content of the story',
@@ -32,6 +32,7 @@ export default class UpdateStoryDto {
     description: 'Unique identifier for the the story',
     example: '550e8400-e29b-41d4-a716-446655440001',
   })
+  @IsNotEmpty()
   @IsString()
   id: string
 }

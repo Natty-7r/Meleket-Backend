@@ -851,7 +851,7 @@ export default class BusinessService {
       userId,
       businessId,
     })
-    validateStory({ ...createStoryDto, businessId })
+    validateStory({ ...createStoryDto })
     const story = await this.prismaService.story.create({
       data: {
         businessId,
@@ -868,20 +868,20 @@ export default class BusinessService {
   async updateStory({
     userId,
     id,
-    ...createStoryDto
+    ...updateStoryDto
   }: UpdateStoryDto & UserIdParams): Promise<ApiResponse> {
-    console.log(id, createStoryDto)
     let oldImageUrl = undefined
     let story = await this.#verifyBusinessStoryId({
       id,
     })
-    console.log(story)
+
     await this.#checkOwner({ businessId: story.businessId, userId })
-    if (createStoryDto.image) oldImageUrl = story.image
+    if (updateStoryDto.image) oldImageUrl = story.image
+    validateStory({ ...updateStoryDto })
     story = await this.prismaService.story.update({
       where: { id },
       data: {
-        ...createStoryDto,
+        ...updateStoryDto,
       },
     })
 
@@ -905,6 +905,7 @@ export default class BusinessService {
     story = await this.prismaService.story.delete({
       where: { id },
     })
+    deleteFileAsync({ filePath: story?.image || '' })
     return {
       status: 'success',
       message: 'story deleted  successfully',

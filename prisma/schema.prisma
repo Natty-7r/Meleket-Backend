@@ -236,7 +236,7 @@ model Rating {
 model Story {
   id          String           @id @default(uuid())
   contentType StoryContentType
-  text        String
+  text        String?
   image       String?
 
   businessId String

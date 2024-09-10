@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common'
-import CreateStoryDto from 'src/business/dto/create-story.dto'
+import { ValidateStory } from '../types/params.type'
 
-export const validateStory = ({ contentType, image, text }: CreateStoryDto) => {
+export const validateStory = ({ contentType, image, text }: ValidateStory) => {
   if (contentType == 'BOTH') {
     if (!image || !text)
       throw new BadRequestException('Both image and text of story required')
