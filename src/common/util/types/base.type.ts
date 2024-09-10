@@ -1,10 +1,5 @@
 import { Request } from 'express'
-import { User } from '@prisma/client'
-
-export type ExceptionResponse = {
-  message: string
-  property: string
-}
+import { Admin, OTPType, User } from '@prisma/client'
 
 export type Module = {
   id: number
@@ -33,8 +28,10 @@ export interface FunctionCallResponse {
   data: any
 }
 
+export type USER = User | Admin
+
 export interface RequestWithUser extends Request {
-  user: User
+  user: USER
 }
 
 export type MulterStorageConfig = {
@@ -47,6 +44,7 @@ export type FileType = 'image' | 'pdf' | 'txt' | 'doc'
 export type MulterFilterConfig = {
   fileType: FileType
   maxSize: number // in MB
+  optional?: boolean
 }
 
 export interface CategoryTreeNode {
@@ -62,4 +60,57 @@ export interface CategoryTreeNode {
 export type CategoryTreeSwaggerConfig = {
   operationName: string
   successMessage: string
+}
+
+export enum SignUpType {
+  BY_EMAIL = 'BY_EMAIL',
+  OAUTH = 'OAUTH',
+}
+
+export interface Config {
+  server: {
+    host: string
+    port: number
+  }
+  db: {
+    user: string
+    password: string
+    name: string
+    url: string
+  }
+  otp: {
+    length: number
+    expirationMinute: number
+  }
+  jwt: {
+    secret: string
+    expiresIn: any
+  }
+  google: {
+    clientId: string
+    clientSecret: string
+    redirectUrl: string
+  }
+  twilio: {
+    accountSid: string
+    authToken: string
+    smsSender: string
+  }
+  email: {
+    host: string
+    port: number
+    sender: string
+    senderPassword: string
+  }
+  superAdmin: {
+    firstName: string
+    lastName: string
+    email: string
+    password: string
+  }
+}
+
+export enum SEX {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
 }

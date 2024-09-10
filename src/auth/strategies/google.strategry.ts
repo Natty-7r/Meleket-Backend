@@ -15,13 +15,14 @@ export default class GoogleStrategy extends PassportStrategy(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: 'http://localhost:8080/auth/google-redirect',
       scope: ['email', 'profile'],
+      passReqToCallback: true,
     })
     // super({
     //   clientID,
     //   clientSecret,
     //   callbackURL,
     //   scope: ['email', 'profile'],
-    // })
+    // })4
   }
 
   async validate(

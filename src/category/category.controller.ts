@@ -7,75 +7,79 @@ import {
   Post,
   Put,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import User from 'src/common/decorators/user.decorator'
-import { User as UserAsType } from '@prisma/client'
+import { USER } from 'src/common/util/types/base.type'
 import CreateCategoryDto from './dto/create-category.dto'
 import CategoryService from './category.service'
 import UpdateCategoryDto from './dto/update-category.dto'
-import { CreateCategorySwaggerDefinition } from './decorators/swagger-definition.decorator'
 import {
   CreateCategory,
   DeleteCategory,
   GetCategories,
+  GetCategoryBusinesses,
   UpdateCategory,
   UpdateCategoryImage,
   UpdateCategoryParent,
   VerifyCategory,
 } from './decorators/category-api-endpoint.decorator'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
-import UpdateCategoryImageDto from './dto/update-category-image.dto '
 
 @ApiTags('Category')
 @Controller('category')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @CreateCategorySwaggerDefinition()
   @CreateCategory()
-  @Post('create-category')
+  @Post()
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
     @UploadedFile() file: Express.Multer.File,
-    @User() user: UserAsType,
+    @User() user: USER,
   ) {
-    return this.categoryService.createCategory(
-      {
-        ...createCategoryDto,
-        image: file?.path || 'uploads/category/category.png',
-        price: createCategoryDto?.price || 50,
-      },
-      !!(user?.userType === 'ADMIN' || user?.userType === 'SUPER_ADMIN'),
-    )
+    return this.categoryService.createCategory({
+      ...createCategoryDto,
+      imageUrl: file?.path || 'uploads/category/category.png',
+      price: createCategoryDto?.price || 50,
+      verified: user.userType !== 'CLIENT_USER',
+    })
   }
 
   @UpdateCategory()
-  @Put('update-category')
+  @Put()
   updateCategory(@Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoryService.updateCategory(updateCategoryDto)
   }
 
-  // update category
   @UpdateCategoryImage()
-  @Put('update-category-image')
+  @Put(':id/image')
   updateCategoryImage(
-    @Body() updateCategoryImageDto: UpdateCategoryImageDto,
+    @Param('id:') id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.categoryService.updateCategoryImage(
-      updateCategoryImageDto,
-      file.path,
-    )
+    return this.categoryService.updateCategoryImage({
+      id,
+      imageUrl: file.path,
+    })
   }
 
   @VerifyCategory()
-  @Put('verify-category')
+  @Put(':id/status')
   verifyCategory(@Param('id') id: string) {
-    return this.categoryService.verifyCategory(id)
+    return this.categoryService.verifyCategory({ id })
+  }
+
+  @UpdateCategoryParent()
+  @Put('/parent')
+  updateParentCategory(
+    @Body() updateParentCategoryDto: UpdateParentCategoryDto,
+  ) {
+    return this.categoryService.updateParentCategory(updateParentCategoryDto)
   }
 
   @GetCategories()
@@ -83,18 +87,15 @@ export default class CategoryController {
   getCategories() {
     return this.categoryService.getCategories()
   }
-
-  @DeleteCategory()
-  @Delete('delete')
-  deleteCategory(@Param('id') id: string) {
-    return this.categoryService.deleteCategory(id)
+  @GetCategoryBusinesses()
+  @Get('/business/:id')
+  getCategoryBusiness() {
+    return this.categoryService.getCategories()
   }
 
-  @UpdateCategoryParent()
-  @Put('update-parent')
-  updateParentCategory(
-    @Body() updateParentCategoryDto: UpdateParentCategoryDto,
-  ) {
-    return this.categoryService.updateParentCategory(updateParentCategoryDto)
+  @DeleteCategory()
+  @Delete(':id')
+  deleteCategory(@Param('id') id: string) {
+    return this.categoryService.deleteCategory({ id })
   }
 }

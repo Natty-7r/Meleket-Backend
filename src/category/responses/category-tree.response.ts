@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger'
-import { CategoryTreeNode } from 'src/common/util/types'
+import { CategoryTreeNode } from 'src/common/util/types/base.type'
 
 class CategoryResponse {
   @ApiResponseProperty({
