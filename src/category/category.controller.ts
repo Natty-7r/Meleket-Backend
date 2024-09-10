@@ -87,6 +87,7 @@ export default class CategoryController {
   getCategories() {
     return this.categoryService.getCategories()
   }
+
   @GetCategoryBusinesses()
   @Get('/business/:id')
   getCategoryBusiness() {

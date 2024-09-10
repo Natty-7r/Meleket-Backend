@@ -7,7 +7,7 @@ export const capitalize = (text: string): string =>
     .split(' ')
     .map((word) => word.toLocaleUpperCase())
     .reduce((textCatitalized, wordCapitalized) =>
-      textCatitalized.concat(' ' + wordCapitalized),
+      textCatitalized.concat(` ${wordCapitalized}`),
     )
 
 export const tolowercaseCustom = (text: string): string =>

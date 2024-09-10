@@ -6,12 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
-import CreateBusinessDto from './dto/create-business.dto'
-import UpdateBusinessDto from './dto/update-business.dto'
-import CreateBusinessServiceDto from './dto/create-business-service.dto'
-import UpdateBusinessServiceDto from './dto/update-business-service.dto'
-import CreateBusinessAddressDto from './dto/create-business-address.dto'
-import UpdateBusinessAddressDto from './dto/update-business-address.dto'
 import {
   Business,
   BusinessAddress,
@@ -22,6 +16,14 @@ import {
   ApiResponse,
   BareApiResponse,
 } from 'src/common/util/types/responses.type'
+
+import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
+import { validateStory } from 'src/common/util/helpers/validator.helper'
+import CreateBusinessDto from './dto/create-business.dto'
+import UpdateBusinessDto from './dto/update-business.dto'
+import CreateBusinessServiceDto from './dto/create-business-service.dto'
+import CreateBusinessAddressDto from './dto/create-business-address.dto'
+import UpdateBusinessAddressDto from './dto/update-business-address.dto'
 import {
   CheckBusinessAddressParams,
   CheckBusinessNameParams,
@@ -39,14 +41,12 @@ import {
   ImageUrlParams,
   SearchBusinessParams,
   UserIdParams,
-} from './../common/util/types/params.type'
+  BaseIdParams,
+} from '../common/util/types/params.type'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 import CreateStoryDto from './dto/create-story.dto'
-import { validateStory } from 'src/common/util/validators/business.validator'
 import UpdateStoryDto from './dto/update-store.dto'
-import { BaseIdParams } from '../common/util/types/params.type'
-
-import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
+import UpdateBusinessServicesDto from './dto/update-business-services.dto'
 
 @Injectable()
 export default class BusinessService {
@@ -66,6 +66,7 @@ export default class BusinessService {
       throw new ForbiddenException('Unverfied user cannot create business ')
     return true
   }
+
   async verifiyBusinessId({ id }: VerifyBusinessIdParams): Promise<Business> {
     const business = await this.prismaService.business.findFirst({
       where: { id },
@@ -217,7 +218,7 @@ export default class BusinessService {
       ratings.reduce((sum, rating) => {
         return sum + rating.rateValue
       }, 0.0) / ratings.length
-
+    /* eslint-disable */
     const ratingSummary = {
       1: ratings.filter((rating) => rating.rateValue === 1).length,
       2: ratings.filter((rating) => rating.rateValue === 2).length,
@@ -225,8 +226,8 @@ export default class BusinessService {
       4: ratings.filter((rating) => rating.rateValue === 4).length,
       5: ratings.filter((rating) => rating.rateValue === 5).length,
     }
-
-    return await this.prismaService.business.update({
+    /* eslint-disable */
+    return this.prismaService.business.update({
       where: { id },
       data: {
         averageRating,
@@ -280,6 +281,7 @@ export default class BusinessService {
       },
     }
   }
+
   async updateBusinessImage({
     id,
     imageUrl,
@@ -302,6 +304,7 @@ export default class BusinessService {
       },
     }
   }
+
   async updateBusiness({
     id,
     name,
@@ -347,9 +350,9 @@ export default class BusinessService {
 
     const buinessService = await this.prismaService.bussinessService.create({
       data: {
-        name: name,
+        name,
         businessId,
-        description: description,
+        description,
         specifications: specifications as any,
         image: imageUrl,
       },
@@ -390,11 +393,11 @@ export default class BusinessService {
     services,
     businessId,
     userId,
-  }: UpdateBusinessServiceDto & UserIdParams): Promise<ApiResponse> {
+  }: UpdateBusinessServicesDto & UserIdParams): Promise<ApiResponse> {
     for (const { id } of services) await this.#verifyBusinessServiceId({ id })
 
     for (const { id, description, name, specifications } of services) {
-      await this.#checkOwner({ userId, businessId: businessId })
+      await this.#checkOwner({ userId, businessId })
       const businessService = await this.#verifyBusinessServiceId({ id })
       await this.prismaService.bussinessService.update({
         where: { id },
@@ -417,6 +420,7 @@ export default class BusinessService {
       data: { ...business },
     }
   }
+
   async deleteBusinessServices({
     id,
     userId,
@@ -427,7 +431,7 @@ export default class BusinessService {
     await this.prismaService.bussinessService.delete({
       where: {
         businessId,
-        id: id,
+        id,
       },
     })
     return {
@@ -462,9 +466,9 @@ export default class BusinessService {
     const buinessAddress = await this.prismaService.businessAddress.create({
       data: {
         businessId,
-        country: country,
-        state: state,
-        city: city,
+        country,
+        state,
+        city,
         streetAddress: streetAddress || undefined,
         specificLocation: specificLocation || undefined,
       },
@@ -477,6 +481,7 @@ export default class BusinessService {
       },
     }
   }
+
   async updateBusinessAddress({
     addressId,
     city,
@@ -513,6 +518,7 @@ export default class BusinessService {
       },
     }
   }
+
   async deleteBusinessAddress({
     id,
     userId,
@@ -576,6 +582,7 @@ export default class BusinessService {
       data: business,
     }
   }
+
   async getAllBusinesses(): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany({
       select: {
@@ -602,6 +609,7 @@ export default class BusinessService {
       data: business,
     }
   }
+
   async getUserBusinesses({ userId }: UserIdParams): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany({
       where: { ownerId: userId },
@@ -762,6 +770,7 @@ export default class BusinessService {
       data: business,
     }
   }
+
   // follow related
   async addFollower({
     id,
@@ -785,6 +794,7 @@ export default class BusinessService {
       message: 'User followed buisness  successfully',
     }
   }
+
   async removeFollower({
     id,
     userId,
@@ -807,6 +817,7 @@ export default class BusinessService {
       message: 'User unfollowed buisness successfully',
     }
   }
+
   async getFollowerBusiness({ userId }: UserIdParams): Promise<ApiResponse> {
     const businesses = await this.prismaService.business.findMany({
       where: {
@@ -865,12 +876,13 @@ export default class BusinessService {
       data: story,
     }
   }
+
   async updateStory({
     userId,
     id,
     ...updateStoryDto
   }: UpdateStoryDto & UserIdParams): Promise<ApiResponse> {
-    let oldImageUrl = undefined
+    let oldImageUrl
     let story = await this.#verifyBusinessStoryId({
       id,
     })
@@ -893,6 +905,7 @@ export default class BusinessService {
       data: story,
     }
   }
+
   async deleteStory({
     userId,
     id,
@@ -911,6 +924,7 @@ export default class BusinessService {
       message: 'story deleted  successfully',
     }
   }
+
   async getStories(): Promise<ApiResponse> {
     const stories = await this.prismaService.story.findMany({
       orderBy: [{ createdAt: 'desc' }],
@@ -921,6 +935,7 @@ export default class BusinessService {
       data: stories,
     }
   }
+
   async getBusinessStories({
     businessId,
   }: BusinessIdParams): Promise<ApiResponse> {

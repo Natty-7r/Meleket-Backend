@@ -52,7 +52,7 @@ export default class ActivityInterceptor implements NestInterceptor {
         if (
           !(
             request.originalUrl.includes('/winston') ||
-            request.originalUrl == '/'
+            request.originalUrl === '/'
           )
         ) {
           this.logger.log('', { ...activityLog })

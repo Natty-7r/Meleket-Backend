@@ -24,7 +24,7 @@ export default class BusinessDetailResponse {
 
   @ApiResponseProperty({
     type: [String],
-    example: [, 'service_uuid2'],
+    example: ['service_uuid2'],
   })
   services: string[]
 

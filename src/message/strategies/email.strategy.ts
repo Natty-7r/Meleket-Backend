@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import {
   SendAccountCreationParams,
@@ -12,10 +12,10 @@ import {
   generateVerifyEmailOTPMessage,
 } from 'src/common/util/helpers/string-util'
 import { MailerService } from '@nestjs-modules/mailer'
-import MessageStrategy from '../interfaces/message-strategry.interface'
 import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
 import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
+import MessageStrategy from '../interfaces/message-strategry.interface'
 
 @Injectable()
 export default class EmailStrategy implements MessageStrategy {
@@ -48,10 +48,13 @@ export default class EmailStrategy implements MessageStrategy {
         ...error,
       }
       this.errorLogger.error('', emailError)
+      return null
     }
   }
 
-  async sendMessage(params: SendMessageParams): Promise<void> {}
+  async sendMessage(params: SendMessageParams): Promise<void> {
+    console.log(params)
+  }
 
   async sendOTP({
     otp,

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiPropertyOptional } from '@nestjs/swagger'
 import { IsString, IsOptional, IsNotEmpty, IsDateString } from 'class-validator'
 import { SEX } from 'src/common/util/types/base.type'
 

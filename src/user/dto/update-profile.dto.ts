@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { IsString, IsOptional, IsDate, IsDateString } from 'class-validator'
+import { IsString, IsOptional, IsDateString } from 'class-validator'
 import { SEX } from 'src/common/util/types/base.type'
 
 export default class UpdateProfileDto {

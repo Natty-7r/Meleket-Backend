@@ -1,15 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { Type } from 'class-transformer'
-import {
-  IsOptional,
-  IsString,
-  IsNotEmpty,
-  IsJSON,
-  IsArray,
-  ValidateNested,
-} from 'class-validator'
+import { IsOptional, IsString, IsNotEmpty, IsJSON } from 'class-validator'
 
-export class UpdateBusinessServiceDto {
+export default class UpdateBusinessServiceDto {
   @ApiProperty({
     description: 'Unique identifier for the business',
     example: '550e8400-e29b-41d4-a716-446655440001',
@@ -43,23 +35,4 @@ export class UpdateBusinessServiceDto {
   @IsJSON()
   @IsNotEmpty()
   specifications?: JSON
-}
-
-export default class UpdateBusinessesServiceDto {
-  @ApiProperty({
-    description: 'List of services to be updated',
-    type: [UpdateBusinessServiceDto],
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => UpdateBusinessServiceDto)
-  services: UpdateBusinessServiceDto[]
-
-  @ApiProperty({
-    description: 'Unique identifier for the business',
-    example: '550e8400-e29b-41d4-a716-446655440001',
-  })
-  @IsString()
-  @IsNotEmpty()
-  businessId: string
 }

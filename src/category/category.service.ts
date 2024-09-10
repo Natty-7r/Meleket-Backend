@@ -1,9 +1,4 @@
 import {
-  CreateCategoryParams,
-  GenerateCategoryTreeParams,
-  OptionalImageUrlParams,
-} from './../common/util/types/params.type'
-import {
   BadRequestException,
   ConflictException,
   Injectable,
@@ -13,13 +8,18 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import { CategoryTreeNode } from 'src/common/util/types/base.type'
-import UpdateCategoryDto from './dto/update-category.dto'
-import UpdateParentCategoryDto from './dto/update-category-parent.dto'
-import CreateCategoryDto from './dto/create-category.dto'
 import BusinessService from 'src/business/business.service'
 import { BaseIdParams } from 'src/common/util/types/params.type'
 import { ApiResponse } from 'src/common/util/types/responses.type'
 import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
+import CreateCategoryDto from './dto/create-category.dto'
+import UpdateParentCategoryDto from './dto/update-category-parent.dto'
+import UpdateCategoryDto from './dto/update-category.dto'
+import {
+  CreateCategoryParams,
+  GenerateCategoryTreeParams,
+  OptionalImageUrlParams,
+} from '../common/util/types/params.type'
 
 @Injectable()
 @UseGuards(JwtAuthGuard)
@@ -208,6 +208,7 @@ export default class CategoryService {
       data: this.generateCategoryTree({ categories: allCategories }),
     }
   }
+
   async getCategoryBusiness({ id }: BaseIdParams): Promise<ApiResponse> {
     return this.businessService.getCategoryBusinesses({ categoryId: id })
   }
