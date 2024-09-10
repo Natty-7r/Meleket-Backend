@@ -243,13 +243,19 @@ export default class BusinessController {
 
   @Get('stories')
   @GetAllStories()
-  async fetchAllStories() {
-    return this.businessService.getStories()
+  async fetchAllStories(@User() user: USER) {
+    return this.businessService.getStories({ userId: user?.id })
   }
 
   @Get('stories/:businessId')
   @GetBusinessStories()
-  async getStories(@Param('businessId') businessId: string) {
-    return this.businessService.getBusinessStories({ businessId })
+  async getStories(
+    @Param('businessId') businessId: string,
+    @User() user: USER,
+  ) {
+    return this.businessService.getBusinessStories({
+      businessId,
+      userId: user?.id,
+    })
   }
 }

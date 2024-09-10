@@ -10,6 +10,7 @@ import {
   UnFollowBusinessSwaggerDefinition,
   UpdateProfileSwaggerDefinition,
   UpdateReviewSwaggerDefinition,
+  ViewStorySwaggerDefinition,
 } from './user-swagger.decorator'
 import { ApiForbiddenResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
@@ -80,3 +81,7 @@ export const UpdateProfile = () =>
     ),
     UpdateProfileSwaggerDefinition(),
   )
+
+// story related
+export const ViewStory = () =>
+  applyDecorators(ClientRole(), ViewStorySwaggerDefinition())

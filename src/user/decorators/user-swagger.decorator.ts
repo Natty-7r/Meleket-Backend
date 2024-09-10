@@ -1,4 +1,9 @@
-import { applyDecorators, NotFoundException, Query } from '@nestjs/common'
+import {
+  applyDecorators,
+  NotFoundException,
+  Param,
+  Query,
+} from '@nestjs/common'
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
@@ -122,4 +127,15 @@ export const UpdateProfileSwaggerDefinition = () =>
     }),
     ApiBadRequestResponse({ description: 'No profile added' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+export const ViewStorySwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'View story' }),
+    ApiCreatedResponse({
+      description: 'Story view  successfully',
+      type: ProfileResponse,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid Story Id' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiParam({ name: 'storyId', description: 'story id ' }),
   )

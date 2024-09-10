@@ -42,6 +42,8 @@ import {
   SearchBusinessParams,
   UserIdParams,
   BaseIdParams,
+  StoryIdParams,
+  OptionalUserIdParams,
 } from '../common/util/types/params.type'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 import CreateStoryDto from './dto/create-story.dto'
@@ -53,6 +55,45 @@ export default class BusinessService {
   constructor(private readonly prismaService: PrismaService) {}
 
   // helper methods
+
+  async calculateRatingSummary({ id }: BaseIdParams) {
+    const ratings = await this.prismaService.rating.findMany({
+      where: {
+        businessId: id,
+      },
+    })
+
+    const averageRating =
+      ratings.reduce((sum, rating) => {
+        return sum + rating.rateValue
+      }, 0.0) / ratings.length
+    /* eslint-disable */
+    const ratingSummary = {
+      1: ratings.filter((rating) => rating.rateValue === 1).length,
+      2: ratings.filter((rating) => rating.rateValue === 2).length,
+      3: ratings.filter((rating) => rating.rateValue === 3).length,
+      4: ratings.filter((rating) => rating.rateValue === 4).length,
+      5: ratings.filter((rating) => rating.rateValue === 5).length,
+    }
+    /* eslint-disable */
+    return this.prismaService.business.update({
+      where: { id },
+      data: {
+        averageRating,
+        ratingSummary: JSON.stringify(ratingSummary),
+      },
+    })
+  }
+  async updateStoryViewCount({ storyId }: StoryIdParams): Promise<Story> {
+    const story = await this.#verifyBusinessStoryId({ id: storyId })
+
+    return await this.prismaService.story.update({
+      where: { id: storyId },
+      data: {
+        viewCount: story.viewCount + 1,
+      },
+    })
+  }
 
   // Private method to verify the business ID by querying the database.
   // Throws a BadRequestException if the business is not found.
@@ -205,35 +246,6 @@ export default class BusinessService {
     })
     if (!story) throw new NotFoundException('Invalid story ID')
     return story
-  }
-
-  async calculateRatingSummary({ id }: BaseIdParams) {
-    const ratings = await this.prismaService.rating.findMany({
-      where: {
-        businessId: id,
-      },
-    })
-
-    const averageRating =
-      ratings.reduce((sum, rating) => {
-        return sum + rating.rateValue
-      }, 0.0) / ratings.length
-    /* eslint-disable */
-    const ratingSummary = {
-      1: ratings.filter((rating) => rating.rateValue === 1).length,
-      2: ratings.filter((rating) => rating.rateValue === 2).length,
-      3: ratings.filter((rating) => rating.rateValue === 3).length,
-      4: ratings.filter((rating) => rating.rateValue === 4).length,
-      5: ratings.filter((rating) => rating.rateValue === 5).length,
-    }
-    /* eslint-disable */
-    return this.prismaService.business.update({
-      where: { id },
-      data: {
-        averageRating,
-        ratingSummary: JSON.stringify(ratingSummary),
-      },
-    })
   }
 
   async createBusiness({
@@ -924,29 +936,60 @@ export default class BusinessService {
       message: 'story deleted  successfully',
     }
   }
-
-  async getStories(): Promise<ApiResponse> {
+  async getStories({ userId }: OptionalUserIdParams): Promise<ApiResponse> {
     const stories = await this.prismaService.story.findMany({
       orderBy: [{ createdAt: 'desc' }],
     })
+
+    let viewedStoryIds: Set<string> = new Set()
+    if (userId) {
+      const userViews = await this.prismaService.userStoryView.findMany({
+        where: { userId },
+        select: { storyId: true },
+      })
+
+      viewedStoryIds = new Set(userViews.map((view) => view.storyId))
+    }
+
+    const enhancedStories = stories.map((story) => ({
+      ...story,
+      viewed: userId ? viewedStoryIds.has(story.id) : false,
+    }))
+
     return {
       status: 'success',
-      message: 'story fetched  successfully',
-      data: stories,
+      message: 'Stories fetched successfully',
+      data: enhancedStories,
     }
   }
-
   async getBusinessStories({
+    userId,
     businessId,
-  }: BusinessIdParams): Promise<ApiResponse> {
+  }: BusinessIdParams & OptionalUserIdParams): Promise<ApiResponse> {
     const stories = await this.prismaService.story.findMany({
       where: { businessId },
       orderBy: [{ createdAt: 'desc' }],
     })
+
+    let viewedStoryIds: Set<string> = new Set()
+    if (userId) {
+      const userViews = await this.prismaService.userStoryView.findMany({
+        where: { userId },
+        select: { storyId: true },
+      })
+
+      viewedStoryIds = new Set(userViews.map((view) => view.storyId))
+    }
+
+    const enhancedStories = stories.map((story) => ({
+      ...story,
+      viewed: userId ? viewedStoryIds.has(story.id) : false,
+    }))
+
     return {
       status: 'success',
-      message: 'story fetched  successfully',
-      data: stories,
+      message: 'Stories fetched successfully',
+      data: enhancedStories,
     }
   }
 }
