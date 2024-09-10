@@ -19,6 +19,7 @@ import CreateCategoryDto from './dto/create-category.dto'
 import BusinessService from 'src/business/business.service'
 import { BaseIdParams } from 'src/common/util/types/params.type'
 import { ApiResponse } from 'src/common/util/types/responses.type'
+import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 
 @Injectable()
 @UseGuards(JwtAuthGuard)
@@ -151,11 +152,14 @@ export default class CategoryService {
     id,
     imageUrl,
   }: BaseIdParams & OptionalImageUrlParams): Promise<ApiResponse> {
+    let oldImageUrl = undefined
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
 
     if (!category) throw new NotFoundException('Invalid category id')
+
+    if (imageUrl) oldImageUrl = category.image
 
     const updatedCategory = await this.prismaService.category.update({
       where: {
@@ -165,6 +169,7 @@ export default class CategoryService {
         image: imageUrl,
       },
     })
+    deleteFileAsync(oldImageUrl)
     return {
       status: 'success',
       message: 'Category updated  successfully',
