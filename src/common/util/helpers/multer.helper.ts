@@ -29,7 +29,6 @@ export const multerFilter = ({
   return (req: Request, file: Express.Multer.File, callback: any) => {
     // Ensure the file is an file format
 
-    console.log(fileType, optional, file)
     if (!optional && !file) {
       return callback(new BadRequestException('File cannot be empty!'), false)
     }
