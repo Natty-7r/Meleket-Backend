@@ -152,14 +152,11 @@ export default class CategoryService {
     id,
     imageUrl,
   }: BaseIdParams & OptionalImageUrlParams): Promise<ApiResponse> {
-    let oldImageUrl = undefined
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
 
     if (!category) throw new NotFoundException('Invalid category id')
-
-    if (imageUrl) oldImageUrl = category.image
 
     const updatedCategory = await this.prismaService.category.update({
       where: {
@@ -169,7 +166,7 @@ export default class CategoryService {
         image: imageUrl,
       },
     })
-    deleteFileAsync(oldImageUrl)
+    deleteFileAsync({ filePath: category.image })
     return {
       status: 'success',
       message: 'Category updated  successfully',
