@@ -6,7 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
-import AddReviewDto from './dto/add-review.dto'
 import {
   BaseIdParams,
   BusinessIdParams,
@@ -17,12 +16,13 @@ import {
   ApiResponse,
   BareApiResponse,
 } from 'src/common/util/types/responses.type'
+import { validateAge } from 'src/common/util/helpers/validator.helper'
+import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
+import AddReviewDto from './dto/add-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
 import EditReviewDto from './dto/edit-review.dto'
 import AddProfileDto from './dto/add-profile.dto'
 import UpdateProfileDto from './dto/update-profile.dto'
-import { validateAge } from 'src/common/util/helpers/validator.helper'
-import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 
 @Injectable()
 export default class UserService {
@@ -41,6 +41,7 @@ export default class UserService {
     if (!user) throw new ForbiddenException('User not found')
     return true
   }
+
   async #checkProfileLevel({ id }: BaseIdParams) {
     const user = await this.prismaService.user.findFirst({
       where: { id },
@@ -66,7 +67,7 @@ export default class UserService {
     const age = validateAge(birthDate)
     profile = await this.prismaService.profile.create({
       data: {
-        userId: userId,
+        userId,
         birthDate,
         age,
         ...addProfileDto,
@@ -84,7 +85,7 @@ export default class UserService {
     birthDate,
     ...updateProfileDto
   }: UpdateProfileDto & UserIdParams): Promise<ApiResponse> {
-    let oldProfilePicturePath = undefined
+    let oldProfilePicturePath
     await this.#checkUserId({ id: userId })
 
     let profile = await this.prismaService.profile.findFirst({
@@ -102,7 +103,6 @@ export default class UserService {
         age,
       },
     })
-    console.log(oldProfilePicturePath)
     if (oldProfilePicturePath)
       deleteFileAsync({ filePath: oldProfilePicturePath })
     return {
@@ -170,6 +170,7 @@ export default class UserService {
       data: review,
     }
   }
+
   async deleteReview({
     userId,
     id,
@@ -192,6 +193,7 @@ export default class UserService {
       data: review,
     }
   }
+
   // Rating related
   async addRating({
     userId,
@@ -226,6 +228,7 @@ export default class UserService {
       data: rating,
     }
   }
+
   // following
   async followBussiness({
     id,
@@ -233,12 +236,14 @@ export default class UserService {
   }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
     return this.businessSevice.addFollower({ id: businessId, userId: id })
   }
+
   async unFollowBussiness({
     id,
     businessId,
   }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
     return this.businessSevice.removeFollower({ id: businessId, userId: id })
   }
+
   async getFollowedBussiness({ id }: BaseIdParams): Promise<ApiResponse> {
     return this.businessSevice.getFollowerBusiness({ userId: id })
   }

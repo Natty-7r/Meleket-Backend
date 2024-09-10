@@ -16,6 +16,7 @@ import { generateOTP } from 'src/common/util/helpers/numbers.helper'
 import MessageService from 'src/message/message.service'
 import { ConfigService } from '@nestjs/config'
 import EmailStrategy from 'src/message/strategies/email.strategy'
+import { BaseIdParams } from 'src/common/util/types/params.type'
 import {
   CreateAccountDto,
   CreateAdminDto,
@@ -27,7 +28,6 @@ import CreateOTPDto from './dto/create-otp.dto'
 import VerifyUserDto from './dto/verify-user.dto'
 import SmsStrategy from '../message/strategies/sms.strategy'
 import UpdatePasswordDto from './dto/update-passowrd.dto'
-import { BaseIdParams } from 'src/common/util/types/params.type'
 
 @Injectable()
 export default class AuthService {
@@ -73,8 +73,9 @@ export default class AuthService {
           signUpType === SignUpType.BY_EMAIL ? 'CREATED' : 'VERIFIED',
       },
     })
-
+    /* eslint-disable */
     const { password: _, ...rest } = userCreated
+    /* eslint-disable */
     if (signUpType === SignUpType.BY_EMAIL) {
       const { otpCode } = await this.#createOTP({
         channelType: 'EMAIL',
@@ -131,9 +132,9 @@ export default class AuthService {
       password,
       address: email,
     })
-
+    /* eslint-disable */
     const { password: _, ...rest } = adminCreated
-
+    /* eslint-disable */
     return {
       status: 'success',
       message: 'Admin created successfully',
@@ -161,8 +162,9 @@ export default class AuthService {
 
     if (userType !== 'CLIENT_USER' && (user as any).status !== 'ACTIVE')
       throw new UnauthorizedException('Admin is Inactive currenlty ')
-
+    /* eslint-disable */
     const { password: _, ...result } = user
+    /* eslint-disable */
     return result
   }
 

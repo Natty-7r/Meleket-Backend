@@ -28,6 +28,7 @@ export default class BusinessAddressResponse {
     example: 'Addis Ababa',
   })
   city?: string
+
   @ApiProperty({
     example: 'street address',
   })

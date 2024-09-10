@@ -7,9 +7,10 @@ import {
   Put,
   UploadedFile,
 } from '@nestjs/common'
-import UserService from './user.service'
 import { USER } from 'src/common/util/types/base.type'
 import User from 'src/common/decorators/user.decorator'
+import { ApiTags } from '@nestjs/swagger'
+import UserService from './user.service'
 import AddReviewDto from './dto/add-review.dto'
 import {
   AddProfile,
@@ -21,7 +22,6 @@ import {
   UpdateProfile,
   UpdateReview,
 } from './decorators/user-endpoint.decorator'
-import { ApiTags } from '@nestjs/swagger'
 import EditReviewDto from './dto/edit-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
 import AddProfileDto from './dto/add-profile.dto'
@@ -76,6 +76,7 @@ export default class UserController {
       userId: user.id,
     })
   }
+
   @Delete('review/:id')
   @DeleteReview()
   deleteReview(@Param('id') id: string, @User() user: USER) {
@@ -84,6 +85,7 @@ export default class UserController {
       userId: user.id,
     })
   }
+
   @AddRating()
   @Post('rating')
   addRaging(@Body() addRatingDto: AddRatingDto, @User() user: USER) {

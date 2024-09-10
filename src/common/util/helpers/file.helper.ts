@@ -1,7 +1,6 @@
-import { BaseFilePathParams } from './../types/params.type'
-import * as fs from 'fs'
 import * as fsAsync from 'fs/promises'
 import * as path from 'path'
+import { BaseFilePathParams } from '../types/params.type'
 
 // base fs functions
 
@@ -27,4 +26,7 @@ const getFullPath = async ({ filePath }: BaseFilePathParams) => {
 export const deleteFileAsync = async ({ filePath }: BaseFilePathParams) => {
   const fullPath = await getFullPath({ filePath })
   fsAsync.unlink(fullPath)
+}
+export const creteFile = ({ filePath }: BaseFilePathParams) => {
+  console.log(filePath)
 }

@@ -11,10 +11,10 @@ import {
   generateResetSMSOTPMessage,
   generateVerifySMSOTPMessage,
 } from 'src/common/util/helpers/string-util'
-import MessageStrategy from '../interfaces/message-strategry.interface'
 import ErrorLoggerStrategy from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
 import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
+import MessageStrategy from '../interfaces/message-strategry.interface'
 
 @Injectable()
 export default class SmsStrategy implements MessageStrategy {
@@ -49,10 +49,13 @@ export default class SmsStrategy implements MessageStrategy {
         ...error,
       }
       this.errorLogger.error('', smsError)
+      return null
     }
   }
 
-  async sendMessage(messageParams: SendMessageParams): Promise<void> {}
+  async sendMessage(params: SendMessageParams): Promise<void> {
+    console.log(params)
+  }
 
   async sendOTP({
     otp,
@@ -77,5 +80,7 @@ export default class SmsStrategy implements MessageStrategy {
 
   async sendAccountCreationMessage(
     params: SendAccountCreationParams,
-  ): Promise<void> {}
+  ): Promise<void> {
+    console.log(params)
+  }
 }

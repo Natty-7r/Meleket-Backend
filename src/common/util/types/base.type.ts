@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { Admin, OTPType, User } from '@prisma/client'
+import { Admin, User } from '@prisma/client'
 
 export type Module = {
   id: number

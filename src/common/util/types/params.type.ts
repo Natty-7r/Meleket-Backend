@@ -59,7 +59,7 @@ export type BaseIdParams = {
   id: string
 }
 
-/***
+/** *
  *
  * Business related params
  */
@@ -129,8 +129,6 @@ export type DeleteBusinessAddressParams = {
 }
 
 // fetch related types
-
-export type GetAllBusinessParams = {}
 
 export type GetBusinessDetailParams = {
   id: string
