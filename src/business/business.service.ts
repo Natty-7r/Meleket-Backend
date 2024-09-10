@@ -41,6 +41,7 @@ import {
   UserIdParams,
 } from './../common/util/types/params.type'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
+import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 @Injectable()
 export default class BusinessService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -270,14 +271,15 @@ export default class BusinessService {
     imageUrl,
     userId,
   }: UpdateBusinessImageParams): Promise<ApiResponse> {
-    await this.#checkOwner({ userId, businessId: id })
+    const business = await this.#checkOwner({ userId, businessId: id })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
+
     const updatedBusiness = await this.prismaService.business.update({
       where: { id },
       data: { mainImageUrl: imageUrl },
     })
-
+    deleteFileAsync({ filePath: business.mainImageUrl })
     return {
       status: 'success',
       message: 'Buisness image updated successfully',
@@ -352,15 +354,15 @@ export default class BusinessService {
     imageUrl,
     userId,
   }: UpdateBusinessImageParams): Promise<ApiResponse> {
-    await this.#verifyBusinessServiceId({ id })
     await this.#checkOwner({ userId, businessId: id })
+    const service = await this.#verifyBusinessServiceId({ id })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
     const updatedBusiness = await this.prismaService.bussinessService.update({
       where: { id },
       data: { image: imageUrl },
     })
-
+    deleteFileAsync({ filePath: service.image })
     return {
       status: 'success',
       message: 'Buisness image updated successfully',

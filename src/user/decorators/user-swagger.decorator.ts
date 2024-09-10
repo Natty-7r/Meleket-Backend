@@ -13,6 +13,7 @@ import {
 } from '@nestjs/swagger'
 import ReviewResponse from '../responses/review-response'
 import RatingResponse from '../responses/rating.response'
+import ProfileResponse from '../responses/profile.response'
 
 export const AddReviewSwaggerDefinition = () =>
   applyDecorators(
@@ -97,5 +98,28 @@ export const FollowedBusinessSwaggerDefinition = () =>
       description: 'Followed bussiness fetched successfully ',
       type: String,
     }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+
+// profile
+
+export const AddProfileSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Add profile' }),
+    ApiCreatedResponse({
+      description: 'Profile added successfully',
+      type: ProfileResponse,
+    }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+
+export const UpdateProfileSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ description: 'Update profile' }),
+    ApiCreatedResponse({
+      description: 'Profile updated successfully',
+      type: ProfileResponse,
+    }),
+    ApiBadRequestResponse({ description: 'No profile added' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
   )

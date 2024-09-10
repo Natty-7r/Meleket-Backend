@@ -109,3 +109,8 @@ export interface Config {
     password: string
   }
 }
+
+export enum SEX {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+}

@@ -1,24 +1,63 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Put,
+  UploadedFile,
+} from '@nestjs/common'
 import UserService from './user.service'
 import { USER } from 'src/common/util/types/base.type'
 import User from 'src/common/decorators/user.decorator'
 import AddReviewDto from './dto/add-review.dto'
 import {
+  AddProfile,
   AddRating,
   AddReveiw,
   DeleteReview,
   FollowBusiness,
   UnFollowBusiness,
+  UpdateProfile,
   UpdateReview,
 } from './decorators/user-endpoint.decorator'
 import { ApiTags } from '@nestjs/swagger'
 import EditReviewDto from './dto/edit-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
+import AddProfileDto from './dto/add-profile.dto'
 
 @ApiTags('User')
 @Controller('user')
 export default class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('profile')
+  @AddProfile()
+  async addProfile(
+    @Body() addProfileDto: AddProfileDto,
+    @User() user: USER,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.userService.addProfile({
+      ...addProfileDto,
+      userId: user.id,
+      profilePicture: file?.path || undefined,
+    })
+  }
+
+  @Put('profile')
+  @UpdateProfile()
+  async updateProfile(
+    @Body() addProfileDto: AddProfileDto,
+    @User() user: USER,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.userService.updateProfile({
+      ...addProfileDto,
+      userId: user.id,
+      profilePicture: file?.path || undefined,
+    })
+  }
 
   @Post('review')
   @AddReveiw()
