@@ -15,7 +15,7 @@ export type PaginationResoponse = {
   previousPage: number | null
   nextPage: number | null
 
-  totalPage: number
+  totalPages: number
   itemsPerPage: number
   isLastPage: boolean
 }

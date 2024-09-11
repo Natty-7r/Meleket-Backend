@@ -1,4 +1,8 @@
 import {
+  ApiResponseWithPagination,
+  PaginationResoponse,
+} from './../common/util/types/responses.type'
+import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
@@ -44,6 +48,8 @@ import {
   BaseIdParams,
   StoryIdParams,
   OptionalUserIdParams,
+  PaginationParams,
+  BaseNameParams,
 } from '../common/util/types/params.type'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 import CreateStoryDto from './dto/create-story.dto'
@@ -580,18 +586,42 @@ export default class BusinessService {
 
   async getCategoryBusinesses({
     categoryId,
-  }: CategoryIdParams): Promise<ApiResponse> {
-    const category = await this.prismaService.category.findFirst({
-      where: { id: categoryId },
+    page = 1,
+    items = 10,
+    sort = ['rating'],
+    sortType = 'desc',
+    name: categoryName,
+  }: CategoryIdParams & PaginationParams & BaseNameParams): Promise<
+    ApiResponseWithPagination<Business[]>
+  > {
+    const businesses = await this.prismaService.business.findMany({
+      where: { categoryId },
+      take: items,
+      skip: items * page - 1,
+      orderBy: [{ averageRating: sortType }],
     })
-    if (!category) throw new NotFoundException('Invalid category id ')
-    const business = await this.prismaService.business.findMany({
+    const totalBusinesses = await this.prismaService.business.count({
       where: { categoryId },
     })
+    const totalPages = Math.ceil(totalBusinesses / items)
+
+    const pagination: PaginationResoponse = {
+      totalPages,
+      firstPage: 1,
+      lastPage: totalPages,
+      currentPage: page,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      itemsPerPage: page,
+      isLastPage: page === totalPages,
+    }
     return {
       status: 'success',
-      message: `${category.name}  buisness fetched successfully`,
-      data: business,
+      message: `${categoryName}  buisness fetched successfully`,
+      data: {
+        pagination,
+        payload: businesses,
+      },
     }
   }
 

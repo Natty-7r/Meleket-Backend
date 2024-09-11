@@ -1,11 +1,14 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseGuards,
 } from '@nestjs/common'
@@ -28,6 +31,7 @@ import {
   VerifyCategory,
 } from './decorators/category-api-endpoint.decorator'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
+import { SortType } from 'src/common/util/types/params.type'
 
 @ApiTags('Category')
 @Controller('category')
@@ -90,8 +94,20 @@ export default class CategoryController {
 
   @GetCategoryBusinesses()
   @Get('/business/:id')
-  getCategoryBusiness(@Param('id') id: string) {
-    return this.categoryService.getCategoryBusiness({ id })
+  getCategoryBusiness(
+    @Param('id') id: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number, // Default to page 1
+    @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number, // Default to 10 items per page
+    @Query('sort') sort: string[], // Sorting fields
+    @Query('sortType', new DefaultValuePipe('desc')) sortType: SortType,
+  ) {
+    return this.categoryService.getCategoryBusiness({
+      id,
+      page,
+      items,
+      sort,
+      sortType,
+    })
   }
 
   @DeleteCategory()

@@ -136,14 +136,44 @@ export const GetBussinesDetailSwaggerDefinition = () =>
   )
 export const GetCategoryBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Get business by category' }),
+    ApiOperation({ description: 'Get businesses by category' }),
     ApiResponse({
-      description: 'category.name business fetched successfully',
-      type: [BusinessResponse],
+      description: 'Category businesses fetched successfully',
+      type: [BusinessResponse], // Assuming this contains the business data
     }),
-    ApiParam({ description: 'category  Id', name: 'categoryId' }),
-    ApiBadRequestResponse({ description: 'Invalid category Id' }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+    ApiParam({
+      description: 'Category ID',
+      name: 'id',
+      required: true,
+      type: 'string',
+    }),
+    ApiQuery({
+      name: 'page',
+      description: 'Page number for pagination (default: 1)',
+      required: false,
+      type: 'number',
+    }),
+    ApiQuery({
+      name: 'items',
+      description: 'Number of items per page (default: 10)',
+      required: false,
+      type: 'number',
+    }),
+    ApiQuery({
+      name: 'sort',
+      description: 'Fields to sort by (e.g., averageRating, name)',
+      required: false,
+      type: 'string',
+      isArray: true, // Indicates that this query parameter can be an array
+    }),
+    ApiQuery({
+      name: 'sortType',
+      description: 'Sort direction (asc or desc)',
+      required: false,
+      type: 'string',
+      enum: ['asc', 'desc'], // Define accepted values
+    }),
+    ApiBadRequestResponse({ description: 'Invalid category ID' }),
   )
 // business address
 
