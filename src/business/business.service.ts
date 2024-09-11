@@ -1,13 +1,10 @@
 import {
-  ApiResponseWithPagination,
-  PaginationResoponse,
-} from './../common/util/types/responses.type'
-import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import {
@@ -23,6 +20,10 @@ import {
 
 import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 import { validateStory } from 'src/common/util/helpers/validator.helper'
+import {
+  ApiResponseWithPagination,
+  PaginationResoponse,
+} from '../common/util/types/responses.type'
 import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
@@ -109,7 +110,8 @@ export default class BusinessService {
       where: { id: userId },
     })
 
-    if (user.profileLevel !== 'VERIFIED')
+    if (!user) throw new UnauthorizedException('User not found ')
+    if (user?.profileLevel !== 'VERIFIED')
       throw new ForbiddenException('Unverfied user cannot create business ')
     return true
   }
@@ -597,13 +599,16 @@ export default class BusinessService {
     const businesses = await this.prismaService.business.findMany({
       where: { categoryId },
       take: items,
-      skip: items * page - 1,
+      skip: (page - 1) * items,
       orderBy: [{ averageRating: sortType }],
     })
     const totalBusinesses = await this.prismaService.business.count({
       where: { categoryId },
     })
-    const totalPages = Math.ceil(totalBusinesses / items)
+    const totalPages =
+      Math.ceil(totalBusinesses / items) === 0
+        ? 1
+        : Math.ceil(totalBusinesses / items)
 
     const pagination: PaginationResoponse = {
       totalPages,
@@ -612,7 +617,7 @@ export default class BusinessService {
       currentPage: page,
       previousPage: page > 1 ? page - 1 : null,
       nextPage: page < totalPages ? page + 1 : null,
-      itemsPerPage: page,
+      itemsPerPage: items,
       isLastPage: page === totalPages,
     }
     return {

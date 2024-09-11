@@ -61,7 +61,7 @@ export const VerifyCategory = () =>
   applyDecorators(AdminRole(), VerifyCategorySwaggerDefinition())
 
 export const GetCategories = () =>
-  applyDecorators(AdminRole(), GetCategoriesSwaggerDefinition())
+  applyDecorators(Public(), GetCategoriesSwaggerDefinition())
 
 export const DeleteCategory = () =>
   applyDecorators(AdminRole(), DeleteCategorySwaggerDefinition())

@@ -15,6 +15,7 @@ import {
   ApiResponseWithPagination,
 } from 'src/common/util/types/responses.type'
 import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
+import { Business } from '@prisma/client'
 import {
   PaginationParams,
   CreateCategoryParams,
@@ -24,7 +25,6 @@ import {
 import CreateCategoryDto from './dto/create-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import UpdateCategoryDto from './dto/update-category.dto'
-import { Business } from '@prisma/client'
 
 @Injectable()
 @UseGuards(JwtAuthGuard)
@@ -40,7 +40,7 @@ export default class CategoryService {
 
   async verifyCategoryId({ id }: BaseIdParams) {
     const category = await this.prismaService.category.findFirst({
-      where: { id: id },
+      where: { id },
     })
     if (!category) throw new BadRequestException('Invalid category Id')
     return category
