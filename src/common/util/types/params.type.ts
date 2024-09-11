@@ -187,3 +187,14 @@ export type ValidateStory = {
   text?: string
   image?: string
 }
+
+/**
+ * Pagination params
+ */
+
+export type PaginationParams = {
+  page?: number
+  items?: number
+  sort?: number
+  sortType?: 'asc' | 'desc'
+}
