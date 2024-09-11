@@ -5,3 +5,5 @@ export const IS_PUBLIC_KEY = 'isPublic'
 export const IS_OPTIONAL_PUBLIC_KEY = 'isPublicOptional'
 
 export const MIN_USER_AGE = 15
+
+export const ITEMS_PER_ROUND = 10
