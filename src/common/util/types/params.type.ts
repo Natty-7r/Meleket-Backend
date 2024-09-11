@@ -194,7 +194,7 @@ export type ValidateStory = {
 
 export type PaginationParams = {
   page?: number
-  items?: number
-  sort?: number
+  items?: number // items per page
+  sort?: number // sort by
   sortType?: 'asc' | 'desc'
 }

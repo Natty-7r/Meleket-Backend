@@ -90,8 +90,8 @@ export default class CategoryController {
 
   @GetCategoryBusinesses()
   @Get('/business/:id')
-  getCategoryBusiness() {
-    return this.categoryService.getCategories()
+  getCategoryBusiness(@Param('id') id: string) {
+    return this.categoryService.getCategoryBusiness({ id })
   }
 
   @DeleteCategory()
