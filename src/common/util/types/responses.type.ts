@@ -8,6 +8,24 @@ export type BareApiResponse = {
   message: string
 }
 
-export type ApiResponse = BareApiResponse & {
-  data: any
+export type PaginationResoponse = {
+  firstPage: number
+  lastPage: number
+  currentPage: number
+  previousPage: number | null
+  nextPage: number | null
+
+  totalPage: number
+  itemsPerPage: number
+  isLastPage: boolean
+}
+
+export type ApiResponse<T = any> = BareApiResponse & {
+  data: T
+}
+export type ApiResponseWithPagination<T = any> = BareApiResponse & {
+  data: {
+    pagination: PaginationResoponse
+    payload: T
+  }
 }
