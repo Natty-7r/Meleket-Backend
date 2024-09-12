@@ -199,3 +199,18 @@ export type PaginationParams = {
   sort?: string[] // sort by
   sortType?: SortType
 }
+
+export type CreatePaginatioParams = {
+  totalCount: number
+  page: number
+  items: number
+}
+
+/**
+ * Sort related
+ */
+
+export type GenerateSortingParams = {
+  sortKeys: string[]
+  sortType: SortType
+}

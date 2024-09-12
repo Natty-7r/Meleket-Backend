@@ -17,13 +17,12 @@ import {
   ApiResponse,
   BareApiResponse,
 } from 'src/common/util/types/responses.type'
-
 import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 import { validateStory } from 'src/common/util/helpers/validator.helper'
-import {
-  ApiResponseWithPagination,
-  PaginationResoponse,
-} from '../common/util/types/responses.type'
+import { generateBusinessSorting } from 'src/common/util/helpers/sorting.helper'
+import { createPagination } from '../common/util/helpers/pagination.helper'
+
+import { ApiResponseWithPagination } from '../common/util/types/responses.type'
 import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
@@ -600,31 +599,21 @@ export default class BusinessService {
       where: { categoryId },
       take: items,
       skip: (page - 1) * items,
-      orderBy: [{ averageRating: sortType }],
+      orderBy: generateBusinessSorting({ sortKeys: sort, sortType }),
     })
     const totalBusinesses = await this.prismaService.business.count({
       where: { categoryId },
     })
-    const totalPages =
-      Math.ceil(totalBusinesses / items) === 0
-        ? 1
-        : Math.ceil(totalBusinesses / items)
 
-    const pagination: PaginationResoponse = {
-      totalPages,
-      firstPage: 1,
-      lastPage: totalPages,
-      currentPage: page,
-      previousPage: page > 1 ? page - 1 : null,
-      nextPage: page < totalPages ? page + 1 : null,
-      itemsPerPage: items,
-      isLastPage: page === totalPages,
-    }
     return {
       status: 'success',
       message: `${categoryName}  buisness fetched successfully`,
       data: {
-        pagination,
+        pagination: createPagination({
+          totalCount: totalBusinesses,
+          page,
+          items,
+        }),
         payload: businesses,
       },
     }
