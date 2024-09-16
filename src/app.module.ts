@@ -3,6 +3,7 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
 import { ConfigModule } from '@nestjs/config'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
+import PaymentModule from './payment/payment.module'
 import AppController from './app.controller'
 import AppService from './app.service'
 import MessageModule from './message/message.module'
@@ -33,6 +34,7 @@ import BusinessModule from './business/business.module'
     MessageModule,
     BusinessModule,
     UserModule,
+    PaymentModule,
   ],
 
   providers: [
