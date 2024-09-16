@@ -622,6 +622,7 @@ export default class BusinessService {
   async getAllBusinesses(): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany({
       select: {
+        id: true,
         name: true,
         mainImageUrl: true,
         description: true,
@@ -650,6 +651,7 @@ export default class BusinessService {
     const business = await this.prismaService.business.findMany({
       where: { ownerId: userId },
       select: {
+        id: true,
         name: true,
         mainImageUrl: true,
         description: true,
@@ -678,6 +680,7 @@ export default class BusinessService {
     const businessDetail = await this.prismaService.business.findFirst({
       where: { id },
       select: {
+        id: true,
         ratings: true,
         reviews: {
           take: 10,
@@ -708,10 +711,17 @@ export default class BusinessService {
     const businessDetail = await this.prismaService.business.findFirst({
       where: { id: businessId },
       select: {
+        id: true,
+        name: true,
         followers: {
           select: {
             firstName: true,
             lastName: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
           },
         },
         ratings: true,
@@ -781,6 +791,7 @@ export default class BusinessService {
         ],
       },
       select: {
+        id: true,
         name: true,
         mainImageUrl: true,
         description: true,
@@ -864,6 +875,7 @@ export default class BusinessService {
         },
       },
       select: {
+        id: true,
         name: true,
         mainImageUrl: true,
         description: true,
