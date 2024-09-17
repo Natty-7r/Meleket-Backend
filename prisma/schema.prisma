@@ -18,6 +18,9 @@ enum PackageType {
   THREE_MONTHLY
   YEARLY
 }
+enum PaymentMethod {
+  CHAPA
+}
 
 enum BusinessVisiblityStatus {
   CREATED // no buyed package
@@ -278,6 +281,7 @@ model Package {
   startDate   DateTime
   endDate     DateTime
   expired     Boolean
+  verified    Boolean
   bill        Bill        @relation(fields: [billId], references: [id])
   billId      String      @unique // Ensure that each Package has only one Bill
 
@@ -291,9 +295,8 @@ model Bill {
   id            String    @id @default(uuid())
   businessId    String
   userId        String
-  date          DateTime
   amount        Float
-  paymentMethod String
+  paymentMethod PaymentMethod
   reference     String
   package       Package?
 
