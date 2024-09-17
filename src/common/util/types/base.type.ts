@@ -67,6 +67,13 @@ export enum SignUpType {
   OAUTH = 'OAUTH',
 }
 
+export interface ChapaConfig {
+  secretKey: string // Chapa secret key
+  baseUrl: string // Base URL for Chapa API
+  initializePath: string // Path for transaction initialization
+  verifyPath: string // Path for transaction verification
+}
+
 export interface Config {
   server: {
     host: string
@@ -84,7 +91,7 @@ export interface Config {
   }
   jwt: {
     secret: string
-    expiresIn: any
+    expiresIn: string | number // More specific type if possible
   }
   google: {
     clientId: string
@@ -108,9 +115,28 @@ export interface Config {
     email: string
     password: string
   }
+  chapa: ChapaConfig
 }
-
 export enum SEX {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
+}
+
+export interface Options {
+  [key: string]: any
+}
+
+// chapa related
+
+export interface CustomerInfo {
+  amount: number
+  currency: string
+  email: string
+  /* eslint-disable */
+  first_name: string
+  last_name: string
+  callback_url: string
+  tx_ref?: string // Optional, will be generated if not provided
+  /* eslint-disable */
+  customization?: Record<string, any> // Customize based on actual usage
 }

@@ -214,3 +214,15 @@ export type GenerateSortingParams = {
   sortKeys: string[]
   sortType: SortType
 }
+
+export type APIMethods = 'GET' | 'POST' | 'PUT' | 'DELETE'
+export interface ApiCallBody {
+  [key: string]: any
+}
+
+export type APICallParams = {
+  url: string
+  method: APIMethods
+  authToken: string
+  body?: ApiCallBody
+}

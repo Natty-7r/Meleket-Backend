@@ -19,7 +19,10 @@ import BusinessModule from './business/business.module'
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+    }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..'), // Set the root path for static files
       serveRoot: '/', // This is the root path for serving static files
