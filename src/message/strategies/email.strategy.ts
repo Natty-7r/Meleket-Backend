@@ -10,7 +10,7 @@ import {
   generateAccountCreationEmailMessage,
   generateResetEmailOTPMessage,
   generateVerifyEmailOTPMessage,
-} from 'src/common/util/helpers/string-util'
+} from 'src/common/util/helpers/string.helper'
 import { MailerService } from '@nestjs-modules/mailer'
 import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'

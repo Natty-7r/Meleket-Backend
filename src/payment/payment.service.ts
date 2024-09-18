@@ -3,17 +3,26 @@ import BusinessService from 'src/business/business.service'
 import {
   BaseNameParams,
   BusinessIdParams,
+  GenerateParmentInitOptionParams,
   PackageIdParams,
+  PaymentInitParams,
   UserIdParams,
 } from 'src/common/util/types/params.type'
 import PrismaService from 'src/prisma/prisma.service'
-import { generatePackageCode } from 'src/common/util/helpers/string-util'
+import {
+  generatePackageCode,
+  generateRandomString,
+} from 'src/common/util/helpers/string.helper'
 import UserService from 'src/user/user.service'
-import { ChapaCustomerInfo } from 'src/common/util/types/base.type'
 import CreatePackageDto from './dto/create-package.dto'
 import PurchasePackageDto from './dto/purchase-package.dto'
 import Chapa from './payment-strategies/chapa.strategy'
 import UpdatePackageDto from './dto/update-package.dto'
+import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/util/constants'
+import {
+  calculatePackageExpireDate,
+  calculatePackageStartDate,
+} from 'src/common/util/helpers/date.helper'
 
 @Injectable()
 export default class PaymentService {
@@ -46,6 +55,38 @@ export default class PaymentService {
       throw new BadRequestException(
         'You have unbilled package please pay or clear it first ',
       )
+  }
+  private async getLastActivePackageExpiredDate({
+    businessId,
+  }: BusinessIdParams): Promise<Date> {
+    const billedPackages = await this.prismaService.businessPackage.findMany({
+      where: {
+        AND: [
+          { businessId },
+          {
+            OR: [
+              {
+                billed: true,
+              },
+              {
+                billId: {
+                  not: null,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    })
+    if (billedPackages && billedPackages.length > MAX_ACTIVE_BUSINESS_COUNT)
+      throw new BadRequestException(
+        `Bussiness can't have more than ${MAX_ACTIVE_BUSINESS_COUNT} active packages`,
+      )
+
+    if (billedPackages.length === 0) {
+      return undefined // Return undefined if the array is empty
+    }
+    return billedPackages[billedPackages.length - 1].expreDate
   }
 
   private async verifyPackageId({ packageId }: PackageIdParams) {
@@ -112,7 +153,6 @@ export default class PaymentService {
 
   async getPackages() {
     const packages = await this.prismaService.package.findMany()
-
     return {
       status: 'success',
       message: 'packages fetched successfully',
@@ -124,9 +164,15 @@ export default class PaymentService {
     businessId,
     packageId,
     userId,
+    paymentMethod,
   }: PurchasePackageDto & UserIdParams) {
     await this.verifyPackageId({ packageId })
     await this.businsesService.verifiyBusinessId({ id: businessId })
+    await this.checkUnBilledPackage({ businessId })
+    const lastPackageExpireData: Date =
+      await this.getLastActivePackageExpiredDate({
+        businessId,
+      })
     const businessDetail = await this.businsesService.getBusinessPackageDetail({
       businessId,
     })
@@ -138,14 +184,50 @@ export default class PaymentService {
       packageDetail.price *
       packageDetail.monthCount
 
-    const { data } = await this.userService.getUserDetail({ id: userId })
-    const chapaCustomerInfo: ChapaCustomerInfo = {
-      first_name: data.firstName,
-      last_name: data.lastName,
-      email: data.email,
-      currency: 'ETB',
-      amount: packageAmount,
+    const { data: user } = await this.userService.getUserDetail({ id: userId })
+    const paymentInitParams: PaymentInitParams = this.generateParmentInitOption(
+      { user, amount: packageAmount, paymentMethod },
+    )
+
+    const businessPackage = await this.prismaService.businessPackage.create({
+      data: {
+        businessId,
+        startDate: calculatePackageStartDate(lastPackageExpireData || null),
+        expreDate: calculatePackageExpireDate(packageDetail.monthCount),
+        reference: paymentInitParams.tx_ref,
+        packageId: packageDetail.id,
+      },
+    })
+
+    const paymentInitData = await this.chapa.initialize(paymentInitParams)
+
+    return {
+      status: 'success',
+      message: 'packages fetched successfully',
+      data: {
+        package: businessPackage,
+        payment: paymentInitData.data,
+      },
     }
-    console.log(chapaCustomerInfo)
+  }
+
+  generateParmentInitOption({
+    paymentMethod,
+    user,
+    amount,
+  }: GenerateParmentInitOptionParams): PaymentInitParams {
+    switch (paymentMethod) {
+      case 'CHAPA':
+        return {
+          first_name: user.firstName,
+          last_name: user.lastName,
+          email: user.email,
+          currency: 'ETB',
+          amount,
+          tx_ref: generateRandomString({}),
+        }
+      default:
+        throw new BadRequestException('Unknown payment method')
+    }
   }
 }

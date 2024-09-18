@@ -136,7 +136,7 @@ export interface ChapaCustomerInfo {
   first_name: string
   last_name: string
   callback_url?: string
-  tx_ref?: string // Optional, will be generated if not provided
+  tx_ref: string // Optional, will be generated if not provided
   /* eslint-disable */
   customization?: Record<string, any> // Customize based on actual usage
 }

@@ -1,6 +1,13 @@
 // business.service.params.ts
 
-import { Category, OTPType, StoryContentType } from '@prisma/client'
+import {
+  Category,
+  OTPType,
+  PaymentMethod,
+  StoryContentType,
+  User,
+} from '@prisma/client'
+import { ChapaCustomerInfo } from './base.type'
 
 export type SendSMSParams = {
   smsAddress: string
@@ -228,4 +235,17 @@ export type APICallParams = {
   method: APIMethods
   authToken: string
   body?: ApiCallBody
+}
+
+export type RandomStringOptions = {
+  length?: number
+  lowercase?: boolean
+}
+
+export type PaymentInitParams = ChapaCustomerInfo
+
+export type GenerateParmentInitOptionParams = {
+  user: User
+  amount: number
+  paymentMethod: PaymentMethod
 }

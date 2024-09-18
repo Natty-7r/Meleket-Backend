@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'
 import {
   ChapaConfig,
   ChapaCustomerInfo,
@@ -12,10 +11,6 @@ export default class Chapa {
   config: ChapaConfig
 
   constructor(private readonly configService: ConfigService) {
-    this.init()
-  }
-
-  init() {
     this.config = {
       secretKey: this.configService.get<string>('chapa.secretKey'),
       baseUrl: this.configService.get<string>('chapa.baseUrl'),
@@ -95,19 +90,16 @@ export default class Chapa {
     customerInfo: ChapaCustomerInfo,
     options: Options = {},
   ): Promise<ApiResponse> {
-    const txRef = (customerInfo.tx_ref || uuidv4()).toLocaleUpperCase()
-
-    customerInfo.tx_ref = txRef
     this.validateCustomerInfo(customerInfo, options)
     this.handleCustomizations(customerInfo)
 
     const response: ApiResponse = await api({
       url: `${this.config.baseUrl}${this.config.initializePath}`,
-      body: { ...customerInfo, tx_ref: txRef },
+      body: { ...customerInfo },
       authToken: this.config.secretKey,
       method: 'POST',
     })
-    response.data.txRef = txRef
+    response.data.txRef = customerInfo.tx_ref
     return response
   }
 

@@ -286,8 +286,8 @@ model BusinessPackage {
   businessId String
 
   startDate DateTime @default(now())
-  endDate   DateTime
-  expired   Boolean
+  expreDate   DateTime
+  expired   Boolean @default(false)
   billed    Boolean  @default(false)
   reference String // reference 
 

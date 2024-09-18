@@ -9,3 +9,5 @@ export const MIN_USER_AGE = 15
 export const ITEMS_PER_ROUND = 10
 
 export const PACKAGE_CODE_PREFIX = 'P_'
+
+export const MAX_ACTIVE_BUSINESS_COUNT = 2
