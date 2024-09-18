@@ -4,7 +4,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsInt,
-  IsDecimal,
+  IsNumber,
 } from 'class-validator'
 
 export default class UpdatePackageDto {
@@ -37,7 +37,7 @@ export default class UpdatePackageDto {
     example: '300 ',
   })
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   price?: number
 
   @ApiPropertyOptional({

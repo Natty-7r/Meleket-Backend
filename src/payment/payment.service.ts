@@ -14,15 +14,15 @@ import {
   generateRandomString,
 } from 'src/common/util/helpers/string.helper'
 import UserService from 'src/user/user.service'
-import CreatePackageDto from './dto/create-package.dto'
-import PurchasePackageDto from './dto/purchase-package.dto'
-import Chapa from './payment-strategies/chapa.strategy'
-import UpdatePackageDto from './dto/update-package.dto'
 import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/util/constants'
 import {
   calculatePackageExpireDate,
   calculatePackageStartDate,
 } from 'src/common/util/helpers/date.helper'
+import CreatePackageDto from './dto/create-package.dto'
+import PurchasePackageDto from './dto/purchase-package.dto'
+import Chapa from './payment-strategies/chapa.strategy'
+import UpdatePackageDto from './dto/update-package.dto'
 
 @Injectable()
 export default class PaymentService {
@@ -56,6 +56,7 @@ export default class PaymentService {
         'You have unbilled package please pay or clear it first ',
       )
   }
+
   private async getLastActivePackageExpiredDate({
     businessId,
   }: BusinessIdParams): Promise<Date> {
@@ -118,7 +119,6 @@ export default class PaymentService {
     const packagesCount = await this.getPackagesCount()
 
     const packageCode = generatePackageCode(packagesCount, name)
-    console.log(packagesCount, packageCode)
     const packageCreated = await this.prismaService.package.create({
       data: {
         name,
