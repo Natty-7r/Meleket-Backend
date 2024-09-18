@@ -7,7 +7,7 @@ import {
   MulterFilterConfig,
   MulterStorageConfig,
 } from '../types/base.type'
-import { changeSpaceByHypen } from './string-util'
+import { changeSpaceByHypen } from './string.helper'
 
 export const multerFilter = ({
   fileType,
