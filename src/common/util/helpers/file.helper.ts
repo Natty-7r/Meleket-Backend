@@ -27,6 +27,7 @@ export const deleteFileAsync = async ({ filePath }: BaseFilePathParams) => {
   const fullPath = await getFullPath({ filePath })
   fsAsync.unlink(fullPath)
 }
-export const creteFile = ({ filePath }: BaseFilePathParams) => {
-  console.log(filePath)
+export const getFileContent = async ({ filePath }: BaseFilePathParams) => {
+  const fullPath = await getFullPath({ filePath })
+  return fsAsync.readFile(fullPath, 'utf8')
 }
