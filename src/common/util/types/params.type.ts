@@ -36,6 +36,9 @@ export type SendAccountCreationParams = {
 export type BaseNameParams = {
   name: string
 }
+export type PackageIdParams = {
+  packageId: string
+}
 
 export type UserIdParams = {
   userId: string

@@ -128,14 +128,14 @@ export interface Options {
 
 // chapa related
 
-export interface CustomerInfo {
+export interface ChapaCustomerInfo {
   amount: number
   currency: string
   email: string
   /* eslint-disable */
   first_name: string
   last_name: string
-  callback_url: string
+  callback_url?: string
   tx_ref?: string // Optional, will be generated if not provided
   /* eslint-disable */
   customization?: Record<string, any> // Customize based on actual usage
