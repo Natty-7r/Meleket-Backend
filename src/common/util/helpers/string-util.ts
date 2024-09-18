@@ -1,3 +1,6 @@
+import { PACKAGE_CODE_PREFIX } from '../constants'
+import { generateEightDigitNumberString } from './numbers.helper'
+
 export const changeSpaceByHypen = (text: string): string => {
   return text.replace(/ /g, '-')
 }
@@ -9,6 +12,15 @@ export const capitalize = (text: string): string =>
     .reduce((textCatitalized, wordCapitalized) =>
       textCatitalized.concat(` ${wordCapitalized}`),
     )
+
+export const generatePackageCode = (
+  packageCount: number,
+  middleText?: string,
+) => {
+  return PACKAGE_CODE_PREFIX.concat(
+    middleText ? `${middleText.toLocaleUpperCase()}_` : '',
+  ).concat(generateEightDigitNumberString(packageCount + 1))
+}
 
 export const tolowercaseCustom = (text: string): string =>
   text.toLocaleLowerCase().trim() || text
