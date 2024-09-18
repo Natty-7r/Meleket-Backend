@@ -6,7 +6,7 @@
 /uploads
 
 #  prisma migrations
-/prisma/migrations
+# /prisma/migrations
 
 # Logs
 logs
