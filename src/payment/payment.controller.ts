@@ -8,7 +8,7 @@ import {
   CreatePackage,
   GetPackages,
   PurchasePackage,
-} from './decorators/payment-api.decorator copy'
+} from './decorators/payment-api.decorator'
 import UpdatePackageDto from './dto/update-package.dto'
 import PurchasePackageDto from './dto/purchase-package.dto'
 
