@@ -1,14 +1,14 @@
 import { v4 as uuidv4 } from 'uuid'
 import {
   ChapaConfig,
-  CustomerInfo,
+  ChapaCustomerInfo,
   Options,
 } from 'src/common/util/types/base.type'
 import { ApiResponse } from 'src/common/util/types/responses.type'
 import { ConfigService } from '@nestjs/config'
 import api from 'src/common/lib/api'
 
-class ChapaStrategy {
+export default class Chapa {
   config: ChapaConfig
 
   constructor(private readonly configService: ConfigService) {
@@ -17,15 +17,18 @@ class ChapaStrategy {
 
   init() {
     this.config = {
-      secretKey: this.configService.get<string>('chapa.secret_key'),
+      secretKey: this.configService.get<string>('chapa.secretKey'),
       baseUrl: this.configService.get<string>('chapa.baseUrl'),
       initializePath: this.configService.get<string>('chapa.initializePath'),
       verifyPath: this.configService.get<string>('chapa.verifyPath'),
     }
   }
 
-  private validateCustomerInfo(customerInfo: CustomerInfo, options: Options) {
-    const requiredFields: (keyof CustomerInfo)[] = [
+  private validateCustomerInfo(
+    customerInfo: ChapaCustomerInfo,
+    options: Options,
+  ) {
+    const requiredFields: (keyof ChapaCustomerInfo)[] = [
       'amount',
       'currency',
       'email',
@@ -68,7 +71,7 @@ class ChapaStrategy {
     }
   }
 
-  private handleCustomizations(customerInfo: CustomerInfo) {
+  private handleCustomizations(customerInfo: ChapaCustomerInfo) {
     if (
       customerInfo.customization &&
       typeof customerInfo.customization === 'object'
@@ -89,21 +92,23 @@ class ChapaStrategy {
    * @throws Error Throws an error if the initialization fails.
    */
   async initialize(
-    customerInfo: CustomerInfo,
+    customerInfo: ChapaCustomerInfo,
     options: Options = {},
   ): Promise<ApiResponse> {
+    const txRef = (customerInfo.tx_ref || uuidv4()).toLocaleUpperCase()
+
+    customerInfo.tx_ref = txRef
     this.validateCustomerInfo(customerInfo, options)
     this.handleCustomizations(customerInfo)
 
-    const txRef = customerInfo.tx_ref || uuidv4()
     const response: ApiResponse = await api({
       url: `${this.config.baseUrl}${this.config.initializePath}`,
-      body: { ...customerInfo, txRef },
+      body: { ...customerInfo, tx_ref: txRef },
       authToken: this.config.secretKey,
       method: 'POST',
     })
-
-    return response.data
+    response.data.txRef = txRef
+    return response
   }
 
   /**
@@ -125,5 +130,3 @@ class ChapaStrategy {
     return response.data
   }
 }
-
-export default ChapaStrategy
