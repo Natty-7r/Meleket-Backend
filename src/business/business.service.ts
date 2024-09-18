@@ -680,6 +680,12 @@ export default class BusinessService {
     const businessDetail = await this.prismaService.business.findFirst({
       where: { id },
       select: {
+        category: {
+          select: {
+            name: true,
+            price: true,
+          },
+        },
         id: true,
         ratings: true,
         reviews: {
@@ -701,6 +707,20 @@ export default class BusinessService {
       message: 'All buisness fetched successfully',
       data: businessDetail,
     }
+  }
+  async getBusinessPackageDetail({ businessId }: BusinessIdParams) {
+    return this.prismaService.business.findFirst({
+      where: { id: businessId },
+      select: {
+        category: {
+          select: {
+            name: true,
+            price: true,
+          },
+        },
+        id: true,
+      },
+    })
   }
 
   async getUserBusinessDetail({
