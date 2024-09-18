@@ -12,12 +12,6 @@ enum UserProfileLevel {
   VERIFIED // by email 
 }
 
-enum PackageType {
-  MONTHLY
-  SIX_MONTHLY
-  THREE_MONTHLY
-  YEARLY
-}
 enum PaymentMethod {
   CHAPA
 }
@@ -132,7 +126,7 @@ model Category {
   name     String  @db.VarChar(255)
   parentId String?
   level    Int
-  price    Float
+  price    Float  // for day
   image    String
   verified Boolean @default(false)
 
@@ -159,9 +153,9 @@ model Business {
   address  BusinessAddress[]
   contact  BusinessContact?
 
-  category      Category  @relation(fields: [categoryId], references: [id])
-  followers     User[]    @relation("UserFollowsBusiness")
-  packages      Package[]
+  category      Category          @relation(fields: [categoryId], references: [id])
+  followers     User[]            @relation("UserFollowsBusiness")
+  packages      BusinessPackage[]
   reviews       Review[]
   ratings       Rating[]
   ratingSummary Json
@@ -275,15 +269,32 @@ model UserStoryView {
 }
 
 model Package {
-  id          String      @id @default(uuid())
-  businessId  String
-  packageType PackageType
-  startDate   DateTime
-  endDate     DateTime
-  expired     Boolean
-  verified    Boolean
-  bill        Bill        @relation(fields: [billId], references: [id])
-  billId      String      @unique // Ensure that each Package has only one Bill
+  id               String            @id @default(uuid())
+  name             String
+  code             String
+  price            Float // amount in birr 
+  monthCount       Int    // number of months the package used for 
+  description      String?
+  businessPackages BusinessPackage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model BusinessPackage {
+  id         String @id @default(uuid())
+  businessId String
+
+  startDate DateTime @default(now())
+  endDate   DateTime
+  expired   Boolean
+  billed    Boolean  @default(false)
+  reference String // reference 
+
+  bill      Bill?   @relation(fields: [billId], references: [id])
+  billId    String? @unique // Ensure that each Package has only one Bill
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id])
 
   business Business @relation(fields: [businessId], references: [id])
 
@@ -292,13 +303,13 @@ model Package {
 }
 
 model Bill {
-  id            String    @id @default(uuid())
+  id            String           @id @default(uuid())
   businessId    String
   userId        String
   amount        Float
   paymentMethod PaymentMethod
   reference     String
-  package       Package?
+  package       BusinessPackage?
 
   business Business @relation(fields: [businessId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
