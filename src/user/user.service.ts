@@ -55,6 +55,17 @@ export default class UserService {
 
   // profile related
 
+  async getUserDetail({ id }: BaseIdParams) {
+    const userDetail = await this.prismaService.user.findFirst({
+      where: { id },
+    })
+    return {
+      status: 'success',
+      message: `user detail fetced  successfully`,
+      data: userDetail,
+    }
+  }
+
   async addProfile({
     userId,
     birthDate,
