@@ -135,12 +135,11 @@ export interface ChapaCustomerInfo {
 }
 
 export enum TimeUnit {
+  h = 'h',
   d = 'd',
+  w = 'w',
   m = 'm',
   y = 'y',
-  D = 'd',
-  M = 'm',
-  Y = 'y',
 }
 export enum LogType {
   ACTIVITY = 'ACTIVITY',

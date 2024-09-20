@@ -29,11 +29,17 @@ export const calculateTimeFrame = ({
     case 'd':
       endDate.setDate(endDate.getDate() + timeFrame)
       break
+    case 'w':
+      endDate.setMonth(endDate.getDate() + 7 * timeFrame)
+      break
     case 'm':
       endDate.setMonth(endDate.getMonth() + timeFrame)
       break
     case 'y':
       endDate.setFullYear(endDate.getFullYear() + timeFrame)
+      break
+    case 'h':
+      endDate.setHours(endDate.getHours() + timeFrame)
       break
     default:
   }
@@ -42,4 +48,51 @@ export const calculateTimeFrame = ({
 
 export const createDateFromString = (dateString: string): Date => {
   return new Date(dateString)
+}
+
+/**
+ * Compares two Date objects.
+ *
+ * @param date1 - The first date to compare.
+ * @param date2 - The second date to compare.
+ * @returns
+ *  1 if date1 is greater than date2,
+ * -1 if date1 is less than date2,
+ *  0 if both dates are equal.
+ */
+export const compareDates = (date1: Date, date2: Date): 1 | -1 | 0 => {
+  // Compare years
+  if (date1.getFullYear() > date2.getFullYear()) {
+    return 1
+  }
+  if (date1.getFullYear() < date2.getFullYear()) {
+    return -1
+  }
+
+  // Compare months
+  if (date1.getMonth() > date2.getMonth()) {
+    return 1
+  }
+  if (date1.getMonth() < date2.getMonth()) {
+    return -1
+  }
+
+  // Compare dates
+  if (date1.getDate() > date2.getDate()) {
+    return 1
+  }
+  if (date1.getDate() < date2.getDate()) {
+    return -1
+  }
+
+  // Compare hours
+  if (date1.getHours() > date2.getHours()) {
+    return 1
+  }
+  if (date1.getHours() < date2.getHours()) {
+    return -1
+  }
+
+  // All components are equal
+  return 0
 }

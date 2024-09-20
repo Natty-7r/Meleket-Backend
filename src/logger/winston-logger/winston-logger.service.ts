@@ -9,7 +9,10 @@ import {
   TimeUnit,
 } from 'src/common/util/types/base.type'
 import { ReadLogFileParams } from 'src/common/util/types/params.type'
-import { calculateTimeFrame } from 'src/common/util/helpers/date.helper'
+import {
+  calculateTimeFrame,
+  compareDates,
+} from 'src/common/util/helpers/date.helper'
 import {
   getFullPath,
   readFileContent,
@@ -17,6 +20,7 @@ import {
 } from 'src/common/util/helpers/file.helper'
 import formatLogFiles from 'src/common/util/helpers/formatter.helper'
 import { parseLogFile } from 'src/common/util/helpers/parser.helper'
+import { LogFileData } from 'src/common/util/types/responses.type'
 import LoggerStrategy from './interfaces/logger-strategy.interface'
 
 @Injectable()
@@ -64,7 +68,6 @@ export default class WinstonLoggerService {
   }
 
   error(message: string, metadata?: Record<string, unknown>) {
-    console.log(this.stragety)
     this.logger.error(message, metadata)
   }
 
@@ -82,13 +85,14 @@ export default class WinstonLoggerService {
 
   async viewLogs({
     logType,
-    endDate = new Date(new Date().setDate(new Date().getDate() + +1)),
-    startDate = new Date(new Date().setDate(new Date().getDate() + -1)),
-    timeUnit = TimeUnit.D,
+    endDate,
+    startDate,
+    timeUnit = TimeUnit.d,
     timeFrame = 1,
   }: ReadLogFileParams) {
     const logFolders: LogFileFolder[] = []
-    let [initialDate, finalDate] = [startDate, endDate]
+    let logFileDatas: LogFileData[] = []
+    let [initialDate, finalDate] = [new Date(), new Date()]
     // check log type
     switch (logType) {
       case 'ERROR':
@@ -116,41 +120,53 @@ export default class WinstonLoggerService {
       ),
     )
     // read all log files
-    const [activitLogFiles, errorLogFiles] = await Promise.all(
+    const logFileNames = await Promise.all(
       logFolderPaths.map(async (logFolderPath) =>
         readFileNamesInFolder({ folderPath: logFolderPath }),
       ),
     )
     // format log files
-    const formatedActivitLogFiles = await formatLogFiles({
-      logType: LogType.ACTIVITY,
-      fileNames: activitLogFiles,
-    })
-    const formatedErrorLogFiles = await formatLogFiles({
-      logType: LogType.ERROR,
-      fileNames: errorLogFiles,
-    })
-
-    // filter by log type
-    let logFiles = []
-
-    if (logType === LogType.ACTIVITY) logFiles.push(...formatedActivitLogFiles)
-    else if (logType === LogType.ERROR) logFiles.push(formatedErrorLogFiles)
-    else logFiles.push(...formatedErrorLogFiles, ...formatedActivitLogFiles)
-
+    if (logFileNames.length === 1)
+      logFileDatas.push(
+        ...(await formatLogFiles({
+          logType,
+          fileNames: logFileNames[0],
+        })),
+      )
+    else {
+      logFileDatas.push(
+        ...(await formatLogFiles({
+          logType: LogType.ACTIVITY,
+          fileNames: logFileNames[0],
+        })),
+        ...(await formatLogFiles({
+          logType: LogType.ERROR,
+          fileNames: logFileNames[1],
+        })),
+      )
+    }
     // filter by time frame
-    logFiles = logFiles
-      .filter((log) => {
-        return log.date >= initialDate && log.date <= finalDate
+    logFileDatas = logFileDatas
+      .filter((logFileData) => {
+        const stratDateComparation = compareDates(initialDate, logFileData.date)
+        const endDateComparation = compareDates(finalDate, logFileData.date)
+
+        return (
+          (stratDateComparation === 1 || stratDateComparation === 0) &&
+          (endDateComparation === 1 || endDateComparation === 0)
+        )
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
+    // read log file content
     const rawLogs: LogFile[] = await Promise.all(
-      logFiles.map(async (log) => ({
-        logType: log.logType,
-        content: await readFileContent({ filePath: log.fullPath }),
+      logFileDatas.map(async (logFileData) => ({
+        logType: logFileData.logType,
+        content: await readFileContent({ filePath: logFileData.fullPath }),
       })),
     )
+
+    // parse logs
     const logs = rawLogs
       .filter((rawLog) => rawLog.content.trim() !== '')
       .map((rawLog) => ({
