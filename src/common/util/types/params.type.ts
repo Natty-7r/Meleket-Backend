@@ -1,6 +1,7 @@
 // business.service.params.ts
 
 import { Category, OTPType, StoryContentType } from '@prisma/client'
+import { LogType, TimeUnit } from './base.type'
 
 export type SendSMSParams = {
   smsAddress: string
@@ -177,6 +178,9 @@ export type GenerateCategoryTreeParams = {
 export type BaseFilePathParams = {
   filePath: string
 }
+export type BaseFolderPathParams = {
+  folderPath: string
+}
 
 /**
  * Validation params
@@ -186,4 +190,18 @@ export type ValidateStory = {
   contentType: StoryContentType
   text?: string
   image?: string
+}
+
+export type TimeFrameParams = {
+  timeUnit: TimeUnit
+  timeFrame: number // time frame
+  startDate?: Date
+}
+
+export type ReadLogFileParams = {
+  timeUnit?: TimeUnit
+  timeFrame?: number // time frame
+  logType?: LogType
+  startDate?: Date
+  endDate?: Date
 }

@@ -114,3 +114,20 @@ export enum SEX {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
 }
+
+export enum TimeUnit {
+  d = 'd',
+  m = 'm',
+  y = 'y',
+  D = 'd',
+  M = 'm',
+  Y = 'y',
+}
+export enum LogType {
+  ACTIVITY = 'ACTIVITY',
+  ERROR = 'ERROR',
+}
+export enum LogFileFolder {
+  ACTIVITY = 'activities',
+  ERROR = 'errors',
+}

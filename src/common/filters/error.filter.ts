@@ -25,6 +25,7 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
     const { message: messageResponse, property } =
       exception.getResponse() as ExceptionResponse
 
+    console.log(exception)
     let stackInfo: any
     if (exception instanceof Error) {
       stackInfo = parseStackTrace(exception.stack)

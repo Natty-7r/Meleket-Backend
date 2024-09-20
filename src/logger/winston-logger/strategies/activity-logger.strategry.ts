@@ -1,4 +1,8 @@
-import { LoggerOption, LoggerType } from 'src/common/util/types/base.type'
+import {
+  LogFileFolder,
+  LoggerOption,
+  LoggerType,
+} from 'src/common/util/types/base.type'
 import LoggerStrategy from '../interfaces/logger-strategy.interface'
 
 export default class ActivityLoggerStrategry implements LoggerStrategy {
@@ -10,8 +14,8 @@ export default class ActivityLoggerStrategry implements LoggerStrategy {
     this.loggerType = LoggerType.ACTIVITY
 
     this.rotationFileRule = {
-      dirname: 'logs/activities',
-      filename: 'API_GATEWAY_%DATE%-activity.log',
+      dirname: `logs/${LogFileFolder.ACTIVITY}`,
+      filename: '%DATE%_activity.log',
       level: 'info',
       ...extra,
     }
