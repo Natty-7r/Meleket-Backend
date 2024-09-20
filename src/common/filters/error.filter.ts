@@ -8,8 +8,8 @@ import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.servi
 import { v4 as uuid } from 'uuid'
 import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import { Request, Response } from 'express'
-import parseStackTrace from '../util/helpers/stack-trace-parser'
 import { ErrorLogData, StackTraceInfo } from '../util/types/base.type'
+import { parseStackTrace } from '../util/helpers/parser.helper'
 
 @Catch()
 export default class ErrorExceptionFilter implements ExceptionFilter {

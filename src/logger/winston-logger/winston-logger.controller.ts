@@ -15,15 +15,15 @@ export default class WinstonLoggerController {
     @Query('logType') logType?: LogType,
     @Query('timeUnit') timeUnit?: TimeUnit,
     @Query('timeFrame') timeFrame?: number,
-    // @Query('startDate') startDate?: Date,
-    // @Query('endDate') endDate?: Date,
+    @Query('startDate') startDate?: Date,
+    @Query('endDate') endDate?: Date,
   ) {
     return this.loggerService.viewLogs({
       logType,
       timeFrame,
       timeUnit,
-      // startDate,
-      // endDate,
+      startDate,
+      endDate,
     })
   }
 }
