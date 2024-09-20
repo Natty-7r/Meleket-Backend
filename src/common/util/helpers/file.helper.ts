@@ -44,6 +44,7 @@ export const readFileNamesInFolder = async ({
 export const readFileContent = async ({ filePath }: BaseFilePathParams) => {
   await ensureFilePath({ filePath })
   return fsAsync.readFile(filePath, 'utf8')
+}
 export const getFileContent = async ({ filePath }: BaseFilePathParams) => {
   const fullPath = await getFullPath({ filePath })
   return fsAsync.readFile(fullPath, 'utf8')
