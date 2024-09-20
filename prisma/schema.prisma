@@ -12,7 +12,7 @@ enum UserProfileLevel {
   VERIFIED // by email 
 }
 
-enum {
+enum PaymentMethod {
   CHAPA
 }
 
@@ -310,6 +310,7 @@ model Bill {
 
   reference     String
   package       BusinessPackage?
+  paymentMethod PaymentMethod
 
   business Business @relation(fields: [businessId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
