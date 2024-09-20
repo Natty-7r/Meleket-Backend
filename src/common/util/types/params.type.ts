@@ -7,8 +7,7 @@ import {
   StoryContentType,
   User,
 } from '@prisma/client'
-import { ChapaCustomerInfo } from './base.type'
-import { LogType, TimeUnit } from './base.type'
+import { ChapaCustomerInfo, LogType, TimeUnit } from './base.type'
 
 export type SendSMSParams = {
   smsAddress: string

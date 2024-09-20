@@ -1,4 +1,5 @@
 import { TimeFrameParams } from '../types/params.type'
+
 export const calculatePackageExpireDate = (monthCount: number): Date => {
   const packageDuration = monthCount * 30
 

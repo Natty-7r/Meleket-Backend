@@ -157,3 +157,12 @@ export enum LogFileFolder {
   ACTIVITY = 'activities',
   ERROR = 'errors',
 }
+
+export interface IActivity {
+  id: string
+  method: string
+  url: string
+  status: number
+  timestamp: string
+  res: any
+}
