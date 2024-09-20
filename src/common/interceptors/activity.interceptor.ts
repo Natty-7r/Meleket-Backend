@@ -10,20 +10,15 @@ import { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
 import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
-
-interface IActivity {
-  id: string
-  method: string
-  url: string
-  status: number
-  timestamp: string
-  res: any
-}
+import { IActivity } from '../util/types/base.type'
 
 @Injectable()
 export default class ActivityInterceptor implements NestInterceptor {
+  activityLoggerStrategry: ActivityLoggerStrategry
+
   constructor(private readonly logger: WinstonLoggerService) {
-    this.logger.configure(new ActivityLoggerStrategry())
+    this.activityLoggerStrategry = new ActivityLoggerStrategry()
+    this.logger.configure(this.activityLoggerStrategry)
   }
 
   intercept(
@@ -54,6 +49,7 @@ export default class ActivityInterceptor implements NestInterceptor {
             request.originalUrl.includes('/logs') || request.originalUrl === '/'
           )
         ) {
+          this.logger.configure(this.activityLoggerStrategry)
           this.logger.log('', { ...activityLog })
         }
       }),
