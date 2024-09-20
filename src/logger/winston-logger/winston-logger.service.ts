@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import * as Winston from 'winston'
 import * as DailyRotateFile from 'winston-daily-rotate-file'
 import {
@@ -14,10 +14,8 @@ import {
   readFileContent,
   readFileNamesInFolder,
 } from 'src/common/util/helpers/file.helper'
-import {
-  formatActivityLogs,
-  formatLogFiles,
-} from 'src/common/util/helpers/formatter.helper'
+import formatLogFiles from 'src/common/util/helpers/formatter.helper'
+import { parseLogs } from 'src/common/util/helpers/parser.helper'
 import LoggerStrategy from './interfaces/logger-strategy.interface'
 
 @Injectable()
@@ -65,7 +63,8 @@ export default class WinstonLoggerService {
   }
 
   error(message: string, metadata?: Record<string, unknown>) {
-    this.logger.error(message, { ...metadata })
+    console.log(this.stragety)
+    this.logger.error(message, metadata)
   }
 
   warn(message: string, metadata?: Record<string, unknown>) {
@@ -80,7 +79,7 @@ export default class WinstonLoggerService {
     this.logger.verbose(message, metadata)
   }
 
-  async getLogs({
+  async viewLogs({
     logType,
     endDate = new Date(new Date().setDate(new Date().getDate() + +1)),
     startDate = new Date(new Date().setDate(new Date().getDate() + -1)),
@@ -126,12 +125,11 @@ export default class WinstonLoggerService {
     })
 
     // filter by log type
-    let logFiles =
-      logType === LogType.ACTIVITY
-        ? formatedActivitLogFiles
-        : logType === LogType.ERROR
-          ? formatedErrorLogFiles
-          : formatedErrorLogFiles.concat(formatedActivitLogFiles)
+    let logFiles = []
+
+    if (logType === LogType.ACTIVITY) logFiles.push(...formatedActivitLogFiles)
+    else if (logType === LogType.ERROR) logFiles.push(formatedErrorLogFiles)
+    else logFiles.push(...formatedErrorLogFiles, ...formatedActivitLogFiles)
 
     // filter by time frame
     logFiles = logFiles
@@ -140,19 +138,19 @@ export default class WinstonLoggerService {
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
-    const logs = await Promise.all(
-      logFiles.map(async (log) => {
-        const content = await readFileContent({ filePath: log.fullPath })
-        return {
-          logType: log.logType,
-          content: content
-            ? log.logType === LogType.ACTIVITY
-              ? formatActivityLogs(content)
-              : formatActivityLogs(content)
-            : '',
-        }
-      }),
+    const rawLogs = await Promise.all(
+      logFiles.map(async (log) => ({
+        logType: log.logType,
+        content: await readFileContent({ filePath: log.fullPath }),
+      })),
     )
+    const logs = rawLogs
+      .filter((rawLog) => rawLog.content.trim() !== '')
+      .map((rawLog) => ({
+        logType: rawLog.logType,
+        logs: parseLogs(rawLog.content, rawLog.logType),
+      }))
+
     return logs
   }
 }

@@ -1,14 +1,16 @@
 import { Controller, Get } from '@nestjs/common'
-import Public from 'src/common/decorators/public.decorator'
+import { ApiTags } from '@nestjs/swagger'
 import WinstonLoggerService from './winston-logger.service'
+import { ViewLogs } from '../decorators/logger-api.decorator'
 
+@ApiTags('Logs')
 @Controller('logs')
 export default class WinstonLoggerController {
   constructor(private readonly loggerService: WinstonLoggerService) {}
 
-  @Public()
+  @ViewLogs()
   @Get()
-  getLogs() {
-    return this.loggerService.getLogs({})
+  viewLogs() {
+    return this.loggerService.viewLogs({})
   }
 }
