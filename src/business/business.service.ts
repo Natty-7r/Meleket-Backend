@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import {
@@ -16,9 +17,12 @@ import {
   ApiResponse,
   BareApiResponse,
 } from 'src/common/util/types/responses.type'
-
 import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 import { validateStory } from 'src/common/util/helpers/validator.helper'
+import { generateBusinessSorting } from 'src/common/util/helpers/sorting.helper'
+import { createPagination } from '../common/util/helpers/pagination.helper'
+
+import { ApiResponseWithPagination } from '../common/util/types/responses.type'
 import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
@@ -44,6 +48,8 @@ import {
   BaseIdParams,
   StoryIdParams,
   OptionalUserIdParams,
+  PaginationParams,
+  BaseNameParams,
 } from '../common/util/types/params.type'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 import CreateStoryDto from './dto/create-story.dto'
@@ -103,7 +109,8 @@ export default class BusinessService {
       where: { id: userId },
     })
 
-    if (user.profileLevel !== 'VERIFIED')
+    if (!user) throw new UnauthorizedException('User not found ')
+    if (user?.profileLevel !== 'VERIFIED')
       throw new ForbiddenException('Unverfied user cannot create business ')
     return true
   }
@@ -580,24 +587,42 @@ export default class BusinessService {
 
   async getCategoryBusinesses({
     categoryId,
-  }: CategoryIdParams): Promise<ApiResponse> {
-    const category = await this.prismaService.category.findFirst({
-      where: { id: categoryId },
+    page = 1,
+    items = 10,
+    sort = ['rating'],
+    sortType = 'desc',
+    name: categoryName,
+  }: CategoryIdParams & PaginationParams & BaseNameParams): Promise<
+    ApiResponseWithPagination<Business[]>
+  > {
+    const businesses = await this.prismaService.business.findMany({
+      where: { categoryId },
+      take: items,
+      skip: (page - 1) * items,
+      orderBy: generateBusinessSorting({ sortKeys: sort, sortType }),
     })
-    if (!category) throw new NotFoundException('Invalid category id ')
-    const business = await this.prismaService.business.findMany({
+    const totalBusinesses = await this.prismaService.business.count({
       where: { categoryId },
     })
+
     return {
       status: 'success',
-      message: `${category.name}  buisness fetched successfully`,
-      data: business,
+      message: `${categoryName}  buisness fetched successfully`,
+      data: {
+        pagination: createPagination({
+          totalCount: totalBusinesses,
+          page,
+          items,
+        }),
+        payload: businesses,
+      },
     }
   }
 
   async getAllBusinesses(): Promise<ApiResponse> {
     const business = await this.prismaService.business.findMany({
       select: {
+        id: true,
         name: true,
         mainImageUrl: true,
         description: true,
@@ -626,6 +651,7 @@ export default class BusinessService {
     const business = await this.prismaService.business.findMany({
       where: { ownerId: userId },
       select: {
+        id: true,
         name: true,
         mainImageUrl: true,
         description: true,
@@ -654,6 +680,13 @@ export default class BusinessService {
     const businessDetail = await this.prismaService.business.findFirst({
       where: { id },
       select: {
+        category: {
+          select: {
+            name: true,
+            price: true,
+          },
+        },
+        id: true,
         ratings: true,
         reviews: {
           take: 10,
@@ -675,6 +708,20 @@ export default class BusinessService {
       data: businessDetail,
     }
   }
+  async getBusinessPackageDetail({ businessId }: BusinessIdParams) {
+    return this.prismaService.business.findFirst({
+      where: { id: businessId },
+      select: {
+        category: {
+          select: {
+            name: true,
+            price: true,
+          },
+        },
+        id: true,
+      },
+    })
+  }
 
   async getUserBusinessDetail({
     businessId,
@@ -684,10 +731,17 @@ export default class BusinessService {
     const businessDetail = await this.prismaService.business.findFirst({
       where: { id: businessId },
       select: {
+        id: true,
+        name: true,
         followers: {
           select: {
             firstName: true,
             lastName: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
           },
         },
         ratings: true,
@@ -757,6 +811,7 @@ export default class BusinessService {
         ],
       },
       select: {
+        id: true,
         name: true,
         mainImageUrl: true,
         description: true,
@@ -840,6 +895,7 @@ export default class BusinessService {
         },
       },
       select: {
+        id: true,
         name: true,
         mainImageUrl: true,
         description: true,
@@ -992,4 +1048,5 @@ export default class BusinessService {
       data: enhancedStories,
     }
   }
+  // package related
 }

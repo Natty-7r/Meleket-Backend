@@ -10,16 +10,21 @@ import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import { CategoryTreeNode } from 'src/common/util/types/base.type'
 import BusinessService from 'src/business/business.service'
 import { BaseIdParams } from 'src/common/util/types/params.type'
-import { ApiResponse } from 'src/common/util/types/responses.type'
-import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
-import CreateCategoryDto from './dto/create-category.dto'
-import UpdateParentCategoryDto from './dto/update-category-parent.dto'
-import UpdateCategoryDto from './dto/update-category.dto'
 import {
+  ApiResponse,
+  ApiResponseWithPagination,
+} from 'src/common/util/types/responses.type'
+import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
+import { Business } from '@prisma/client'
+import {
+  PaginationParams,
   CreateCategoryParams,
   GenerateCategoryTreeParams,
   OptionalImageUrlParams,
 } from '../common/util/types/params.type'
+import CreateCategoryDto from './dto/create-category.dto'
+import UpdateParentCategoryDto from './dto/update-category-parent.dto'
+import UpdateCategoryDto from './dto/update-category.dto'
 
 @Injectable()
 @UseGuards(JwtAuthGuard)
@@ -30,6 +35,16 @@ export default class CategoryService {
     private readonly prismaService: PrismaService,
     private readonly businessService: BusinessService,
   ) {}
+
+  // helper function
+
+  async verifyCategoryId({ id }: BaseIdParams) {
+    const category = await this.prismaService.category.findFirst({
+      where: { id },
+    })
+    if (!category) throw new BadRequestException('Invalid category Id')
+    return category
+  }
 
   generateCategoryTree({
     categories,
@@ -201,7 +216,7 @@ export default class CategoryService {
   }
 
   async getCategories(): Promise<ApiResponse> {
-    const allCategories = await this.prismaService.category.findMany()
+    const allCategories = await this.prismaService.category.findMany({})
     return {
       status: 'success',
       message: 'categories fetched',
@@ -209,8 +224,18 @@ export default class CategoryService {
     }
   }
 
-  async getCategoryBusiness({ id }: BaseIdParams): Promise<ApiResponse> {
-    return this.businessService.getCategoryBusinesses({ categoryId: id })
+  async getCategoryBusiness({
+    id,
+    ...paginationParams
+  }: BaseIdParams & PaginationParams): Promise<
+    ApiResponseWithPagination<Business[]>
+  > {
+    const category = await this.verifyCategoryId({ id })
+    return this.businessService.getCategoryBusinesses({
+      ...paginationParams,
+      categoryId: id,
+      name: category.name,
+    })
   }
 
   async deleteCategory({ id }: BaseIdParams): Promise<ApiResponse> {

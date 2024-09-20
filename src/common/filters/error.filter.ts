@@ -8,24 +8,25 @@ import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.servi
 import { v4 as uuid } from 'uuid'
 import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import { Request, Response } from 'express'
-import CustomeException from '../util/exception/custome-exception'
-import { ExceptionResponse } from '../util/types/responses.type'
-import parseStackTrace from '../util/helpers/stack-trace-parser'
+import { ErrorLogData, StackTraceInfo } from '../util/types/base.type'
+import { parseStackTrace } from '../util/helpers/parser.helper'
 
-@Catch(CustomeException)
+@Catch()
 export default class ErrorExceptionFilter implements ExceptionFilter {
+  errorLoggerStrategry: ErrorLoggerStrategry
+
   constructor(private logger: WinstonLoggerService) {
-    this.logger.configure(new ErrorLoggerStrategry())
+    this.errorLoggerStrategry = new ErrorLoggerStrategry()
+    this.logger.configure(this.errorLoggerStrategry)
   }
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
     const request = ctx.getRequest<Request>()
     const response = ctx.getResponse<Response>()
-    const { message: messageResponse, property } =
-      exception.getResponse() as ExceptionResponse
-
-    let stackInfo: any
+    const messageResponse = exception.message
+    const { property } = exception
+    let stackInfo: StackTraceInfo
     if (exception instanceof Error) {
       stackInfo = parseStackTrace(exception.stack)
     }
@@ -40,24 +41,23 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
             statusCode: 500,
           }
 
-    const loggerResponse = {
+    const loggerResponse: ErrorLogData = {
       id: uuid(),
       status: statusCode,
-      path: request.url,
+      url: request.url,
       method: request.method,
       ip: request.ip,
       timestamp: new Date().toISOString(),
       stack: exception instanceof Error ? exception.stack : '',
+      ...stackInfo,
     }
+    this.logger.configure(this.errorLoggerStrategry)
     this.logger.error(
       typeof message !== 'string' ? (message as any).message : message,
-      {
-        ...stackInfo,
-        ...loggerResponse,
-      },
+      loggerResponse,
     )
-    response.status(exception.getStatus()).json({
-      statusCode: exception.getStatus(),
+    response.status(statusCode).json({
+      statusCode,
       message: messageResponse,
       property,
     })

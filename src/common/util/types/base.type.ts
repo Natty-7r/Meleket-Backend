@@ -16,13 +16,6 @@ export type LoggerOption = {
   filename: string
 }
 
-export type StackTraceInfo = {
-  fileName: string
-  row: string
-  errorType: string
-  col: string
-}
-
 export interface FunctionCallResponse {
   status: 'fail' | 'success'
   data: any
@@ -67,6 +60,13 @@ export enum SignUpType {
   OAUTH = 'OAUTH',
 }
 
+export interface ChapaConfig {
+  secretKey: string // Chapa secret key
+  baseUrl: string // Base URL for Chapa API
+  initializePath: string // Path for transaction initialization
+  verifyPath: string // Path for transaction verification
+}
+
 export interface Config {
   server: {
     host: string
@@ -84,7 +84,7 @@ export interface Config {
   }
   jwt: {
     secret: string
-    expiresIn: any
+    expiresIn: string | number // More specific type if possible
   }
   google: {
     clientId: string
@@ -108,9 +108,70 @@ export interface Config {
     email: string
     password: string
   }
+  chapa: ChapaConfig
 }
-
 export enum SEX {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
+}
+
+export interface Options {
+  [key: string]: any
+}
+
+// chapa related
+
+export interface ChapaCustomerInfo {
+  amount: number
+  currency: string
+  email: string
+  /* eslint-disable */
+  first_name: string
+  last_name: string
+  callback_url: string
+  tx_ref: string // Optional, will be generated if not provided
+  /* eslint-disable */
+  customization?: Record<string, any> // Customize based on actual usage
+}
+
+export enum TimeUnit {
+  h = 'h',
+  d = 'd',
+  w = 'w',
+  m = 'm',
+  y = 'y',
+}
+export enum LogType {
+  ACTIVITY = 'ACTIVITY',
+  ERROR = 'ERROR',
+}
+export enum LogFileFolder {
+  ACTIVITY = 'activities',
+  ERROR = 'errors',
+}
+
+export type LogData = {
+  id: string
+  method: string
+  ip: string
+  url: string
+  status: number
+  timestamp: string
+}
+export type StackTraceInfo = {
+  fileName?: string
+  row?: string
+  errorType?: string
+  col?: string
+}
+export type ActivityLogData = LogData & {
+  res: any
+}
+export type ErrorLogData = LogData & {
+  stack: any
+} & StackTraceInfo
+
+export type LogFile = {
+  logType: LogType
+  content: string
 }

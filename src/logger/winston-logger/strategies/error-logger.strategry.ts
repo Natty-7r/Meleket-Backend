@@ -1,4 +1,8 @@
-import { LoggerOption, LoggerType } from 'src/common/util/types/base.type'
+import {
+  LogFileFolder,
+  LoggerOption,
+  LoggerType,
+} from 'src/common/util/types/base.type'
 import LoggerStrategy from '../interfaces/logger-strategy.interface'
 
 export default class ErrorLoggerStrategy implements LoggerStrategy {
@@ -10,8 +14,8 @@ export default class ErrorLoggerStrategy implements LoggerStrategy {
     this.loggerType = LoggerType.ERROR
 
     this.rotationFileRule = {
-      dirname: 'logs/errors',
-      filename: 'API_GATEWAY_%DATE%-error.log',
+      dirname: `logs/${LogFileFolder.ERROR}`,
+      filename: '%DATE%_error.log',
       level: 'error',
       ...extra,
     }

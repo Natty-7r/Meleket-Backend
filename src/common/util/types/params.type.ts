@@ -1,6 +1,13 @@
 // business.service.params.ts
 
-import { Category, OTPType, StoryContentType } from '@prisma/client'
+import {
+  Category,
+  OTPType,
+  PaymentMethod,
+  StoryContentType,
+  User,
+} from '@prisma/client'
+import { ChapaCustomerInfo, LogType, TimeUnit } from './base.type'
 
 export type SendSMSParams = {
   smsAddress: string
@@ -35,6 +42,9 @@ export type SendAccountCreationParams = {
 
 export type BaseNameParams = {
   name: string
+}
+export type PackageIdParams = {
+  packageId: string
 }
 
 export type UserIdParams = {
@@ -177,6 +187,9 @@ export type GenerateCategoryTreeParams = {
 export type BaseFilePathParams = {
   filePath: string
 }
+export type BaseFolderPathParams = {
+  folderPath: string
+}
 
 /**
  * Validation params
@@ -186,4 +199,76 @@ export type ValidateStory = {
   contentType: StoryContentType
   text?: string
   image?: string
+}
+
+/**
+ * Pagination params
+ */
+export type SortType = 'asc' | 'desc'
+
+export type PaginationParams = {
+  page?: number
+  items?: number // items per page
+  sort?: string[] // sort by
+  sortType?: SortType
+}
+
+export type CreatePaginatioParams = {
+  totalCount: number
+  page: number
+  items: number
+}
+
+/**
+ * Sort related
+ */
+
+export type GenerateSortingParams = {
+  sortKeys: string[]
+  sortType: SortType
+}
+
+export type APIMethods = 'GET' | 'POST' | 'PUT' | 'DELETE'
+export interface ApiCallBody {
+  [key: string]: any
+}
+
+export type APICallParams = {
+  url: string
+  method: APIMethods
+  authToken: string
+  body?: ApiCallBody
+}
+
+export type RandomStringOptions = {
+  length?: number
+  lowercase?: boolean
+}
+
+export type PaymentInitParams = ChapaCustomerInfo
+
+export type GenerateParmentInitOptionParams = {
+  user: User
+  amount: number
+  paymentMethod: PaymentMethod
+  callbackUrl: string
+}
+
+export type TimeFrameParams = {
+  timeUnit: TimeUnit
+  timeFrame: number // time frame
+  startDate?: Date
+}
+
+export type ReadLogFileParams = {
+  timeUnit?: TimeUnit
+  timeFrame?: number // time frame
+  logType?: LogType
+  startDate?: Date
+  endDate?: Date
+}
+
+export type LogFileFormatterParams = {
+  logType: LogType
+  fileNames: string[]
 }

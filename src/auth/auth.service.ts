@@ -47,10 +47,12 @@ export default class AuthService {
     const admins = await this.prismaService.admin.findMany({})
     if (admins.length === 0)
       this.createAdminAccount({
-        firstName: this.configService.get<string>('superAdmin.firstName'),
-        lastName: this.configService.get<string>('superAdmin.lastName'),
-        email: this.configService.get<string>('superAdmin.email'),
-        password: this.configService.get<string>('superAdmin.password'),
+        firstName: this.configService
+          .get<string>('superAdmin.firstName')
+          .trim(),
+        lastName: this.configService.get<string>('superAdmin.lastName').trim(),
+        email: this.configService.get<string>('superAdmin.email').trim(),
+        password: this.configService.get<string>('superAdmin.password').trim(),
         role: 'SUPER_ADMIN',
       })
   }
@@ -112,7 +114,7 @@ export default class AuthService {
   }: CreateAdminDto) {
     const admin = await this.prismaService.admin.findFirst({ where: { email } })
     if (admin) throw new ConflictException('Email is already in use!')
-    const hashedPassword = await bcrypt.hash('password', 12)
+    const hashedPassword = await bcrypt.hash(password, 12)
 
     const adminCreated = await this.prismaService.admin.create({
       data: {
@@ -153,6 +155,7 @@ export default class AuthService {
       userType = 'ADMIN'
       user = await this.prismaService.admin.findFirst({ where: { email } })
     }
+
     if (!user)
       throw new NotFoundException(`No user is registered with ${email} email`)
 

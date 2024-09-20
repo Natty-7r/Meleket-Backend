@@ -1,3 +1,5 @@
+import { LogType } from './base.type'
+
 export type ExceptionResponse = {
   message: string
   property: string
@@ -8,6 +10,31 @@ export type BareApiResponse = {
   message: string
 }
 
-export type ApiResponse = BareApiResponse & {
-  data: any
+export type PaginationResoponse = {
+  firstPage: number
+  lastPage: number
+  currentPage: number
+  previousPage: number | null
+  nextPage: number | null
+
+  totalPages: number
+  itemsPerPage: number
+  isLastPage: boolean
+}
+
+export type ApiResponse<T = any> = BareApiResponse & {
+  data: T
+}
+export type ApiResponseWithPagination<T = any> = BareApiResponse & {
+  data: {
+    pagination: PaginationResoponse
+    payload: T
+  }
+}
+
+export type LogFileData = {
+  logType: LogType
+  fileName: string
+  fullPath: string
+  date: Date
 }
