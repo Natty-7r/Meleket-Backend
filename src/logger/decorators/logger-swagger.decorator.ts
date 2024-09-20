@@ -1,26 +1,16 @@
-import { applyDecorators, Query } from '@nestjs/common'
+import { applyDecorators } from '@nestjs/common'
 import {
-  ApiBadRequestResponse,
-  ApiConflictResponse,
-  ApiConsumes,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
   ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiResponse,
 } from '@nestjs/swagger'
 
-export const CreateBusinessSwaggerDefinition = () =>
+export const ViewLogsSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Create business ' }),
+    ApiOperation({ description: 'View Logs' }),
     ApiCreatedResponse({
-      description: 'Create Business successfully',
+      description: 'Logs Fetched successfully',
       type: String,
     }),
-    ApiConflictResponse({ description: 'Business name already taken' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
   )
