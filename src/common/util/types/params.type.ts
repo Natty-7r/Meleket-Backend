@@ -248,4 +248,5 @@ export type GenerateParmentInitOptionParams = {
   user: User
   amount: number
   paymentMethod: PaymentMethod
+  callbackUrl: string
 }

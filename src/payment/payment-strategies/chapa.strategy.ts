@@ -90,17 +90,25 @@ export default class Chapa {
     customerInfo: ChapaCustomerInfo,
     options: Options = {},
   ): Promise<ApiResponse> {
-    this.validateCustomerInfo(customerInfo, options)
-    this.handleCustomizations(customerInfo)
+    try {
+      this.validateCustomerInfo(customerInfo, options)
+      this.handleCustomizations(customerInfo)
 
-    const response: ApiResponse = await api({
-      url: `${this.config.baseUrl}${this.config.initializePath}`,
-      body: { ...customerInfo },
-      authToken: this.config.secretKey,
-      method: 'POST',
-    })
-    response.data.txRef = customerInfo.tx_ref
-    return response
+      const response: ApiResponse = await api({
+        url: `${this.config.baseUrl}${this.config.initializePath}`,
+        body: { ...customerInfo },
+        authToken: this.config.secretKey,
+        method: 'POST',
+      })
+      response.data.txRef = customerInfo.tx_ref
+      return response
+    } catch (error) {
+      return {
+        status: 'fail',
+        message: error.message,
+        data: null,
+      }
+    }
   }
 
   /**

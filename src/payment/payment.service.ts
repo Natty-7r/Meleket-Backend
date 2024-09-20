@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common'
 import BusinessService from 'src/business/business.service'
 import {
   BaseNameParams,
@@ -165,6 +169,7 @@ export default class PaymentService {
     packageId,
     userId,
     paymentMethod,
+    callbackUrl,
   }: PurchasePackageDto & UserIdParams) {
     await this.verifyPackageId({ packageId })
     await this.businsesService.verifiyBusinessId({ id: businessId })
@@ -179,15 +184,22 @@ export default class PaymentService {
     const packageDetail = await this.prismaService.package.findFirst({
       where: { id: packageId },
     })
-    const packageAmount =
-      businessDetail.category.price *
-      packageDetail.price *
-      packageDetail.monthCount
+    const packageAmount = businessDetail.category.price * packageDetail.price
 
     const { data: user } = await this.userService.getUserDetail({ id: userId })
     const paymentInitParams: PaymentInitParams = this.generateParmentInitOption(
-      { user, amount: packageAmount, paymentMethod },
+      {
+        user,
+        amount: packageAmount,
+        paymentMethod,
+        callbackUrl,
+      },
     )
+
+    const { status, message, data } =
+      await this.chapa.initialize(paymentInitParams)
+    if (status === 'fail')
+      throw new InternalServerErrorException(`Payemnt error:${message}`)
 
     const businessPackage = await this.prismaService.businessPackage.create({
       data: {
@@ -198,15 +210,12 @@ export default class PaymentService {
         packageId: packageDetail.id,
       },
     })
-
-    const paymentInitData = await this.chapa.initialize(paymentInitParams)
-
     return {
       status: 'success',
       message: 'packages fetched successfully',
       data: {
         package: businessPackage,
-        payment: paymentInitData.data,
+        payment: data,
       },
     }
   }
@@ -215,6 +224,7 @@ export default class PaymentService {
     paymentMethod,
     user,
     amount,
+    callbackUrl,
   }: GenerateParmentInitOptionParams): PaymentInitParams {
     switch (paymentMethod) {
       case 'CHAPA':
@@ -225,6 +235,7 @@ export default class PaymentService {
           currency: 'ETB',
           amount,
           tx_ref: generateRandomString({}),
+          callback_url: callbackUrl,
         }
       default:
         throw new BadRequestException('Unknown payment method')

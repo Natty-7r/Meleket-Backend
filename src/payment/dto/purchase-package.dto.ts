@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { IsString, IsNotEmpty } from 'class-validator'
 import { PaymentMethod } from '@prisma/client'
+import { ApiProperty } from '@nestjs/swagger'
+import { IsString, IsNotEmpty, IsEnum } from 'class-validator'
 
 export default class PurchasePackageDto {
   @ApiProperty({
@@ -21,7 +21,17 @@ export default class PurchasePackageDto {
 
   @ApiProperty({
     description: 'payment method',
-    enum: PaymentMethod,
+    example: 'CHAPA',
   })
+  @IsNotEmpty()
+  @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod
+
+  @ApiProperty({
+    description: 'callback url to redirect the client after payment',
+    example: 'localhost:8080',
+  })
+  @IsString()
+  @IsNotEmpty()
+  callbackUrl: string
 }
