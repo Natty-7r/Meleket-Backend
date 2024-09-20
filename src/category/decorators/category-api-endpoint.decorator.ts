@@ -21,7 +21,7 @@ import Public from 'src/common/decorators/public.decorator'
 const AdminRole = () =>
   applyDecorators(
     Roles('ADMIN', 'SUPER_ADMIN'),
-    ApiUnauthorizedResponse({ description: 'Only owner can manupulate' }),
+    ApiUnauthorizedResponse({ description: 'Insucffincent permission' }),
   )
 
 export const CreateCategory = () =>

@@ -8,6 +8,7 @@ import {
   User,
 } from '@prisma/client'
 import { ChapaCustomerInfo } from './base.type'
+import { LogType, TimeUnit } from './base.type'
 
 export type SendSMSParams = {
   smsAddress: string
@@ -187,6 +188,9 @@ export type GenerateCategoryTreeParams = {
 export type BaseFilePathParams = {
   filePath: string
 }
+export type BaseFolderPathParams = {
+  folderPath: string
+}
 
 /**
  * Validation params
@@ -249,4 +253,18 @@ export type GenerateParmentInitOptionParams = {
   amount: number
   paymentMethod: PaymentMethod
   callbackUrl: string
+}
+
+export type TimeFrameParams = {
+  timeUnit: TimeUnit
+  timeFrame: number // time frame
+  startDate?: Date
+}
+
+export type ReadLogFileParams = {
+  timeUnit?: TimeUnit
+  timeFrame?: number // time frame
+  logType?: LogType
+  startDate?: Date
+  endDate?: Date
 }

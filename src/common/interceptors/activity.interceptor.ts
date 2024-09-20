@@ -51,8 +51,7 @@ export default class ActivityInterceptor implements NestInterceptor {
       tap(() => {
         if (
           !(
-            request.originalUrl.includes('/winston') ||
-            request.originalUrl === '/'
+            request.originalUrl.includes('/logs') || request.originalUrl === '/'
           )
         ) {
           this.logger.log('', { ...activityLog })

@@ -140,3 +140,20 @@ export interface ChapaCustomerInfo {
   /* eslint-disable */
   customization?: Record<string, any> // Customize based on actual usage
 }
+
+export enum TimeUnit {
+  d = 'd',
+  m = 'm',
+  y = 'y',
+  D = 'd',
+  M = 'm',
+  Y = 'y',
+}
+export enum LogType {
+  ACTIVITY = 'ACTIVITY',
+  ERROR = 'ERROR',
+}
+export enum LogFileFolder {
+  ACTIVITY = 'activities',
+  ERROR = 'errors',
+}

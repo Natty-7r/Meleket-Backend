@@ -1,4 +1,14 @@
-import { Controller } from '@nestjs/common'
+import { Controller, Get } from '@nestjs/common'
+import Public from 'src/common/decorators/public.decorator'
+import WinstonLoggerService from './winston-logger.service'
 
-@Controller('winston-logger')
-export default class WinstonLoggerController {}
+@Controller('logs')
+export default class WinstonLoggerController {
+  constructor(private readonly loggerService: WinstonLoggerService) {}
+
+  @Public()
+  @Get()
+  getLogs() {
+    return this.loggerService.getLogs({})
+  }
+}
