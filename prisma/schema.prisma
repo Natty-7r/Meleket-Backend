@@ -12,7 +12,7 @@ enum UserProfileLevel {
   VERIFIED // by email 
 }
 
-enum PaymentMethod {
+enum {
   CHAPA
 }
 
@@ -307,7 +307,7 @@ model Bill {
   businessId    String
   userId        String
   amount        Float
-  paymentMethod PaymentMethod
+
   reference     String
   package       BusinessPackage?
 
