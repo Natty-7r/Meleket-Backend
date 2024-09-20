@@ -267,3 +267,13 @@ export type ReadLogFileParams = {
   startDate?: Date
   endDate?: Date
 }
+
+export type ParseLogsParams = {
+  rawLogs: string
+  logType: LogType
+}
+
+export type LogFileFormatterParams = {
+  logType: LogType
+  fileNames: string[]
+}

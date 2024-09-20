@@ -16,13 +16,6 @@ export type LoggerOption = {
   filename: string
 }
 
-export type StackTraceInfo = {
-  fileName: string
-  row: string
-  errorType: string
-  col: string
-}
-
 export interface FunctionCallResponse {
   status: 'fail' | 'success'
   data: any
@@ -158,11 +151,28 @@ export enum LogFileFolder {
   ERROR = 'errors',
 }
 
-export interface IActivity {
+export type LogData = {
   id: string
   method: string
+  ip: string
   url: string
   status: number
   timestamp: string
+}
+export type StackTraceInfo = {
+  fileName?: string
+  row?: string
+  errorType?: string
+  col?: string
+}
+export type ActivityLogData = LogData & {
   res: any
+}
+export type ErrorLogData = LogData & {
+  stack: any
+} & StackTraceInfo
+
+export type LogFile = {
+  logType: LogType
+  content: string
 }

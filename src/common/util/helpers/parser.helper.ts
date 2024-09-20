@@ -1,8 +1,38 @@
-import { LogType } from '../types/base.type'
+import { basename } from 'path'
+import {
+  ActivityLogData,
+  ErrorLogData,
+  LogType,
+  StackTraceInfo,
+  LogFile,
+} from '../types/base.type'
 
-export const parseActivityLogs = (rawLogs: string) => {
-  const logEntries = rawLogs.split('\n').filter(Boolean)
+export const parseStackTrace = (stack: string): StackTraceInfo => {
+  const lines = stack.split('\n')
+  const [type] = lines[0].split(':')
+  const errorType = type
 
+  const stackInfo: StackTraceInfo = {
+    fileName: '',
+    row: '',
+    col: '',
+    errorType,
+  }
+
+  const stackTracePattern = /at .+ \(([^:]+):(\d+):(\d+)\)/
+  const match = lines[1].match(stackTracePattern)
+
+  if (match) {
+    const [, filePath, row, col] = match
+    stackInfo.fileName = basename(filePath)
+    stackInfo.row = row
+    stackInfo.col = col
+  }
+  return stackInfo
+}
+
+export const parseActivityLogs = (logCotent: string): ActivityLogData[] => {
+  const logEntries = logCotent.split('\n').filter(Boolean)
   return logEntries.map((logEntry) => {
     const parsedLog = JSON.parse(logEntry)
     return {
@@ -13,13 +43,13 @@ export const parseActivityLogs = (rawLogs: string) => {
       status: parsedLog?.status,
       url: parsedLog?.url,
       timestamp: new Date(parsedLog?.timestamp)?.toLocaleString(), // Convert to local date string
-      data: parsedLog?.res,
+      res: parsedLog?.res,
+      ip: parsedLog?.ip,
     }
   })
 }
-export const parseErrorLogs = (rawLogs: string) => {
-  const logEntries = rawLogs.split('\n').filter(Boolean)
-
+export const parseErrorLogs = (logCotent: string): ErrorLogData[] => {
+  const logEntries = logCotent.split('\n').filter(Boolean)
   return logEntries.map((logEntry) => {
     const parsedLog = JSON.parse(logEntry)
     return {
@@ -40,7 +70,7 @@ export const parseErrorLogs = (rawLogs: string) => {
   })
 }
 
-export const parseLogs = (rawLogs: string, logType: LogType) => {
-  if (logType === LogType.ACTIVITY) return parseActivityLogs(rawLogs)
-  return parseErrorLogs(rawLogs)
+export const parseLogFile = ({ content, logType }: LogFile) => {
+  if (logType === LogType.ACTIVITY) return parseActivityLogs(content)
+  return parseErrorLogs(content)
 }

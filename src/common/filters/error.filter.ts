@@ -9,6 +9,7 @@ import { v4 as uuid } from 'uuid'
 import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import { Request, Response } from 'express'
 import parseStackTrace from '../util/helpers/stack-trace-parser'
+import { ErrorLogData, StackTraceInfo } from '../util/types/base.type'
 
 @Catch()
 export default class ErrorExceptionFilter implements ExceptionFilter {
@@ -25,7 +26,7 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>()
     const messageResponse = exception.message
     const { property } = exception
-    let stackInfo: any
+    let stackInfo: StackTraceInfo
     if (exception instanceof Error) {
       stackInfo = parseStackTrace(exception.stack)
     }
@@ -40,7 +41,7 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
             statusCode: 500,
           }
 
-    const loggerResponse = {
+    const loggerResponse: ErrorLogData = {
       id: uuid(),
       status: statusCode,
       url: request.url,
@@ -48,14 +49,12 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
       ip: request.ip,
       timestamp: new Date().toISOString(),
       stack: exception instanceof Error ? exception.stack : '',
+      ...stackInfo,
     }
     this.logger.configure(this.errorLoggerStrategry)
     this.logger.error(
       typeof message !== 'string' ? (message as any).message : message,
-      {
-        ...stackInfo,
-        ...loggerResponse,
-      },
+      loggerResponse,
     )
     response.status(statusCode).json({
       statusCode,

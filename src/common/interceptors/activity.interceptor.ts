@@ -10,7 +10,7 @@ import { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
 import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
-import { IActivity } from '../util/types/base.type'
+import { ActivityLogData } from '../util/types/base.type'
 
 @Injectable()
 export default class ActivityInterceptor implements NestInterceptor {
@@ -29,9 +29,10 @@ export default class ActivityInterceptor implements NestInterceptor {
     const request = ctx.getRequest<Request>()
     const response = ctx.getResponse<Response>()
 
-    const activityLog: IActivity = {
+    const activityLog: ActivityLogData = {
       id: uuidv4(),
       method: request.method,
+      ip: request.ip,
       url: request.originalUrl,
       status: response.statusCode,
       timestamp: new Date().toISOString(),

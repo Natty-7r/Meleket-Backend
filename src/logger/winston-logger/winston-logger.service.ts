@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import * as Winston from 'winston'
 import * as DailyRotateFile from 'winston-daily-rotate-file'
 import {
+  LogFile,
   LogFileFolder,
   LoggerType,
   LogType,
@@ -15,7 +16,7 @@ import {
   readFileNamesInFolder,
 } from 'src/common/util/helpers/file.helper'
 import formatLogFiles from 'src/common/util/helpers/formatter.helper'
-import { parseLogs } from 'src/common/util/helpers/parser.helper'
+import { parseLogFile } from 'src/common/util/helpers/parser.helper'
 import LoggerStrategy from './interfaces/logger-strategy.interface'
 
 @Injectable()
@@ -88,6 +89,7 @@ export default class WinstonLoggerService {
   }: ReadLogFileParams) {
     const logFolders: LogFileFolder[] = []
     let [initialDate, finalDate] = [startDate, endDate]
+    // check log type
     switch (logType) {
       case 'ERROR':
         logFolders.push(LogFileFolder.ERROR)
@@ -99,29 +101,34 @@ export default class WinstonLoggerService {
         logFolders.push(LogFileFolder.ACTIVITY, LogFileFolder.ERROR)
         break
     }
+    // check end date or calculate time frame
     if (!endDate)
       [initialDate, finalDate] = calculateTimeFrame({
         startDate,
         timeFrame,
         timeUnit,
       })
+
+    //  get log folder paths
     const logFolderPaths = await Promise.all(
       logFolders.map(async (logFolder) =>
         getFullPath({ filePath: `/logs/${logFolder}` }),
       ),
     )
+    // read all log files
     const [activitLogFiles, errorLogFiles] = await Promise.all(
       logFolderPaths.map(async (logFolderPath) =>
         readFileNamesInFolder({ folderPath: logFolderPath }),
       ),
     )
+    // format log files
     const formatedActivitLogFiles = await formatLogFiles({
       logType: LogType.ACTIVITY,
-      files: activitLogFiles,
+      fileNames: activitLogFiles,
     })
     const formatedErrorLogFiles = await formatLogFiles({
       logType: LogType.ERROR,
-      files: errorLogFiles,
+      fileNames: errorLogFiles,
     })
 
     // filter by log type
@@ -138,7 +145,7 @@ export default class WinstonLoggerService {
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
-    const rawLogs = await Promise.all(
+    const rawLogs: LogFile[] = await Promise.all(
       logFiles.map(async (log) => ({
         logType: log.logType,
         content: await readFileContent({ filePath: log.fullPath }),
@@ -148,7 +155,7 @@ export default class WinstonLoggerService {
       .filter((rawLog) => rawLog.content.trim() !== '')
       .map((rawLog) => ({
         logType: rawLog.logType,
-        logs: parseLogs(rawLog.content, rawLog.logType),
+        logs: parseLogFile(rawLog),
       }))
 
     return logs
