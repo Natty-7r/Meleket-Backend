@@ -12,7 +12,7 @@ import PackageResponse from '../responses/package.response copy'
 
 export const CreatePackageSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Create package ' }),
+    ApiOperation({ summary: 'Create package ' }),
     ApiCreatedResponse({
       description: 'Package created  successfully',
       type: PackageResponse,
@@ -21,7 +21,7 @@ export const CreatePackageSwaggerDefinition = () =>
   )
 export const UpdatePackageSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update package ' }),
+    ApiOperation({ summary: 'Update package ' }),
     ApiCreatedResponse({
       description: 'Package updated  successfully',
       type: PackageResponse,
@@ -30,7 +30,7 @@ export const UpdatePackageSwaggerDefinition = () =>
   )
 export const GetPackagesSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Get packages ' }),
+    ApiOperation({ summary: 'Get packages ' }),
     ApiCreatedResponse({
       description: 'Packages fetched  successfully',
       type: Array<PackageResponse>,
@@ -40,7 +40,7 @@ export const GetPackagesSwaggerDefinition = () =>
 
 export const PurchasePackageSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Purchase package ' }),
+    ApiOperation({ summary: 'Purchase package ' }),
     ApiCreatedResponse({
       description: 'package purchased  successfully',
       type: BusinessPackageResponse,

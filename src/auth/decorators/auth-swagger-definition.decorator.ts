@@ -8,7 +8,6 @@ import {
   ApiNotFoundResponse,
   ApiOperation,
   ApiResponse,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 import SignInResponse from 'src/auth/responses/sign-in.response'
 import CreateAccountResponse from '../responses/create-account.response'
@@ -16,7 +15,7 @@ import CreateAdminAccountResponse from '../responses/create-admin.response '
 
 export const SignInSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'User Login  ' }),
+    ApiOperation({ summary: 'User Login  ' }),
     ApiCreatedResponse({
       type: SignInResponse,
       description: 'User Logged in successfully',
@@ -31,7 +30,7 @@ export const SignInSwaggerDefinition = () => {
 
 export const CreateUserAccountSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'Create user account' }),
+    ApiOperation({ summary: 'Create user account' }),
     ApiCreatedResponse({
       type: CreateAccountResponse,
       description: 'user account created successfully',
@@ -42,7 +41,7 @@ export const CreateUserAccountSwaggerDefinition = () => {
 }
 export const CreateAdminSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'Create admin account' }),
+    ApiOperation({ summary: 'Create admin account' }),
     ApiCreatedResponse({
       type: CreateAdminAccountResponse,
       description: 'admin account created successfully',
@@ -54,7 +53,7 @@ export const CreateAdminSwaggerDefinition = () => {
 
 export const RequestOTPSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'Request OTP ' }),
+    ApiOperation({ summary: 'Request OTP ' }),
     ApiResponse({
       type: String,
       description: 'OTP created successfully',
@@ -66,7 +65,7 @@ export const RequestOTPSwaggerDefinition = () => {
 
 export const VerifyOTPSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'verifiy OTP ' }),
+    ApiOperation({ summary: 'verifiy OTP ' }),
     ApiResponse({
       type: String,
       description: 'OTP verified successfully',
@@ -79,7 +78,7 @@ export const VerifyOTPSwaggerDefinition = () => {
 
 export const VerifyUserSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'verifiy user ' }),
+    ApiOperation({ summary: 'verifiy user ' }),
     ApiResponse({
       type: String,
       description: 'user verified successfully',
@@ -93,7 +92,7 @@ export const VerifyUserSwaggerDefinition = () => {
 
 export const UpdatePasswordSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'update password user ' }),
+    ApiOperation({ summary: 'update password user ' }),
     ApiResponse({
       type: String,
       description: 'password verified successfully',
@@ -106,7 +105,7 @@ export const UpdatePasswordSwaggerDefinition = () => {
 }
 export const UpdateAdminStatusSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'update admin status ' }),
+    ApiOperation({ summary: 'update admin status ' }),
     ApiResponse({
       type: String,
       description: 'Admin status updated successfully',
@@ -116,7 +115,7 @@ export const UpdateAdminStatusSwaggerDefinition = () => {
 }
 export const GetAdminsSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'get all  admins ' }),
+    ApiOperation({ summary: 'get all  admins ' }),
     ApiResponse({
       type: Array<CreateAdminAccountResponse>,
       description: 'Admins fetched  successfully',
@@ -125,7 +124,7 @@ export const GetAdminsSwaggerDefinition = () => {
 }
 export const DeleteAdminAccountSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ description: 'update admin status ' }),
+    ApiOperation({ summary: 'update admin status ' }),
     ApiResponse({
       type: String,
       description: 'Admin status updated successfully',

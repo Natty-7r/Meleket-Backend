@@ -20,7 +20,7 @@ import StoryResponse from '../responses/story.response'
 
 export const CreateBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Create business ' }),
+    ApiOperation({ summary: 'Create business ' }),
     ApiCreatedResponse({
       description: 'Create Business successfully',
       type: BusinessResponse,
@@ -31,7 +31,7 @@ export const CreateBusinessSwaggerDefinition = () =>
   )
 export const UpdateBusinessImageSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update buiness image' }),
+    ApiOperation({ summary: 'Update buiness image' }),
     ApiResponse({
       description: 'Business image updated successfully',
       type: BusinessResponse,
@@ -44,7 +44,7 @@ export const UpdateBusinessImageSwaggerDefinition = () =>
 
 export const UpdateBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update business' }),
+    ApiOperation({ summary: 'Update business' }),
     ApiResponse({
       description: 'Business  updated successfully',
       type: BusinessResponse,
@@ -57,7 +57,7 @@ export const UpdateBusinessSwaggerDefinition = () =>
 // business service related
 export const AddBusinessServiceSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Add business service' }),
+    ApiOperation({ summary: 'Add business service' }),
     ApiResponse({
       description: 'Business service added successfully',
       type: BusinessServicerResponse,
@@ -70,7 +70,7 @@ export const AddBusinessServiceSwaggerDefinition = () =>
 
 export const UpdateBusinessServiceImageSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update business service image' }),
+    ApiOperation({ summary: 'Update business service image' }),
     ApiResponse({
       description: 'Business  updated successfully',
       type: BusinessResponse,
@@ -82,7 +82,7 @@ export const UpdateBusinessServiceImageSwaggerDefinition = () =>
 
 export const UpdateBusinessServiceSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update business service' }),
+    ApiOperation({ summary: 'Update business service' }),
     ApiResponse({
       description: 'Business service image updated successfully',
       type: [BusinessServicerResponse],
@@ -93,7 +93,7 @@ export const UpdateBusinessServiceSwaggerDefinition = () =>
   )
 export const DeleteBusinessServiceSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Delete business service' }),
+    ApiOperation({ summary: 'Delete business service' }),
     ApiResponse({
       description: 'Business service deleted successfully',
       type: [BusinessServicerResponse],
@@ -106,7 +106,7 @@ export const DeleteBusinessServiceSwaggerDefinition = () =>
 
 export const SearchBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Search business by key' }),
+    ApiOperation({ summary: 'Search business by key' }),
     ApiResponse({
       description: 'Business for search.key fetched successfully',
       type: [BusinessResponse],
@@ -118,7 +118,7 @@ export const SearchBusinessSwaggerDefinition = () =>
 
 export const GetBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Get all businesses' }),
+    ApiOperation({ summary: 'Get all businesses' }),
     ApiResponse({
       description: 'All Business fetched successfully',
       type: [BusinessResponse],
@@ -127,7 +127,7 @@ export const GetBusinessSwaggerDefinition = () =>
   )
 export const GetBussinesDetailSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Get business detail' }),
+    ApiOperation({ summary: 'Get business detail' }),
     ApiResponse({
       description: 'All Business fetched successfully',
       type: BusinessDetailResponse,
@@ -136,7 +136,7 @@ export const GetBussinesDetailSwaggerDefinition = () =>
   )
 export const GetCategoryBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Get businesses by category' }),
+    ApiOperation({ summary: 'Get businesses by category' }),
     ApiResponse({
       description: 'Category businesses fetched successfully',
       type: [BusinessResponse], // Assuming this contains the business data
@@ -179,7 +179,7 @@ export const GetCategoryBusinessSwaggerDefinition = () =>
 
 export const CreateBusinessAddressSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Add business address' }),
+    ApiOperation({ summary: 'Add business address' }),
     ApiResponse({
       description: 'Business address  added successfully',
       type: BusinessAddressResponse,
@@ -190,7 +190,7 @@ export const CreateBusinessAddressSwaggerDefinition = () =>
   )
 export const UpdateBusinessAddressSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update business address' }),
+    ApiOperation({ summary: 'Update business address' }),
     ApiResponse({
       description: 'Business address  updated successfully',
       type: BusinessAddressResponse,
@@ -201,7 +201,7 @@ export const UpdateBusinessAddressSwaggerDefinition = () =>
 
 export const DeleteBusinessAddressSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Delete business address' }),
+    ApiOperation({ summary: 'Delete business address' }),
     ApiResponse({
       description: 'Business address  deleted successfully',
       type: String,
@@ -215,7 +215,7 @@ export const DeleteBusinessAddressSwaggerDefinition = () =>
 
 export const UpdateBusinessContactSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update business contact info' }),
+    ApiOperation({ summary: 'Update business contact info' }),
     ApiResponse({
       description: 'Business contact updated successfully',
       type: BusinessAddressResponse,
@@ -227,7 +227,7 @@ export const UpdateBusinessContactSwaggerDefinition = () =>
 //story related
 export const AddStorySwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Add  story ' }),
+    ApiOperation({ summary: 'Add  story ' }),
     ApiCreatedResponse({
       description: 'story  added successfully',
       type: StoryResponse,
@@ -238,7 +238,7 @@ export const AddStorySwaggerDefinition = () =>
   )
 export const UpdatedStorySwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update  story ' }),
+    ApiOperation({ summary: 'Update  story ' }),
     ApiCreatedResponse({
       description: 'story updated successfully',
       type: StoryResponse,
@@ -250,7 +250,7 @@ export const UpdatedStorySwaggerDefinition = () =>
 
 export const DeleteStorySwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Delte story ' }),
+    ApiOperation({ summary: 'Delte story ' }),
     ApiCreatedResponse({
       description: 'story deleted successfully',
       type: String,
@@ -262,7 +262,7 @@ export const DeleteStorySwaggerDefinition = () =>
 
 export const GetAllStoriesSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Fetch stories ' }),
+    ApiOperation({ summary: 'Fetch stories ' }),
     ApiCreatedResponse({
       description: 'stories fetched successfully',
       type: Array<StoryResponse>,
@@ -272,7 +272,7 @@ export const GetAllStoriesSwaggerDefinition = () =>
 
 export const GetBusinessStoriesSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Fetch business stories ' }),
+    ApiOperation({ summary: 'Fetch business stories ' }),
     ApiCreatedResponse({
       description: 'Business stories fetched successfully',
       type: Array<StoryResponse>,

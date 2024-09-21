@@ -22,7 +22,7 @@ import ProfileResponse from '../responses/profile.response'
 
 export const AddReviewSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Add review  ' }),
+    ApiOperation({ summary: 'Add review  ' }),
     ApiCreatedResponse({
       description: 'Review  added  successfully',
       type: ReviewResponse,
@@ -36,7 +36,7 @@ export const AddReviewSwaggerDefinition = () =>
   )
 export const UpdateReviewSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Updated review  ' }),
+    ApiOperation({ summary: 'Updated review  ' }),
     ApiCreatedResponse({
       description: 'Review updated  successfully',
       type: ReviewResponse,
@@ -47,7 +47,7 @@ export const UpdateReviewSwaggerDefinition = () =>
   )
 export const DeleteReviewSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Remove review  ' }),
+    ApiOperation({ summary: 'Remove review  ' }),
     ApiCreatedResponse({
       description: 'Review delted  successfully',
       type: String,
@@ -61,7 +61,7 @@ export const DeleteReviewSwaggerDefinition = () =>
 
 export const AddRatingSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Rate a bussines' }),
+    ApiOperation({ summary: 'Rate a bussines' }),
     ApiCreatedResponse({
       description: 'Rate added successfully',
       type: RatingResponse,
@@ -74,7 +74,7 @@ export const AddRatingSwaggerDefinition = () =>
 // follow related
 export const FollowBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Follow a bussines' }),
+    ApiOperation({ summary: 'Follow a bussines' }),
     ApiCreatedResponse({
       description: 'Bussiness followed successfully ',
       type: String,
@@ -88,7 +88,7 @@ export const FollowBusinessSwaggerDefinition = () =>
 
 export const UnFollowBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Unfollow a bussines' }),
+    ApiOperation({ summary: 'Unfollow a bussines' }),
     ApiCreatedResponse({
       description: 'Bussiness Unfollowed successfully ',
       type: String,
@@ -98,7 +98,7 @@ export const UnFollowBusinessSwaggerDefinition = () =>
   )
 export const GetFollowedBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Get Followed  bussines' }),
+    ApiOperation({ summary: 'Get Followed  bussines' }),
     ApiCreatedResponse({
       description: 'Followed Bussiness Unfollowed successfully ',
       type: String,
@@ -107,7 +107,7 @@ export const GetFollowedBusinessSwaggerDefinition = () =>
   )
 export const FollowedBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Get followed bussinesses' }),
+    ApiOperation({ summary: 'Get followed bussinesses' }),
     ApiCreatedResponse({
       description: 'Followed bussiness fetched successfully ',
       type: String,
@@ -119,7 +119,7 @@ export const FollowedBusinessSwaggerDefinition = () =>
 
 export const AddProfileSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Add profile' }),
+    ApiOperation({ summary: 'Add profile' }),
     ApiCreatedResponse({
       description: 'Profile added successfully',
       type: ProfileResponse,
@@ -129,7 +129,7 @@ export const AddProfileSwaggerDefinition = () =>
 
 export const UpdateProfileSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update profile' }),
+    ApiOperation({ summary: 'Update profile' }),
     ApiCreatedResponse({
       description: 'Profile updated successfully',
       type: ProfileResponse,
@@ -139,7 +139,7 @@ export const UpdateProfileSwaggerDefinition = () =>
   )
 export const ViewStorySwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'View story' }),
+    ApiOperation({ summary: 'View story' }),
     ApiCreatedResponse({
       description: 'Story view  successfully',
       type: ProfileResponse,

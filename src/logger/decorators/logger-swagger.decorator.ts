@@ -7,7 +7,7 @@ import {
 
 export const ViewLogsSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'View Logs' }),
+    ApiOperation({ summary: 'View Logs' }),
     ApiCreatedResponse({
       description: 'Logs Fetched successfully',
       type: String,
