@@ -142,8 +142,11 @@ export enum TimeUnit {
   y = 'y',
 }
 export enum LogType {
-  ACTIVITY = 'ACTIVITY',
   ERROR = 'ERROR',
+  WARNING = 'WARNING',
+  ACTIVITY = 'ACTIVITY',
+  USER_ACTIVITY = 'USER_ACTIVITY',
+  ADMIN_ACTIVITY = 'ADMIN_ACTIVITY',
 }
 export enum LogFileFolder {
   ACTIVITY = 'activities',

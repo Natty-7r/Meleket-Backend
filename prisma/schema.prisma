@@ -55,6 +55,13 @@ enum Sex {
   FEMALE
 }
 
+enum LogType {
+  USER_ACTIVITY
+  ADMIN_ACTIVITY
+  ERROR
+  WARNING
+}
+
 model User {
   id                 String           @id @default(uuid())
   firstName          String
@@ -70,6 +77,7 @@ model User {
   bills              Bill[]
   businesses         Business[]       @relation("UserOwnsBusiness")
   followedBusinesses Business[]       @relation("UserFollowsBusiness")
+  logs               Log[]            @relation("UserLogs")
 
   createdAt         DateTime @default(now())
   passwordUpdatedAt DateTime @updatedAt
@@ -98,6 +106,7 @@ model Admin {
   password       String
   userType       UserType    @default(ADMIN)
   status         AdminStatus @default(CREATED)
+  logs           Log[]       @relation("AdminLogs")
   inactiveReason String?     @default("new account")
   createdAat     DateTime    @default(now()) @map("created_at")
   updatedAat     DateTime    @updatedAt @map("updated_at")
@@ -126,7 +135,7 @@ model Category {
   name     String  @db.VarChar(255)
   parentId String?
   level    Int
-  price    Float  // for day
+  price    Float // for day
   image    String
   verified Boolean @default(false)
 
@@ -273,7 +282,7 @@ model Package {
   name             String
   code             String
   price            Float // amount in birr 
-  monthCount       Int    // number of months the package used for 
+  monthCount       Int // number of months the package used for 
   description      String?
   businessPackages BusinessPackage[]
 
@@ -286,8 +295,8 @@ model BusinessPackage {
   businessId String
 
   startDate DateTime @default(now())
-  expreDate   DateTime
-  expired   Boolean @default(false)
+  expreDate DateTime
+  expired   Boolean  @default(false)
   billed    Boolean  @default(false)
   reference String // reference 
 
@@ -303,10 +312,10 @@ model BusinessPackage {
 }
 
 model Bill {
-  id            String           @id @default(uuid())
-  businessId    String
-  userId        String
-  amount        Float
+  id         String @id @default(uuid())
+  businessId String
+  userId     String
+  amount     Float
 
   reference     String
   package       BusinessPackage?
@@ -317,4 +326,22 @@ model Bill {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+}
+
+//    notificaiton related
+
+// log related 
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  logType   LogType
+  message   String
+  context   String?
+  archived  Boolean  @default(false)
+  timestamp DateTime @default(now())
+  userId    String?
+  adminId   String?
+
+  user  User?  @relation("UserLogs", fields: [userId], references: [id])
+  admin Admin? @relation("AdminLogs", fields: [adminId], references: [id])
 }
