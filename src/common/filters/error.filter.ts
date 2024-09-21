@@ -8,6 +8,8 @@ import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.servi
 import { v4 as uuid } from 'uuid'
 import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import { Request, Response } from 'express'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
 import { ErrorLogData, StackTraceInfo } from '../util/types/base.type'
 import { parseStackTrace } from '../util/helpers/parser.helper'
 
@@ -15,9 +17,11 @@ import { parseStackTrace } from '../util/helpers/parser.helper'
 export default class ErrorExceptionFilter implements ExceptionFilter {
   errorLoggerStrategry: ErrorLoggerStrategry
 
+  activityLoggerStrategry: ActivityLoggerStrategry
+
   constructor(private logger: WinstonLoggerService) {
     this.errorLoggerStrategry = new ErrorLoggerStrategry()
-    this.logger.configure(this.errorLoggerStrategry)
+    this.activityLoggerStrategry = new ActivityLoggerStrategry()
   }
 
   catch(exception: any, host: ArgumentsHost) {
@@ -27,9 +31,14 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
     const messageResponse = exception.message
     const { property } = exception
     let stackInfo: StackTraceInfo
+
     if (exception instanceof Error) {
       stackInfo = parseStackTrace(exception.stack)
     }
+    if (exception instanceof PrismaClientKnownRequestError) {
+      stackInfo = parseStackTrace(exception.stack)
+    }
+
     const { message, statusCode } =
       exception instanceof HttpException
         ? {
@@ -49,13 +58,20 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
       ip: request.ip,
       timestamp: new Date().toISOString(),
       stack: exception instanceof Error ? exception.stack : '',
-      ...stackInfo,
     }
-    this.logger.configure(this.errorLoggerStrategry)
-    this.logger.error(
-      typeof message !== 'string' ? (message as any).message : message,
-      loggerResponse,
-    )
+    if (statusCode >= 400 || statusCode < 500) {
+      this.logger.configure(this.activityLoggerStrategry)
+      this.logger.log(
+        typeof message !== 'string' ? (message as any).message : message,
+        { ...loggerResponse },
+      )
+    } else {
+      this.logger.configure(this.errorLoggerStrategry)
+      this.logger.error(
+        typeof message !== 'string' ? (message as any).message : message,
+        { ...loggerResponse, ...stackInfo },
+      )
+    }
     response.status(statusCode).json({
       statusCode,
       message: messageResponse,
