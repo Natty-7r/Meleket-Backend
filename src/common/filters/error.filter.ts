@@ -12,6 +12,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
 import { ErrorLogData, StackTraceInfo } from '../types/base.type'
 import { parseStackTrace } from '../helpers/parser.helper'
+import LoggerService from '../../logger/logger.service'
 
 @Catch()
 export default class ErrorExceptionFilter implements ExceptionFilter {
@@ -19,7 +20,10 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
 
   activityLoggerStrategry: ActivityLoggerStrategry
 
-  constructor(private logger: WinstonLoggerService) {
+  constructor(
+    private logger: WinstonLoggerService,
+    private readonly loggerSerive: LoggerService,
+  ) {
     this.errorLoggerStrategry = new ErrorLoggerStrategry()
     this.activityLoggerStrategry = new ActivityLoggerStrategry()
   }
@@ -73,6 +77,11 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
         typeof message !== 'string' ? (message as any).message : message,
         { ...loggerResponse, ...stackInfo },
       )
+      this.loggerSerive.createLog({
+        logType: 'ERROR',
+        message: messageResponse,
+        context: `at filename: ${loggerResponse.fileName} from IP: ${loggerResponse.ip} saved with Id: ${loggerResponse.id}`,
+      })
     }
     response.status(statusCode).json({
       statusCode,
