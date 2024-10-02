@@ -31,7 +31,7 @@ export const parseStackTrace = (stack: string): StackTraceInfo => {
   return stackInfo
 }
 
-export const parseActivityLogs = (logCotent: string): ActivityLogData[] => {
+export const parseActivityFileLog = (logCotent: string): ActivityLogData[] => {
   const logEntries = logCotent.split('\n').filter(Boolean)
   return logEntries.map((logEntry) => {
     const parsedLog = JSON.parse(logEntry)
@@ -48,7 +48,7 @@ export const parseActivityLogs = (logCotent: string): ActivityLogData[] => {
     }
   })
 }
-export const parseErrorLogs = (logCotent: string): ErrorLogData[] => {
+export const parseErrorFileLog = (logCotent: string): ErrorLogData[] => {
   const logEntries = logCotent.split('\n').filter(Boolean)
   return logEntries.map((logEntry) => {
     const parsedLog = JSON.parse(logEntry)
@@ -71,6 +71,6 @@ export const parseErrorLogs = (logCotent: string): ErrorLogData[] => {
 }
 
 export const parseLogFile = ({ content, logType }: LogFile) => {
-  if (logType === LogType.ACTIVITY) return parseActivityLogs(content)
-  return parseErrorLogs(content)
+  if (logType === LogType.ACTIVITY) return parseActivityFileLog(content)
+  return parseErrorFileLog(content)
 }
