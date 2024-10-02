@@ -17,6 +17,7 @@ import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import { validateStory } from 'src/common/helpers/validator.helper'
 import { generateBusinessSorting } from 'src/common/helpers/sorting.helper'
+import LoggerService from 'src/logger/logger.service'
 import { createPagination } from '../common/helpers/pagination.helper'
 
 import { ApiResponseWithPagination } from '../common/types/responses.type'
@@ -55,7 +56,10 @@ import UpdateBusinessServicesDto from './dto/update-business-services.dto'
 
 @Injectable()
 export default class BusinessService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly loggerService: LoggerService,
+  ) {}
 
   // helper methods
 
@@ -287,8 +291,22 @@ export default class BusinessService {
           5: 0,
         }),
       },
+      select: {
+        owner: true,
+        name: true,
+        description: true,
+        templateId: true,
+        mainImageUrl: true,
+        averageRating: true,
+        category: { select: { name: true, id: true } },
+      },
     })
-
+    this.loggerService.createLog({
+      logType: 'USER_ACTIVITY',
+      message: `${business.owner.firstName.concat(' ').concat(business.owner.lastName)} created bussines with name:${business.name} under category:${business.category.name}`,
+      context: 'new bussines',
+      userId,
+    })
     return {
       status: 'success',
       message: 'Account created successfully',

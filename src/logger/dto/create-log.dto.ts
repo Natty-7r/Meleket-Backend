@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { LogType } from '@prisma/client'
-import { IsNotEmpty, IsString, IsOptional, IsDate } from 'class-validator'
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator'
 
 export default class CreateLogDto {
   @ApiProperty({
@@ -30,16 +30,6 @@ export default class CreateLogDto {
   @IsString()
   @IsOptional()
   context?: string
-
-  @ApiProperty({
-    type: String,
-    example: '2023-09-21T10:00:00Z',
-    description: 'Timestamp of the log entry',
-    required: false,
-  })
-  @IsDate()
-  @IsOptional()
-  timestamp?: Date
 
   @ApiProperty({
     type: String,

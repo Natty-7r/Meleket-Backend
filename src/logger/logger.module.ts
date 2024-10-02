@@ -6,6 +6,7 @@ import WinstonLoggerModule from './winston-logger/winstone-logger.module'
 @Global()
 @Module({
   providers: [LoggerService],
+  exports: [LoggerService],
   imports: [WinstonLoggerModule],
   controllers: [LoggerController],
 })
