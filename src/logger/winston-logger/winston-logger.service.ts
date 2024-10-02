@@ -8,7 +8,7 @@ import {
   LogType,
   TimeUnit,
 } from 'src/common/util/types/base.type'
-import { ReadLogFileParams } from 'src/common/util/types/params.type'
+import { LogParams } from 'src/common/util/types/params.type'
 import {
   calculateTimeFrame,
   compareDates,
@@ -83,28 +83,31 @@ export default class WinstonLoggerService {
     this.logger.verbose(message, metadata)
   }
 
-  async viewLogs({
+  async getFileLogs(params: LogParams) {
+    if (params.logType) return this.readLogFile(params)
+    return [
+      {
+        logType: LogType.ERROR,
+        logs: await this.readLogFile({ ...params, logType: LogType.ERROR }),
+      },
+      {
+        logType: LogType.ACTIVITY,
+        logs: await this.readLogFile({ ...params, logType: LogType.ACTIVITY }),
+      },
+    ]
+  }
+
+  async readLogFile({
     logType,
     endDate,
     startDate,
     timeUnit = TimeUnit.d,
     timeFrame = 1,
-  }: ReadLogFileParams) {
-    const logFolders: LogFileFolder[] = []
+  }: LogParams) {
+    const folderName = LogFileFolder[logType]
     let logFileDatas: LogFileData[] = []
     let [initialDate, finalDate] = [new Date(), new Date()]
-    // check log type
-    switch (logType) {
-      case 'ERROR':
-        logFolders.push(LogFileFolder.ERROR)
-        break
-      case 'ACTIVITY':
-        logFolders.push(LogFileFolder.ACTIVITY)
-        break
-      default:
-        logFolders.push(LogFileFolder.ACTIVITY, LogFileFolder.ERROR)
-        break
-    }
+
     // check end date or calculate time frame
     if (!endDate)
       [initialDate, finalDate] = calculateTimeFrame({
@@ -114,37 +117,22 @@ export default class WinstonLoggerService {
       })
 
     //  get log folder paths
-    const logFolderPaths = await Promise.all(
-      logFolders.map(async (logFolder) =>
-        getFullPath({ filePath: `/logs/${logFolder}` }),
-      ),
-    )
+    const logFolderPath = await getFullPath({
+      filePath: `/logs/${folderName}`,
+    })
+
     // read all log files
-    const logFileNames = await Promise.all(
-      logFolderPaths.map(async (logFolderPath) =>
-        readFileNamesInFolder({ folderPath: logFolderPath }),
-      ),
+    const logFileNames = await readFileNamesInFolder({
+      folderPath: logFolderPath,
+    })
+
+    logFileDatas.push(
+      ...(await formatLogFiles({
+        logType,
+        fileNames: logFileNames,
+      })),
     )
-    // format log files
-    if (logFileNames.length === 1)
-      logFileDatas.push(
-        ...(await formatLogFiles({
-          logType,
-          fileNames: logFileNames[0],
-        })),
-      )
-    else {
-      logFileDatas.push(
-        ...(await formatLogFiles({
-          logType: LogType.ACTIVITY,
-          fileNames: logFileNames[0],
-        })),
-        ...(await formatLogFiles({
-          logType: LogType.ERROR,
-          fileNames: logFileNames[1],
-        })),
-      )
-    }
+
     // filter by time frame
     logFileDatas = logFileDatas
       .filter((logFileData) => {
@@ -169,10 +157,8 @@ export default class WinstonLoggerService {
     // parse logs
     const logs = rawLogs
       .filter((rawLog) => rawLog.content.trim() !== '')
-      .map((rawLog) => ({
-        logType: rawLog.logType,
-        logs: parseLogFile(rawLog),
-      }))
+      .map((rawLog) => parseLogFile(rawLog))
+      .flat()
 
     return logs
   }
