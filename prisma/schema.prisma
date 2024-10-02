@@ -333,14 +333,15 @@ model Bill {
 // log related 
 
 model Log {
-  id        String @id @default(uuid())
-  logType   LogType
-  message   String
-  context   String?
-  archived  Boolean  @default(false)
-  timestamp DateTime @default(now())
-  userId    String?
-  adminId   String?
+  id         String    @id @default(uuid())
+  logType    LogType
+  message    String
+  context    String?
+  archived   Boolean   @default(false)
+  timestamp  DateTime  @default(now())
+  archivedAt DateTime?
+  userId     String?
+  adminId    String?
 
   user  User?  @relation("UserLogs", fields: [userId], references: [id])
   admin Admin? @relation("AdminLogs", fields: [adminId], references: [id])
