@@ -12,22 +12,16 @@ import {
   generateVerifyEmailOTPMessage,
 } from 'src/common/helpers/string.helper'
 import { MailerService } from '@nestjs-modules/mailer'
-import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
-import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
-import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
 import MessageStrategy from '../interfaces/message-strategry.interface'
+import LoggerService from 'src/logger/logger.service'
 
 @Injectable()
 export default class EmailStrategy implements MessageStrategy {
   constructor(
     private mailerService: MailerService,
     private configService: ConfigService,
-    private errorLogger: WinstonLoggerService,
-    private activityrLogger: WinstonLoggerService,
-  ) {
-    this.errorLogger.configure(new ErrorLoggerStrategry())
-    this.activityrLogger.configure(new ActivityLoggerStrategry())
-  }
+    private loggerService: LoggerService,
+  ) {}
 
   async #sendEmail({ address, subject, body }: SendEmailParams) {
     try {
@@ -38,7 +32,7 @@ export default class EmailStrategy implements MessageStrategy {
         text: subject,
         html: body,
       })
-      this.activityrLogger.log('', { ...message, to: address, subject })
+      this.loggerService.log('', { ...message, to: address, subject })
       return message
     } catch (error) {
       const emailError = {
@@ -47,7 +41,7 @@ export default class EmailStrategy implements MessageStrategy {
         subject,
         ...error,
       }
-      this.errorLogger.error('', emailError)
+      this.loggerService.error('', emailError)
       return null
     }
   }

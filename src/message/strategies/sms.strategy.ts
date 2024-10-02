@@ -11,22 +11,16 @@ import {
   generateResetSMSOTPMessage,
   generateVerifySMSOTPMessage,
 } from 'src/common/helpers/string.helper'
-import ErrorLoggerStrategy from 'src/logger/winston-logger/strategies/error-logger.strategry'
-import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
-import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
 import MessageStrategy from '../interfaces/message-strategry.interface'
+import LoggerService from 'src/logger/logger.service'
 
 @Injectable()
 export default class SmsStrategy implements MessageStrategy {
   constructor(
     private twilioService: TwilioService,
     private configService: ConfigService,
-    private errorLogger: WinstonLoggerService,
-    private activityrLogger: WinstonLoggerService,
-  ) {
-    this.errorLogger.configure(new ErrorLoggerStrategy())
-    this.activityrLogger.configure(new ActivityLoggerStrategry())
-  }
+    private loggerService: LoggerService,
+  ) {}
 
   async #sendSMS({ smsBody, smsAddress, subject }: SendSMSParams) {
     try {
@@ -35,7 +29,7 @@ export default class SmsStrategy implements MessageStrategy {
         body: smsBody,
         to: smsAddress,
       })
-      this.activityrLogger.log('', {
+      this.loggerService.log('', {
         ...message,
         to: smsAddress,
         subject,
@@ -48,7 +42,7 @@ export default class SmsStrategy implements MessageStrategy {
         subject,
         ...error,
       }
-      this.errorLogger.error('', smsError)
+      this.loggerService.error('', smsError)
       return null
     }
   }
