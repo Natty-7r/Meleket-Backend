@@ -11,8 +11,8 @@ import {
   generateResetSMSOTPMessage,
   generateVerifySMSOTPMessage,
 } from 'src/common/helpers/string.helper'
-import MessageStrategy from '../interfaces/message-strategry.interface'
 import LoggerService from 'src/logger/logger.service'
+import MessageStrategy from '../interfaces/message-strategry.interface'
 
 @Injectable()
 export default class SmsStrategy implements MessageStrategy {
@@ -42,7 +42,7 @@ export default class SmsStrategy implements MessageStrategy {
         subject,
         ...error,
       }
-      this.loggerService.error('', smsError)
+      this.loggerService.error('', smsError, error?.response)
       return null
     }
   }

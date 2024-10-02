@@ -12,8 +12,8 @@ import {
   generateVerifyEmailOTPMessage,
 } from 'src/common/helpers/string.helper'
 import { MailerService } from '@nestjs-modules/mailer'
-import MessageStrategy from '../interfaces/message-strategry.interface'
 import LoggerService from 'src/logger/logger.service'
+import MessageStrategy from '../interfaces/message-strategry.interface'
 
 @Injectable()
 export default class EmailStrategy implements MessageStrategy {
@@ -41,7 +41,7 @@ export default class EmailStrategy implements MessageStrategy {
         subject,
         ...error,
       }
-      this.loggerService.error('', emailError)
+      this.loggerService.error('', emailError, error?.response)
       return null
     }
   }

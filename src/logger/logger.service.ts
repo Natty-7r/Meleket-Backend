@@ -6,10 +6,14 @@ import { ARCHIVED_LOG_EXPIRATION_DATE } from 'src/common/constants'
 import { calculateTimeFrame } from 'src/common/helpers/date.helper'
 import CreateLogDto from './dto/create-log.dto'
 import WinstonLoggerService from './winston-logger/winston-logger.service'
+import ActivityLoggerStrategry from './winston-logger/strategies/activity-logger.strategry'
+import ErrorLoggerStrategy from './winston-logger/strategies/error-logger.strategry'
 
 @Injectable()
 export default class LoggerService {
   constructor(
+    private readonly activityLoggerStrategry: ActivityLoggerStrategry,
+    private readonly errorLoggerStrategy: ErrorLoggerStrategy,
     private readonly winstonLoggerService: WinstonLoggerService,
     private readonly prismaService: PrismaService,
   ) {}
@@ -97,5 +101,26 @@ export default class LoggerService {
       message: 'Logs fetched successfully',
       data: logs,
     }
+  }
+
+  async log(message: string, metadata?: Record<string, unknown>) {
+    this.winstonLoggerService.configure(this.activityLoggerStrategry)
+    this.winstonLoggerService.log(message, metadata)
+  }
+
+  async error(
+    message: string,
+    metadata?: Record<string, unknown>,
+    context?: string,
+  ) {
+    this.winstonLoggerService.configure(this.errorLoggerStrategy)
+    this.createLog({
+      logType: 'ERROR',
+      message: message || (metadata?.message as string),
+      context:
+        context ||
+        `at filename: ${metadata?.fileName} from IP: ${metadata?.ip} saved with Id: ${metadata?.id}`,
+    })
+    this.winstonLoggerService.error(message, metadata)
   }
 }

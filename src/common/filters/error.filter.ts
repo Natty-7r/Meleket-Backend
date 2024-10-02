@@ -4,29 +4,16 @@ import {
   ExceptionFilter,
   HttpException,
 } from '@nestjs/common'
-import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
 import { v4 as uuid } from 'uuid'
-import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import { Request, Response } from 'express'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
 import { ErrorLogData, StackTraceInfo } from '../types/base.type'
 import { parseStackTrace } from '../helpers/parser.helper'
 import LoggerService from '../../logger/logger.service'
 
 @Catch()
 export default class ErrorExceptionFilter implements ExceptionFilter {
-  errorLoggerStrategry: ErrorLoggerStrategry
-
-  activityLoggerStrategry: ActivityLoggerStrategry
-
-  constructor(
-    private logger: WinstonLoggerService,
-    private readonly loggerSerive: LoggerService,
-  ) {
-    this.errorLoggerStrategry = new ErrorLoggerStrategry()
-    this.activityLoggerStrategry = new ActivityLoggerStrategry()
-  }
+  constructor(private loggerService: LoggerService) {}
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
@@ -66,22 +53,15 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
     if (statusCode >= 400 && statusCode < 500) {
       // take user error as activity
 
-      this.logger.configure(this.activityLoggerStrategry)
-      this.logger.log(
+      this.loggerService.log(
         typeof message !== 'string' ? (message as any).message : message,
         { ...loggerResponse },
       )
     } else {
-      this.logger.configure(this.errorLoggerStrategry)
-      this.logger.error(
+      this.loggerService.error(
         typeof message !== 'string' ? (message as any).message : message,
         { ...loggerResponse, ...stackInfo },
       )
-      this.loggerSerive.createLog({
-        logType: 'ERROR',
-        message: messageResponse,
-        context: `at filename: ${loggerResponse.fileName} from IP: ${loggerResponse.ip} saved with Id: ${loggerResponse.id}`,
-      })
     }
     response.status(statusCode).json({
       statusCode,
