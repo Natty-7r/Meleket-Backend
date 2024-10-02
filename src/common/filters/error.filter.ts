@@ -59,7 +59,9 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       stack: exception instanceof Error ? exception.stack : '',
     }
-    if (statusCode >= 400 || statusCode < 500) {
+    if (statusCode >= 400 && statusCode < 500) {
+      // take user error as activity
+
       this.logger.configure(this.activityLoggerStrategry)
       this.logger.log(
         typeof message !== 'string' ? (message as any).message : message,
