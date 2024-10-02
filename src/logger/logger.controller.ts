@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { LogType, TimeUnit } from 'src/common/util/types/base.type'
+import { LogType, TimeUnit } from 'src/common/types/base.type'
 import { ViewFileLogs, ViewLogs } from './decorators/logger-api.decorator'
 import LoggerService from './logger.service'
 

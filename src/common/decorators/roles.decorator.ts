@@ -1,7 +1,7 @@
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common'
 import { UserType } from '@prisma/client'
 import { ApiBearerAuth, ApiUnauthorizedResponse } from '@nestjs/swagger'
-import { ROLES_KEY } from '../util/constants'
+import { ROLES_KEY } from '../constants'
 import RolesGuard from '../guards/role.guard'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 

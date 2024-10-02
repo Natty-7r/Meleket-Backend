@@ -10,8 +10,8 @@ import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-log
 import { Request, Response } from 'express'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
-import { ErrorLogData, StackTraceInfo } from '../util/types/base.type'
-import { parseStackTrace } from '../util/helpers/parser.helper'
+import { ErrorLogData, StackTraceInfo } from '../types/base.type'
+import { parseStackTrace } from '../helpers/parser.helper'
 
 @Catch()
 export default class ErrorExceptionFilter implements ExceptionFilter {

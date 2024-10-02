@@ -11,14 +11,11 @@ import {
   BusinessIdParams,
   StoryIdParams,
   UserIdParams,
-} from 'src/common/util/types/params.type'
+} from 'src/common/types/params.type'
 import BusinessService from 'src/business/business.service'
-import {
-  ApiResponse,
-  BareApiResponse,
-} from 'src/common/util/types/responses.type'
-import { validateAge } from 'src/common/util/helpers/validator.helper'
-import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
+import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
+import { validateAge } from 'src/common/helpers/validator.helper'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import AddReviewDto from './dto/add-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
 import EditReviewDto from './dto/edit-review.dto'

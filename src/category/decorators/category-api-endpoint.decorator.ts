@@ -1,9 +1,7 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
 
 import { FileInterceptor } from '@nestjs/platform-express'
-import muluterStorage, {
-  multerFilter,
-} from 'src/common/util/helpers/multer.helper'
+import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import Roles from 'src/common/decorators/roles.decorator'
 import {
   CreateCategorySwaggerDefinition,

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { LogParams } from 'src/common/util/types/params.type'
+import { LogParams } from 'src/common/types/params.type'
 import PrismaService from 'src/prisma/prisma.service'
 import { Cron } from '@nestjs/schedule'
-import { ARCHIVED_LOG_EXPIRATION_DATE } from 'src/common/util/constants'
-import { calculateTimeFrame } from 'src/common/util/helpers/date.helper'
+import { ARCHIVED_LOG_EXPIRATION_DATE } from 'src/common/constants'
+import { calculateTimeFrame } from 'src/common/helpers/date.helper'
 import CreateLogDto from './dto/create-log.dto'
 import WinstonLoggerService from './winston-logger/winston-logger.service'
 

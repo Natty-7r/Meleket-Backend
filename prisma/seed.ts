@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { generatePackageCode } from 'src/common/util/helpers/string.helper'
+import { generatePackageCode } from 'src/common/helpers/string.helper'
 import CreatePackageDto from 'src/payment/dto/create-package.dto'
 
 const prisma = new PrismaClient()

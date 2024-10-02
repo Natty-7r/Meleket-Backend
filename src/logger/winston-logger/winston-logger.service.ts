@@ -7,20 +7,20 @@ import {
   LoggerType,
   LogType,
   TimeUnit,
-} from 'src/common/util/types/base.type'
-import { LogParams } from 'src/common/util/types/params.type'
+} from 'src/common/types/base.type'
+import { LogParams } from 'src/common/types/params.type'
 import {
   calculateTimeFrame,
   compareDates,
-} from 'src/common/util/helpers/date.helper'
+} from 'src/common/helpers/date.helper'
 import {
   getFullPath,
   readFileContent,
   readFileNamesInFolder,
-} from 'src/common/util/helpers/file.helper'
-import formatLogFiles from 'src/common/util/helpers/formatter.helper'
-import { parseLogFile } from 'src/common/util/helpers/parser.helper'
-import { LogFileData } from 'src/common/util/types/responses.type'
+} from 'src/common/helpers/file.helper'
+import formatLogFiles from 'src/common/helpers/formatter.helper'
+import { parseLogFile } from 'src/common/helpers/parser.helper'
+import { LogFileData } from 'src/common/types/responses.type'
 import LoggerStrategy from './interfaces/logger-strategy.interface'
 
 @Injectable()

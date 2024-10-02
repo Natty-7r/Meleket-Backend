@@ -16,9 +16,7 @@ import {
 import { ApiForbiddenResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
-import muluterStorage, {
-  multerFilter,
-} from 'src/common/util/helpers/multer.helper'
+import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 
 const ClientRole = () =>
   applyDecorators(

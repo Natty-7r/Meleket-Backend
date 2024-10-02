@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios'
-import { APICallParams } from '../util/types/params.type'
-import { ApiResponse } from '../util/types/responses.type'
+import { APICallParams } from '../types/params.type'
+import { ApiResponse } from '../types/responses.type'
 
 export const api = async ({
   url,

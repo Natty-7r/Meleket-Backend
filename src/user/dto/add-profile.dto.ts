@@ -1,6 +1,6 @@
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger'
 import { IsString, IsOptional, IsNotEmpty, IsDateString } from 'class-validator'
-import { SEX } from 'src/common/util/types/base.type'
+import { SEX } from 'src/common/types/base.type'
 
 export default class AddProfileDto {
   @ApiProperty({

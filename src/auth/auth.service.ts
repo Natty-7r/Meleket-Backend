@@ -11,12 +11,12 @@ import PrismaService from 'src/prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { OTPType, UserType, Admin } from '@prisma/client'
-import { SignUpType, USER } from 'src/common/util/types/base.type'
-import { generateOTP } from 'src/common/util/helpers/numbers.helper'
+import { SignUpType, USER } from 'src/common/types/base.type'
+import { generateOTP } from 'src/common/helpers/numbers.helper'
 import MessageService from 'src/message/message.service'
 import { ConfigService } from '@nestjs/config'
 import EmailStrategy from 'src/message/strategies/email.strategy'
-import { BaseIdParams } from 'src/common/util/types/params.type'
+import { BaseIdParams } from 'src/common/types/params.type'
 import {
   CreateAccountDto,
   CreateAdminDto,

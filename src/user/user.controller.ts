@@ -8,7 +8,7 @@ import {
   Put,
   UploadedFile,
 } from '@nestjs/common'
-import { USER } from 'src/common/util/types/base.type'
+import { USER } from 'src/common/types/base.type'
 import User from 'src/common/decorators/user.decorator'
 import { ApiTags } from '@nestjs/swagger'
 import UserService from './user.service'

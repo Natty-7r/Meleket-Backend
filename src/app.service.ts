@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { marked } from 'marked'
-import { getFileContent } from './common/util/helpers/file.helper'
+import { getFileContent } from './common/helpers/file.helper'
 
 @Injectable()
 export default class AppService {

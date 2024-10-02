@@ -5,12 +5,12 @@ import {
   SendEmailParams,
   SendMessageParams,
   SendOTPParams,
-} from 'src/common/util/types/params.type'
+} from 'src/common/types/params.type'
 import {
   generateAccountCreationEmailMessage,
   generateResetEmailOTPMessage,
   generateVerifyEmailOTPMessage,
-} from 'src/common/util/helpers/string.helper'
+} from 'src/common/helpers/string.helper'
 import { MailerService } from '@nestjs-modules/mailer'
 import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'

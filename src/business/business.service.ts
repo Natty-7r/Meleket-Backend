@@ -13,16 +13,13 @@ import {
   BussinessService as BussinesServiceModelType,
   Story,
 } from '@prisma/client'
-import {
-  ApiResponse,
-  BareApiResponse,
-} from 'src/common/util/types/responses.type'
-import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
-import { validateStory } from 'src/common/util/helpers/validator.helper'
-import { generateBusinessSorting } from 'src/common/util/helpers/sorting.helper'
-import { createPagination } from '../common/util/helpers/pagination.helper'
+import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
+import { validateStory } from 'src/common/helpers/validator.helper'
+import { generateBusinessSorting } from 'src/common/helpers/sorting.helper'
+import { createPagination } from '../common/helpers/pagination.helper'
 
-import { ApiResponseWithPagination } from '../common/util/types/responses.type'
+import { ApiResponseWithPagination } from '../common/types/responses.type'
 import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
@@ -50,7 +47,7 @@ import {
   OptionalUserIdParams,
   PaginationParams,
   BaseNameParams,
-} from '../common/util/types/params.type'
+} from '../common/types/params.type'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 import CreateStoryDto from './dto/create-story.dto'
 import UpdateStoryDto from './dto/update-store.dto'

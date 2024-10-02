@@ -6,11 +6,11 @@ import {
   SendMessageParams,
   SendOTPParams,
   SendSMSParams,
-} from 'src/common/util/types/params.type'
+} from 'src/common/types/params.type'
 import {
   generateResetSMSOTPMessage,
   generateVerifySMSOTPMessage,
-} from 'src/common/util/helpers/string.helper'
+} from 'src/common/helpers/string.helper'
 import ErrorLoggerStrategy from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
 import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'

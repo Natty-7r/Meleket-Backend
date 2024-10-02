@@ -10,7 +10,7 @@ import { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
 import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
-import { ActivityLogData } from '../util/types/base.type'
+import { ActivityLogData } from '../types/base.type'
 
 @Injectable()
 export default class ActivityInterceptor implements NestInterceptor {
