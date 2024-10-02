@@ -141,12 +141,15 @@ export enum TimeUnit {
   m = 'm',
   y = 'y',
 }
+
+export enum AuthLogType {
+  USER_ACTIVITY = 'USER_ACTIVITY',
+  ADMIN_ACTIVITY = 'ADMIN_ACTIVITY',
+}
 export enum LogType {
   ERROR = 'ERROR',
   WARNING = 'WARNING',
   ACTIVITY = 'ACTIVITY',
-  USER_ACTIVITY = 'USER_ACTIVITY',
-  ADMIN_ACTIVITY = 'ADMIN_ACTIVITY',
 }
 export enum LogFileFolder {
   ACTIVITY = 'activities',

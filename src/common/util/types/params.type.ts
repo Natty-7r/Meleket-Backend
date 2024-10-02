@@ -260,7 +260,7 @@ export type TimeFrameParams = {
   startDate?: Date
 }
 
-export type ReadLogFileParams = {
+export type LogParams = {
   timeUnit?: TimeUnit
   timeFrame?: number // time frame
   logType?: LogType
