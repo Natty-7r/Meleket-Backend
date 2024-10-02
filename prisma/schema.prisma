@@ -77,8 +77,6 @@ model User {
   bills              Bill[]
   businesses         Business[]       @relation("UserOwnsBusiness")
   followedBusinesses Business[]       @relation("UserFollowsBusiness")
-  logs               Log[]            @relation("UserLogs")
-
   createdAt         DateTime @default(now())
   passwordUpdatedAt DateTime @updatedAt
 
@@ -106,7 +104,6 @@ model Admin {
   password       String
   userType       UserType    @default(ADMIN)
   status         AdminStatus @default(CREATED)
-  logs           Log[]       @relation("AdminLogs")
   inactiveReason String?     @default("new account")
   createdAat     DateTime    @default(now()) @map("created_at")
   updatedAat     DateTime    @updatedAt @map("updated_at")
@@ -343,6 +340,4 @@ model Log {
   userId     String?
   adminId    String?
 
-  user  User?  @relation("UserLogs", fields: [userId], references: [id])
-  admin Admin? @relation("AdminLogs", fields: [adminId], references: [id])
-}
+  }
