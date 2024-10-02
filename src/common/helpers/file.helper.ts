@@ -10,6 +10,7 @@ const getCwd = () => {
 }
 const ensureFilePath = async ({ filePath }: BaseFilePathParams) => {
   try {
+    console.log(filePath)
     await fsAsync.access(filePath)
     return filePath
   } catch (error) {
@@ -42,8 +43,8 @@ export const readFileNamesInFolder = async ({
 }
 
 export const readFileContent = async ({ filePath }: BaseFilePathParams) => {
-  await ensureFilePath({ filePath })
-  return fsAsync.readFile(filePath, 'utf8')
+  const fullPath = await getFullPath({ filePath })
+  return fsAsync.readFile(fullPath, 'utf8')
 }
 export const getFileContent = async ({ filePath }: BaseFilePathParams) => {
   const fullPath = await getFullPath({ filePath })

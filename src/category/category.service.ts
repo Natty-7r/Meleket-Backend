@@ -7,21 +7,21 @@ import {
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
-import { CategoryTreeNode } from 'src/common/util/types/base.type'
+import { CategoryTreeNode } from 'src/common/types/base.type'
 import BusinessService from 'src/business/business.service'
-import { BaseIdParams } from 'src/common/util/types/params.type'
+import { BaseIdParams } from 'src/common/types/params.type'
 import {
   ApiResponse,
   ApiResponseWithPagination,
-} from 'src/common/util/types/responses.type'
-import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
+} from 'src/common/types/responses.type'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import { Business } from '@prisma/client'
 import {
   PaginationParams,
   CreateCategoryParams,
   GenerateCategoryTreeParams,
   OptionalImageUrlParams,
-} from '../common/util/types/params.type'
+} from '../common/types/params.type'
 import CreateCategoryDto from './dto/create-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import UpdateCategoryDto from './dto/update-category.dto'

@@ -10,7 +10,7 @@ import {
   Delete,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { RequestWithUser, SignUpType } from 'src/common/util/types/base.type'
+import { RequestWithUser, SignUpType } from 'src/common/types/base.type'
 import { User } from '@prisma/client'
 import { AuthGuard } from '@nestjs/passport'
 import AuthService from './auth.service'

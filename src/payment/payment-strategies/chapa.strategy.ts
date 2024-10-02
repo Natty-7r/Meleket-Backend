@@ -2,8 +2,8 @@ import {
   ChapaConfig,
   ChapaCustomerInfo,
   Options,
-} from 'src/common/util/types/base.type'
-import { ApiResponse } from 'src/common/util/types/responses.type'
+} from 'src/common/types/base.type'
+import { ApiResponse } from 'src/common/types/responses.type'
 import { ConfigService } from '@nestjs/config'
 import api from 'src/common/lib/api'
 

@@ -11,18 +11,18 @@ import {
   PackageIdParams,
   PaymentInitParams,
   UserIdParams,
-} from 'src/common/util/types/params.type'
+} from 'src/common/types/params.type'
 import PrismaService from 'src/prisma/prisma.service'
 import {
   generatePackageCode,
   generateRandomString,
-} from 'src/common/util/helpers/string.helper'
+} from 'src/common/helpers/string.helper'
 import UserService from 'src/user/user.service'
-import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/util/constants'
+import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/constants'
 import {
   calculatePackageExpireDate,
   calculatePackageStartDate,
-} from 'src/common/util/helpers/date.helper'
+} from 'src/common/helpers/date.helper'
 import CreatePackageDto from './dto/create-package.dto'
 import PurchasePackageDto from './dto/purchase-package.dto'
 import Chapa from './payment-strategies/chapa.strategy'

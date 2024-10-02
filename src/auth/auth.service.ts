@@ -11,12 +11,13 @@ import PrismaService from 'src/prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { OTPType, UserType, Admin } from '@prisma/client'
-import { SignUpType, USER } from 'src/common/util/types/base.type'
-import { generateOTP } from 'src/common/util/helpers/numbers.helper'
+import { SignUpType, USER } from 'src/common/types/base.type'
+import { generateOTP } from 'src/common/helpers/numbers.helper'
 import MessageService from 'src/message/message.service'
 import { ConfigService } from '@nestjs/config'
 import EmailStrategy from 'src/message/strategies/email.strategy'
-import { BaseIdParams } from 'src/common/util/types/params.type'
+import { BaseIdParams } from 'src/common/types/params.type'
+import LoggerService from 'src/logger/logger.service'
 import {
   CreateAccountDto,
   CreateAdminDto,
@@ -39,6 +40,7 @@ export default class AuthService {
     private readonly smsStrategy: SmsStrategy,
     private readonly emailStrategy: EmailStrategy,
     private readonly configService: ConfigService,
+    private readonly loggerSerive: LoggerService,
   ) {
     this.#createSuperAdminAccount()
   }
@@ -95,7 +97,12 @@ export default class AuthService {
         address: email,
       })
     }
-
+    this.loggerSerive.createLog({
+      logType: 'USER_ACTIVITY',
+      message: `user account created for ${email}, ${firstName}, ${lastName} with ID${rest.id}`,
+      context: 'user account creation',
+      userId: rest.id,
+    })
     return {
       status: 'success',
       message: 'Account created successfully',
@@ -134,9 +141,17 @@ export default class AuthService {
       password,
       address: email,
     })
+
     /* eslint-disable */
     const { password: _, ...rest } = adminCreated
     /* eslint-disable */
+
+    this.loggerSerive.createLog({
+      logType: 'ADMIN_ACTIVITY',
+      message: `${role == 'SUPER_ADMIN' && 'Super'} admin account created for email:${email}, name: ${firstName}, ${lastName} with ID ${rest.id}`,
+      context: 'admin account creation',
+      adminId: rest.id,
+    })
     return {
       status: 'success',
       message: 'Admin created successfully',
@@ -419,6 +434,13 @@ export default class AuthService {
         },
       })
     }
+    this.loggerSerive.createLog({
+      logType: userType === 'CLIENT_USER' ? 'USER_ACTIVITY' : 'ADMIN_ACTIVITY',
+      message: `${userType == 'CLIENT_USER' ? 'user ' : 'admin'} with  id: ${user.id} name: ${user.firstName.concat(' ').concat(user.lastName)}  update password`,
+      context: 'password update',
+      userId: userType === 'CLIENT_USER' && user.id,
+      adminId: userType !== 'CLIENT_USER' && user.id,
+    })
     return {
       status: 'success',
       message: 'Password updated successfully',

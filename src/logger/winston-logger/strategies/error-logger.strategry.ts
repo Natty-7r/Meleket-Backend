@@ -2,7 +2,7 @@ import {
   LogFileFolder,
   LoggerOption,
   LoggerType,
-} from 'src/common/util/types/base.type'
+} from 'src/common/types/base.type'
 import LoggerStrategy from '../interfaces/logger-strategy.interface'
 
 export default class ErrorLoggerStrategy implements LoggerStrategy {

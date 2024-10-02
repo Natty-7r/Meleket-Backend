@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Put } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import User from 'src/common/decorators/user.decorator'
-import { USER } from 'src/common/util/types/base.type'
+import { USER } from 'src/common/types/base.type'
 import CreatePackageDto from './dto/create-package.dto'
 import PaymentService from './payment.service'
 import {

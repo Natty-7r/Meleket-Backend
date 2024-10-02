@@ -8,18 +8,12 @@ import { Observable } from 'rxjs'
 import { map, tap } from 'rxjs/operators'
 import { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
-import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
-import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
-import { ActivityLogData } from '../util/types/base.type'
+import LoggerService from 'src/logger/logger.service'
+import { ActivityLogData } from '../types/base.type'
 
 @Injectable()
 export default class ActivityInterceptor implements NestInterceptor {
-  activityLoggerStrategry: ActivityLoggerStrategry
-
-  constructor(private readonly logger: WinstonLoggerService) {
-    this.activityLoggerStrategry = new ActivityLoggerStrategry()
-    this.logger.configure(this.activityLoggerStrategry)
-  }
+  constructor(private readonly loggerService: LoggerService) {}
 
   intercept(
     context: ExecutionContext,
@@ -50,8 +44,7 @@ export default class ActivityInterceptor implements NestInterceptor {
             request.originalUrl.includes('/logs') || request.originalUrl === '/'
           )
         ) {
-          this.logger.configure(this.activityLoggerStrategry)
-          this.logger.log('', { ...activityLog })
+          this.loggerService.log('', { ...activityLog })
         }
       }),
     )

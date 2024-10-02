@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger'
-import { SEX } from 'src/common/util/types/base.type'
+import { SEX } from 'src/common/types/base.type'
 
 export default class ProfileResponse {
   @ApiResponseProperty({ example: '8ada29bb-5c51-4dd9-9819-4fb5175dd5ac' })

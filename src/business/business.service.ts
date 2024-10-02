@@ -13,16 +13,14 @@ import {
   BussinessService as BussinesServiceModelType,
   Story,
 } from '@prisma/client'
-import {
-  ApiResponse,
-  BareApiResponse,
-} from 'src/common/util/types/responses.type'
-import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
-import { validateStory } from 'src/common/util/helpers/validator.helper'
-import { generateBusinessSorting } from 'src/common/util/helpers/sorting.helper'
-import { createPagination } from '../common/util/helpers/pagination.helper'
+import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
+import { validateStory } from 'src/common/helpers/validator.helper'
+import { generateBusinessSorting } from 'src/common/helpers/sorting.helper'
+import LoggerService from 'src/logger/logger.service'
+import { createPagination } from '../common/helpers/pagination.helper'
 
-import { ApiResponseWithPagination } from '../common/util/types/responses.type'
+import { ApiResponseWithPagination } from '../common/types/responses.type'
 import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
@@ -50,7 +48,7 @@ import {
   OptionalUserIdParams,
   PaginationParams,
   BaseNameParams,
-} from '../common/util/types/params.type'
+} from '../common/types/params.type'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 import CreateStoryDto from './dto/create-story.dto'
 import UpdateStoryDto from './dto/update-store.dto'
@@ -58,7 +56,10 @@ import UpdateBusinessServicesDto from './dto/update-business-services.dto'
 
 @Injectable()
 export default class BusinessService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly loggerService: LoggerService,
+  ) {}
 
   // helper methods
 
@@ -290,8 +291,22 @@ export default class BusinessService {
           5: 0,
         }),
       },
+      select: {
+        owner: true,
+        name: true,
+        description: true,
+        templateId: true,
+        mainImageUrl: true,
+        averageRating: true,
+        category: { select: { name: true, id: true } },
+      },
     })
-
+    this.loggerService.createLog({
+      logType: 'USER_ACTIVITY',
+      message: `${business.owner.firstName.concat(' ').concat(business.owner.lastName)} created bussines with name:${business.name} under category:${business.category.name}`,
+      context: 'new bussines',
+      userId,
+    })
     return {
       status: 'success',
       message: 'Account created successfully',

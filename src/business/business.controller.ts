@@ -11,7 +11,7 @@ import {
   UploadedFile,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { USER } from 'src/common/util/types/base.type'
+import { USER } from 'src/common/types/base.type'
 import User from 'src/common/decorators/user.decorator'
 import CreateBusinessDto from './dto/create-business.dto'
 import BusinessService from './business.service'
