@@ -13,3 +13,7 @@ export const PACKAGE_CODE_PREFIX: string = 'P_'
 export const MAX_ACTIVE_BUSINESS_COUNT: number = 2
 
 export const ARCHIVED_LOG_EXPIRATION_DATE: number = 20
+
+export const EMAIL_TEMPLATE_FOLDER_PATH: string = '/src/message/templates/mail/'
+
+export const SMS_TEMPLATE_FOLDER_PATH: string = '/src/message/templates/sms/'
