@@ -333,7 +333,7 @@ model Bill {
 // log related 
 
 model Log {
-  id        Int      @id @default(autoincrement())
+  id        String @id @default(uuid())
   logType   LogType
   message   String
   context   String?
