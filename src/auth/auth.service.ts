@@ -148,9 +148,9 @@ export default class AuthService {
 
     this.loggerSerive.createLog({
       logType: 'ADMIN_ACTIVITY',
-      message: `${role == 'SUPER_ADMIN' && 'Super'} admin account created for ${email}, ${firstName}, ${lastName} with ID${rest.id}`,
+      message: `${role == 'SUPER_ADMIN' && 'Super'} admin account created for email:${email}, name: ${firstName}, ${lastName} with ID ${rest.id}`,
       context: 'admin account creation',
-      userId: rest.id,
+      adminId: rest.id,
     })
     return {
       status: 'success',
