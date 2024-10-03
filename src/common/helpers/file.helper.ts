@@ -10,7 +10,6 @@ const getCwd = () => {
 }
 const ensureFilePath = async ({ filePath }: BaseFilePathParams) => {
   try {
-    console.log(filePath)
     await fsAsync.access(filePath)
     return filePath
   } catch (error) {
