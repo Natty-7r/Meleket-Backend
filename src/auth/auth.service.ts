@@ -42,10 +42,10 @@ export default class AuthService {
     private readonly configService: ConfigService,
     private readonly loggerSerive: LoggerService,
   ) {
-    this.#createSuperAdminAccount()
+    this.createSuperAdminAccount()
   }
 
-  async #createSuperAdminAccount() {
+  async createSuperAdminAccount() {
     const admins = await this.prismaService.admin.findMany({})
     if (admins.length === 0)
       this.createAdminAccount({
@@ -81,7 +81,7 @@ export default class AuthService {
     const { password: _, ...rest } = userCreated
     /* eslint-disable */
     if (signUpType === SignUpType.BY_EMAIL) {
-      const { otpCode } = await this.#createOTP({
+      const { otpCode } = await this.createOTP({
         channelType: 'EMAIL',
         email,
         type: 'VERIFICATION',
@@ -215,13 +215,7 @@ export default class AuthService {
   }
 
   // private method to create otp
-  async #createOTP({
-    type,
-    email,
-    phone,
-    channelType,
-    userType,
-  }: CreateOTPDto) {
+  async createOTP({ type, email, phone, channelType, userType }: CreateOTPDto) {
     const otpCode = generateOTP()
     let colSpecification = {}
     let channelValue = 'EMAIL'
@@ -276,7 +270,7 @@ export default class AuthService {
   // to request otp for verification and reset
   async requestOTP(createOTPDto: CreateOTPDto) {
     const { channelType, channelValue, otpCode, user, type } =
-      await this.#createOTP(createOTPDto)
+      await this.createOTP(createOTPDto)
 
     // sending otp via appropriate channel
     channelType === 'EMAIL'
@@ -372,7 +366,7 @@ export default class AuthService {
     }
   }
 
-  async #checkOTPVerification({
+  async checkOTPVerification({
     type,
     userId,
   }: {
@@ -408,7 +402,7 @@ export default class AuthService {
           })
     if (!user) throw new BadRequestException('Invalid user id ')
 
-    await this.#checkOTPVerification({ type: 'RESET', userId })
+    await this.checkOTPVerification({ type: 'RESET', userId })
 
     const hashedPassword = await bcrypt.hash(password, 12)
 

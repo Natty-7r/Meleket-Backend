@@ -31,7 +31,7 @@ export default class UserService {
 
   // helpers
 
-  async #checkUserId({ id }: BaseIdParams) {
+  async checkUserId({ id }: BaseIdParams) {
     const user = await this.prismaService.user.findFirst({
       where: { id },
     })
@@ -68,7 +68,7 @@ export default class UserService {
     birthDate,
     ...addProfileDto
   }: AddProfileDto & UserIdParams): Promise<ApiResponse> {
-    await this.#checkUserId({ id: userId })
+    await this.checkUserId({ id: userId })
     let profile = await this.prismaService.profile.findFirst({
       where: { userId },
     })
@@ -96,7 +96,7 @@ export default class UserService {
     ...updateProfileDto
   }: UpdateProfileDto & UserIdParams): Promise<ApiResponse> {
     let oldProfilePicturePath
-    await this.#checkUserId({ id: userId })
+    await this.checkUserId({ id: userId })
 
     let profile = await this.prismaService.profile.findFirst({
       where: { userId },

@@ -22,7 +22,7 @@ export default class EmailStrategy implements MessageStrategy {
     private loggerService: LoggerService,
   ) {}
 
-  async #sendEmail({ address, subject, body }: SendEmailParams) {
+  async sendEmail({ address, subject, body }: SendEmailParams) {
     try {
       const message = await this.mailerService.sendMail({
         sender: this.configService.get<string>('email.sender'),
@@ -63,7 +63,7 @@ export default class EmailStrategy implements MessageStrategy {
       data: { firstName, otp },
     })
     if (emailBody)
-      await this.#sendEmail({
+      await this.sendEmail({
         address,
         body: emailBody,
         subject:
@@ -85,7 +85,7 @@ export default class EmailStrategy implements MessageStrategy {
         password,
       },
     })
-    await this.#sendEmail({
+    await this.sendEmail({
       address,
       body: emailBody,
       subject: 'New Account Creation',
