@@ -17,10 +17,6 @@ async function bootstrap() {
   const port = process.env.PORT || 3000
 
   app.enableCors()
-  app.use((req, res, next) => {
-    console.log(req.path)
-    next()
-  })
   await app.listen(port, () => {
     console.log(`Meleket Backend is Running at port  ${port}`)
   })
