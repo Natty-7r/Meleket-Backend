@@ -1,10 +1,13 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common'
 import BusinessService from 'src/business/business.service'
 import {
+  AdminIdParams,
   BaseNameParams,
   BusinessIdParams,
   GenerateParmentInitOptionParams,
@@ -23,6 +26,8 @@ import {
   calculatePackageExpireDate,
   calculatePackageStartDate,
 } from 'src/common/helpers/date.helper'
+import LoggerService from 'src/logger/logger.service'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import CreatePackageDto from './dto/create-package.dto'
 import PurchasePackageDto from './dto/purchase-package.dto'
 import Chapa from './payment-strategies/chapa.strategy'
@@ -35,6 +40,7 @@ export default class PaymentService {
     private readonly businsesService: BusinessService,
     private readonly userService: UserService,
     private readonly prismaService: PrismaService,
+    private readonly loggerService: LoggerService,
   ) {}
 
   private async checkUnBilledPackage({ businessId }: BusinessIdParams) {
@@ -118,7 +124,8 @@ export default class PaymentService {
     price,
     monthCount,
     description,
-  }: CreatePackageDto) {
+    adminId,
+  }: CreatePackageDto & AdminIdParams) {
     await this.verifyPackageName({ name })
     const packagesCount = await this.getPackagesCount()
 
@@ -132,6 +139,12 @@ export default class PaymentService {
         code: packageCode,
       },
     })
+    this.loggerService.createLog({
+      logType: 'ADMIN_ACTIVITY',
+      message: 'Package created',
+      context: `name: ${name} ID: ${packageCreated.id} `,
+      adminId,
+    })
     return {
       status: 'success',
       message: 'packages fetched successfully',
@@ -139,7 +152,11 @@ export default class PaymentService {
     }
   }
 
-  async updatePackage({ id, ...updatePackgeDto }: UpdatePackageDto) {
+  async updatePackage({
+    id,
+    adminId,
+    ...updatePackgeDto
+  }: UpdatePackageDto & AdminIdParams) {
     await this.verifyPackageId({ packageId: id })
 
     const updatedPackage = await this.prismaService.package.update({
@@ -147,6 +164,12 @@ export default class PaymentService {
       data: {
         ...updatePackgeDto,
       },
+    })
+    this.loggerService.createLog({
+      logType: 'ADMIN_ACTIVITY',
+      message: 'Package updated',
+      context: `name: ${updatePackgeDto.name} ID: ${updatedPackage.id} `,
+      adminId,
     })
     return {
       status: 'success',
@@ -218,6 +241,78 @@ export default class PaymentService {
         payment: data,
       },
     }
+  }
+
+  async verifyChapaPayment(reference: string, userId: string) {
+    const boughtPackage = await this.prismaService.businessPackage.findFirst({
+      where: { reference },
+    })
+    if (!boughtPackage) throw new NotFoundException('Invalid refrence value')
+    if (boughtPackage.billed)
+      throw new ConflictException('Package billed already')
+
+    const response = await this.chapa.verify(reference)
+    if (response.status === 'pending')
+      throw new BadRequestException('Payment not finished')
+    if (response.status === 'fail')
+      throw new BadRequestException('Payment failed')
+
+    const packageBill = await this.prismaService.bill.create({
+      data: {
+        paymentMethod: 'CHAPA',
+        businessId: boughtPackage.businessId,
+        userId,
+        amount: response.amount,
+        reference,
+      },
+    })
+    const billedPackage = await this.prismaService.businessPackage.update({
+      where: { id: boughtPackage.id },
+      data: {
+        billId: packageBill.id,
+        billed: true,
+      },
+      select: {
+        id: true,
+        reference: true,
+        package: {
+          select: { id: true, name: true, monthCount: true, price: true },
+        },
+        business: {
+          select: { id: true, name: true },
+        },
+        bill: {
+          select: { id: true, amount: true, paymentMethod: true },
+        },
+      },
+    })
+    this.loggerService.createLog({
+      logType: 'USER_ACTIVITY',
+      message: 'Package billed',
+      context: `bussinesPackageId: ${boughtPackage.id} businessId: ${boughtPackage.businessId} amount: ${packageBill.amount} billId: ${packageBill.id} userId: ${userId}`,
+    })
+    return {
+      status: 'success',
+      message: 'package billed successfully',
+      data: billedPackage,
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async clearUnbilledPackages() {
+    const oneDayAgo = new Date()
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1)
+
+    await this.prismaService.businessPackage.deleteMany({
+      where: {
+        AND: [{ billed: false }, { createdAt: { lte: oneDayAgo } }],
+      },
+    })
+    this.loggerService.createLog({
+      logType: 'SYSTEM_ACTIVITY',
+      message: 'unbilled packages clead',
+      context: `Date: ${oneDayAgo.toLocaleString()} `,
+    })
   }
 
   generateParmentInitOption({

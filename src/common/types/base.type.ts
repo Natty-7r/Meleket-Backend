@@ -145,6 +145,7 @@ export enum TimeUnit {
 export enum AuthLogType {
   USER_ACTIVITY = 'USER_ACTIVITY',
   ADMIN_ACTIVITY = 'ADMIN_ACTIVITY',
+  SYSTEM_ACTIVITY = 'SYSTEM_ACTIVITY',
 }
 export enum LogType {
   ERROR = 'ERROR',

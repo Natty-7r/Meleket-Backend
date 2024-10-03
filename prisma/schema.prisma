@@ -60,6 +60,8 @@ enum LogType {
   ADMIN_ACTIVITY
   ERROR
   WARNING
+  SYSTEM_ACTIVITY
+
 }
 
 model User {

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import { ConfigModule } from '@nestjs/config'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
@@ -16,6 +16,7 @@ import configuration from './config/configuration'
 import UserModule from './user/user.module'
 import BusinessModule from './business/business.module'
 import LoggerModule from './logger/logger.module'
+import JwtAuthGuard from './auth/guards/jwt.guard'
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import LoggerModule from './logger/logger.module'
   providers: [
     { provide: APP_FILTER, useClass: ErrorExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: ActivityInterceptor },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
     AppService,
   ],
 

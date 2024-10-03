@@ -3,6 +3,7 @@ import { ApiForbiddenResponse } from '@nestjs/swagger'
 import Roles from 'src/common/decorators/roles.decorator'
 import Public from 'src/common/decorators/public.decorator'
 import {
+  BillPackageSwaggerDefinition,
   CreatePackageSwaggerDefinition,
   GetPackagesSwaggerDefinition,
   PurchasePackageSwaggerDefinition,
@@ -22,9 +23,15 @@ const AdminRole = () =>
 
 export const PurchasePackage = () =>
   applyDecorators(ClientRole(), PurchasePackageSwaggerDefinition())
+
+export const BillPackage = () =>
+  applyDecorators(ClientRole(), BillPackageSwaggerDefinition())
+
 export const CreatePackage = () =>
   applyDecorators(AdminRole(), CreatePackageSwaggerDefinition())
+
 export const UpdatePackage = () =>
   applyDecorators(AdminRole(), UpdatePackageSwaggerDefinition())
+
 export const GetPackages = () =>
   applyDecorators(Public(), GetPackagesSwaggerDefinition())
