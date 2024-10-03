@@ -16,3 +16,11 @@
     -   admin acvitated and deativated
     -   activate or deactive user
     -
+
+# Payment Rules
+
+## Package rules
+
+    -  package price : is the package price * category price
+    where category price is calculated per day and package is per month or 3 or year
+
