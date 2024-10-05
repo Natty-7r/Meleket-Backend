@@ -10,11 +10,9 @@ import {
   Put,
   Query,
   UploadedFile,
-  UseGuards,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import User from 'src/common/decorators/user.decorator'
 import { USER } from 'src/common/types/base.type'
 import { SortType } from 'src/common/types/params.type'
@@ -35,7 +33,6 @@ import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 
 @ApiTags('Category')
 @Controller('category')
-@UseGuards(JwtAuthGuard)
 export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
@@ -51,6 +48,7 @@ export default class CategoryController {
       imageUrl: file?.path || 'uploads/category/category.png',
       price: createCategoryDto?.price || 50,
       verified: user.userType !== 'CLIENT_USER',
+      userId: user.id,
     })
   }
 

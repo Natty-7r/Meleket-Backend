@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Put } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import User from 'src/common/decorators/user.decorator'
 import { USER } from 'src/common/types/base.type'
 import CreatePackageDto from './dto/create-package.dto'
 import PaymentService from './payment.service'
 import {
+  BillPackage,
   CreatePackage,
   GetPackages,
   PurchasePackage,
@@ -19,14 +20,26 @@ export default class PaymentController {
 
   @CreatePackage()
   @Post('package')
-  createPackage(@Body() createPackageDto: CreatePackageDto) {
-    return this.paymentService.createPackage(createPackageDto)
+  createPackage(
+    @Body() createPackageDto: CreatePackageDto,
+    @User() user: USER,
+  ) {
+    return this.paymentService.createPackage({
+      ...createPackageDto,
+      adminId: user.id,
+    })
   }
 
   @CreatePackage()
   @Put('package')
-  updatePackage(@Body() updatePackageDto: UpdatePackageDto) {
-    return this.paymentService.updatePackage(updatePackageDto)
+  updatePackage(
+    @Body() updatePackageDto: UpdatePackageDto,
+    @User() user: USER,
+  ) {
+    return this.paymentService.updatePackage({
+      ...updatePackageDto,
+      adminId: user.id,
+    })
   }
 
   @GetPackages()
@@ -45,5 +58,11 @@ export default class PaymentController {
       ...purchasePackageDto,
       userId: user.id,
     })
+  }
+
+  @BillPackage()
+  @Put('chapa/verify/:reference')
+  chapaCallback(@Param('reference') reference: string, @User() user: USER) {
+    return this.paymentService.verifyChapaPayment(reference, user?.id)
   }
 }

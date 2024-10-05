@@ -50,6 +50,9 @@ export type PackageIdParams = {
 export type UserIdParams = {
   userId: string
 }
+export type AdminIdParams = {
+  adminId: string
+}
 export type OptionalUserIdParams = {
   userId?: string
 }
@@ -173,9 +176,10 @@ export type SearchBusinessByAddressParams = {
  * Category related params
  */
 
-export type CreateCategoryParams = OptionalImageUrlParams & {
-  verified: boolean
-}
+export type CreateCategoryParams = OptionalImageUrlParams &
+  UserIdParams & {
+    verified: boolean
+  }
 export type GenerateCategoryTreeParams = {
   categories: Category[]
 }

@@ -16,6 +16,7 @@ import {
 } from 'src/common/types/responses.type'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import { Business } from '@prisma/client'
+import UserService from 'src/user/user.service'
 import {
   PaginationParams,
   CreateCategoryParams,
@@ -34,6 +35,7 @@ export default class CategoryService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly businessService: BusinessService,
+    private readonly userService: UserService,
   ) {}
 
   // helper function
@@ -79,8 +81,12 @@ export default class CategoryService {
 
   async createCategory({
     imageUrl,
+    verified,
+    userId,
     ...createCategoryDto
   }: CreateCategoryDto & CreateCategoryParams): Promise<ApiResponse> {
+    if (!verified) await this.userService.checkProfileLevel({ id: userId })
+
     const previesCategory = await this.prismaService.category.findFirst({
       where: { name: createCategoryDto.name.toLocaleLowerCase().trim() },
     })
@@ -109,6 +115,7 @@ export default class CategoryService {
         name: createCategoryDto.name.toLocaleLowerCase().trim(), // changing name for search
         ...createCategoryDto,
         image: imageUrl,
+        verified,
       },
     })
 

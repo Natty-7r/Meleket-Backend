@@ -1,6 +1,7 @@
 import { applyDecorators, Query } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
@@ -46,5 +47,16 @@ export const PurchasePackageSwaggerDefinition = () =>
       type: BusinessPackageResponse,
     }),
     ApiBadRequestResponse({ description: 'Invalid Package or Business Id ' }),
+    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
+  )
+export const BillPackageSwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ summary: 'Bill  package ' }),
+    ApiCreatedResponse({
+      description: 'package billed  successfully',
+      type: BusinessPackageResponse,
+    }),
+    ApiBadRequestResponse({ description: 'Invalid Package or Business Id ' }),
+    ApiConflictResponse({ description: 'Package aleardy billed' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
   )

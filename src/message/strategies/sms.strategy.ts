@@ -21,7 +21,7 @@ export default class SmsStrategy implements MessageStrategy {
     private loggerService: LoggerService,
   ) {}
 
-  async #sendSMS({ smsBody, smsAddress, subject }: SendSMSParams) {
+  async sendSMS({ smsBody, smsAddress, subject }: SendSMSParams) {
     try {
       const message = await this.twilioService.client.messages.create({
         from: this.configService.get<string>('twilio.smsSender'),
@@ -64,7 +64,7 @@ export default class SmsStrategy implements MessageStrategy {
       data: { firstName, otp },
     })
     if (smsBody)
-      await this.#sendSMS({
+      await this.sendSMS({
         smsAddress: address,
         smsBody,
         subject:

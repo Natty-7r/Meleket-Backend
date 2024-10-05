@@ -117,7 +117,7 @@ export default class Chapa {
    * @returns A Promise that resolves to the API response.
    * @throws Error Throws an error if the verification fails.
    */
-  async verify(txnRef: string): Promise<ApiResponse> {
+  async verify(txnRef: string): Promise<any> {
     if (!txnRef || typeof txnRef !== 'string') {
       throw new Error('Transaction reference must be a non-empty string!')
     }
@@ -126,7 +126,7 @@ export default class Chapa {
       url: `${this.config.baseUrl}${this.config.verifyPath}${txnRef}`,
       authToken: this.config.secretKey,
     })
-
+    if (response.status !== 'success') throw new Error(response.message)
     return response.data
   }
 }
