@@ -12,10 +12,8 @@ enum UserProfileLevel {
   VERIFIED // by email 
 }
 
-enum PackageType {
-  MONTHLY
-  SIX_MONTHLY
-  YEARLY
+enum PaymentMethod {
+  CHAPA
 }
 
 enum BusinessVisiblityStatus {
@@ -57,24 +55,35 @@ enum Sex {
   FEMALE
 }
 
-model User {
-  id                String           @id @default(uuid())
-  firstName         String
-  lastName          String
-  email             String           @unique
-  phoneNumber       String?
-  profileLevel      UserProfileLevel @default(CREATED)
-  userType          UserType         @default(CLIENT_USER)
-  password          String
-  profile           Profile?
-  reviews           Review[]
-  ratings           Rating[]
-  bills             Bill[]
-  businesses        Business[]       @relation("UserOwnsBusiness")
-  followedBussiness Business[]       @relation("UserFollowsBusiness")
+enum LogType {
+  USER_ACTIVITY
+  ADMIN_ACTIVITY
+  ERROR
+  WARNING
+  SYSTEM_ACTIVITY
 
+}
+
+model User {
+  id                 String           @id @default(uuid())
+  firstName          String
+  lastName           String
+  email              String           @unique
+  phoneNumber        String?
+  profileLevel       UserProfileLevel @default(CREATED)
+  userType           UserType         @default(CLIENT_USER)
+  password           String
+  profile            Profile?
+  reviews            Review[]
+  ratings            Rating[]
+  bills              Bill[]
+  businesses         Business[]       @relation("UserOwnsBusiness")
+  followedBusinesses Business[]       @relation("UserFollowsBusiness")
   createdAt         DateTime @default(now())
-  passwordUpdatedAt DateTime @default(now())
+  passwordUpdatedAt DateTime @updatedAt
+
+  // New relation to UserStoryView
+  storyViews UserStoryView[]
 }
 
 model OTP {
@@ -103,13 +112,18 @@ model Admin {
 }
 
 model Profile {
-  id             String   @id @default(uuid())
-  age            Int?
-  birthDate      DateTime
-  sex            Sex
-  profilePicture String?
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id])
+  id               String   @id @default(uuid())
+  age              Int?
+  birthDate        DateTime
+  sex              Sex
+  profilePicture   String?
+  country          String
+  city             String
+  streetAddress    String?
+  specificLocation String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -120,7 +134,7 @@ model Category {
   name     String  @db.VarChar(255)
   parentId String?
   level    Int
-  price    Float
+  price    Float // for day
   image    String
   verified Boolean @default(false)
 
@@ -147,9 +161,9 @@ model Business {
   address  BusinessAddress[]
   contact  BusinessContact?
 
-  category      Category  @relation(fields: [categoryId], references: [id])
-  followers     User[]    @relation("UserFollowsBusiness")
-  packages      Package[]
+  category      Category          @relation(fields: [categoryId], references: [id])
+  followers     User[]            @relation("UserFollowsBusiness")
+  packages      BusinessPackage[]
   reviews       Review[]
   ratings       Rating[]
   ratingSummary Json
@@ -238,21 +252,57 @@ model Story {
   contentType StoryContentType
   text        String?
   image       String?
+  viewCount   Int              @default(0) // Total number of views
 
   businessId String
   business   Business @relation(fields: [businessId], references: [id])
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // New relation to UserStoryView
+  userViews UserStoryView[]
+}
+
+model UserStoryView {
+  id       String   @id @default(uuid())
+  userId   String
+  storyId  String
+  viewedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  story Story @relation(fields: [storyId], references: [id])
+
+  @@unique([userId, storyId]) // Ensures that each user can view a story only once
 }
 
 model Package {
-  id          String      @id @default(uuid())
-  businessId  String
-  packageType PackageType
-  startDate   DateTime
-  endDate     DateTime
-  expired     Boolean
+  id               String            @id @default(uuid())
+  name             String
+  code             String
+  price            Float // amount in birr 
+  monthCount       Int // number of months the package used for 
+  description      String?
+  businessPackages BusinessPackage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model BusinessPackage {
+  id         String @id @default(uuid())
+  businessId String
+
+  startDate DateTime @default(now())
+  expreDate DateTime
+  expired   Boolean  @default(false)
+  billed    Boolean  @default(false)
+  reference String // reference 
+
+  bill      Bill?   @relation(fields: [billId], references: [id])
+  billId    String? @unique // Ensure that each Package has only one Bill
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id])
 
   business Business @relation(fields: [businessId], references: [id])
 
@@ -261,13 +311,14 @@ model Package {
 }
 
 model Bill {
-  id            String   @id @default(uuid())
-  businessId    String
-  userId        String
-  date          DateTime
-  amount        Float
-  paymentMethod String
+  id         String @id @default(uuid())
+  businessId String
+  userId     String
+  amount     Float
+
   reference     String
+  package       BusinessPackage?
+  paymentMethod PaymentMethod
 
   business Business @relation(fields: [businessId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
@@ -275,3 +326,20 @@ model Bill {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
+
+//    notificaiton related
+
+// log related 
+
+model Log {
+  id         String    @id @default(uuid())
+  logType    LogType
+  message    String
+  context    String?
+  archived   Boolean   @default(false)
+  timestamp  DateTime  @default(now())
+  archivedAt DateTime?
+  userId     String?
+  adminId    String?
+
+  }

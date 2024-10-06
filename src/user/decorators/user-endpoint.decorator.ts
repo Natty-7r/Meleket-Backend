@@ -8,15 +8,15 @@ import {
   FollowBusinessSwaggerDefinition,
   FollowedBusinessSwaggerDefinition,
   UnFollowBusinessSwaggerDefinition,
+  GetFollowedBusinessSwaggerDefinition,
   UpdateProfileSwaggerDefinition,
   UpdateReviewSwaggerDefinition,
+  ViewStorySwaggerDefinition,
 } from './user-swagger.decorator'
 import { ApiForbiddenResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
-import muluterStorage, {
-  multerFilter,
-} from 'src/common/util/helpers/multer.helper'
+import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 
 const ClientRole = () =>
   applyDecorators(
@@ -44,6 +44,9 @@ export const FollowBusiness = () =>
 
 export const UnFollowBusiness = () =>
   applyDecorators(ClientRole(), UnFollowBusinessSwaggerDefinition())
+
+export const GetFollowedBusiness = () =>
+  applyDecorators(ClientRole(), GetFollowedBusinessSwaggerDefinition())
 
 export const FollowedBusinesses = () =>
   applyDecorators(ClientRole(), FollowedBusinessSwaggerDefinition())
@@ -80,3 +83,7 @@ export const UpdateProfile = () =>
     ),
     UpdateProfileSwaggerDefinition(),
   )
+
+// story related
+export const ViewStory = () =>
+  applyDecorators(ClientRole(), ViewStorySwaggerDefinition())

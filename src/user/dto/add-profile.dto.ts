@@ -1,9 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger'
 import { IsString, IsOptional, IsNotEmpty, IsDateString } from 'class-validator'
-import { SEX } from 'src/common/util/types/base.type'
+import { SEX } from 'src/common/types/base.type'
 
 export default class AddProfileDto {
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Birth Date',
     example: new Date(),
   })
@@ -11,7 +11,7 @@ export default class AddProfileDto {
   @IsNotEmpty()
   birthDate: Date
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Sex of the user',
     example: 'Male',
   })
@@ -19,7 +19,7 @@ export default class AddProfileDto {
   @IsNotEmpty()
   sex: SEX
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Profile picture URL',
     example: 'https://example.com/profile.jpg',
     required: false,
@@ -27,4 +27,38 @@ export default class AddProfileDto {
   @IsString()
   @IsOptional()
   profilePicture?: string
+
+  @ApiProperty({
+    description: 'Country of the user',
+    example: 'United States',
+  })
+  @IsString()
+  @IsNotEmpty()
+  country: string
+
+  @ApiProperty({
+    description: 'City of the user',
+    example: 'New York',
+  })
+  @IsString()
+  @IsNotEmpty()
+  city: string
+
+  @ApiProperty({
+    description: 'Street address of the user',
+    example: '123 Main St',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  streetAddress?: string
+
+  @ApiPropertyOptional({
+    description: 'Specific location of the user',
+    example: 'Apartment 4B',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  specificLocation?: string
 }

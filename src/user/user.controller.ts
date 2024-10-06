@@ -2,14 +2,16 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Put,
   UploadedFile,
 } from '@nestjs/common'
-import UserService from './user.service'
-import { USER } from 'src/common/util/types/base.type'
+import { USER } from 'src/common/types/base.type'
 import User from 'src/common/decorators/user.decorator'
+import { ApiTags } from '@nestjs/swagger'
+import UserService from './user.service'
 import AddReviewDto from './dto/add-review.dto'
 import {
   AddProfile,
@@ -17,11 +19,12 @@ import {
   AddReveiw,
   DeleteReview,
   FollowBusiness,
+  GetFollowedBusiness,
   UnFollowBusiness,
   UpdateProfile,
   UpdateReview,
+  ViewStory,
 } from './decorators/user-endpoint.decorator'
-import { ApiTags } from '@nestjs/swagger'
 import EditReviewDto from './dto/edit-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
 import AddProfileDto from './dto/add-profile.dto'
@@ -76,6 +79,7 @@ export default class UserController {
       userId: user.id,
     })
   }
+
   @Delete('review/:id')
   @DeleteReview()
   deleteReview(@Param('id') id: string, @User() user: USER) {
@@ -84,6 +88,7 @@ export default class UserController {
       userId: user.id,
     })
   }
+
   @AddRating()
   @Post('rating')
   addRaging(@Body() addRatingDto: AddRatingDto, @User() user: USER) {
@@ -108,12 +113,15 @@ export default class UserController {
     return this.userService.unFollowBussiness({ id: user.id, businessId })
   }
 
-  @Delete('following-business')
-  @UnFollowBusiness()
-  getFollowedBusiness(
-    @Param('businessId') businessId: string,
-    @User() user: USER,
-  ) {
+  @Get('following-business')
+  @GetFollowedBusiness()
+  getFollowedBusiness(@User() user: USER) {
     return this.userService.getFollowedBussiness({ id: user.id })
+  }
+
+  @Put('story/:storyId')
+  @ViewStory()
+  viewStory(@Param('storyId') storyId: string, @User() user: USER) {
+    return this.userService.viewStory({ userId: user.id, storyId })
   }
 }

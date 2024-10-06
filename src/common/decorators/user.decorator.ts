@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
-import { RequestWithUser } from '../util/types/base.type'
+import { RequestWithUser } from '../types/base.type'
 
 // decorator to extract user from request
 const User = createParamDecorator((data: string, context: ExecutionContext) => {

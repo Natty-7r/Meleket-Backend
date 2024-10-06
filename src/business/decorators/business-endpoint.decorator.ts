@@ -21,11 +21,10 @@ import {
   GetBusinessStoriesSwaggerDefinition,
 } from './business-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
-import muluterStorage, {
-  multerFilter,
-} from 'src/common/util/helpers/multer.helper'
+import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import { ApiForbiddenResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
+import RolesOptional from 'src/common/decorators/optianal-roles.decorator'
 
 const ClientRole = () =>
   applyDecorators(
@@ -170,7 +169,7 @@ export const DeleteStory = () =>
   applyDecorators(ClientRole(), DeleteStorySwaggerDefinition())
 
 export const GetAllStories = () =>
-  applyDecorators(Public(), GetAllStoriesSwaggerDefinition())
+  applyDecorators(RolesOptional(), GetAllStoriesSwaggerDefinition())
 
 export const GetBusinessStories = () =>
-  applyDecorators(Public(), GetBusinessStoriesSwaggerDefinition())
+  applyDecorators(RolesOptional(), GetBusinessStoriesSwaggerDefinition())

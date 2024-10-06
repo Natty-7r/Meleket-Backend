@@ -10,9 +10,11 @@ import {
   Request,
   UploadedFile,
 } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
+import { USER } from 'src/common/types/base.type'
+import User from 'src/common/decorators/user.decorator'
 import CreateBusinessDto from './dto/create-business.dto'
 import BusinessService from './business.service'
-import { ApiTags } from '@nestjs/swagger'
 import {
   AddBusinessService,
   CreateBusiness,
@@ -33,16 +35,14 @@ import {
   GetBusinessStories,
   GetAllStories,
 } from './decorators/business-endpoint.decorator'
-import { USER } from 'src/common/util/types/base.type'
-import User from 'src/common/decorators/user.decorator'
-import CreateBusinessServiceDto from './dto/create-business-service.dto'
-import UpdateBusinessServiceDtos from './dto/update-business-service.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import CreateBusinessAddressDto from './dto/create-business-address.dto'
 import UpdateBusinessAddressDto from './dto/update-business-address.dto'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 import CreateStoryDto from './dto/create-story.dto'
 import UpdateStoryDto from './dto/update-store.dto'
+import CreateBusinessServiceDto from './dto/create-business-service.dto'
+import UpdateBusinessServicesDto from './dto/update-business-services.dto'
 
 @ApiTags('Businesses')
 @Controller('businesses')
@@ -121,7 +121,7 @@ export default class BusinessController {
   @Put('services')
   @UpdateBusinessServices()
   async updateBusinessServices(
-    @Body() updateBusinessServiceDto: UpdateBusinessServiceDtos,
+    @Body() updateBusinessServiceDto: UpdateBusinessServicesDto,
     @User() user: USER,
   ) {
     return this.businessService.updateBusinessServices({
@@ -129,6 +129,7 @@ export default class BusinessController {
       userId: user.id,
     })
   }
+
   @Delete('services/:id')
   @DeleteBusinessService()
   deleteService(@Param('id') id: string, @User() { id: userId }: USER) {
@@ -151,6 +152,7 @@ export default class BusinessController {
       userId: user.id,
     })
   }
+
   @Put('address')
   @UpdateBusinessAddress()
   updateBusinessAddress(
@@ -162,6 +164,7 @@ export default class BusinessController {
       userId: user.id,
     })
   }
+
   @Delete('address/:id')
   @DeleteBusinessAddress()
   deleteBusinessAddress(
@@ -203,7 +206,7 @@ export default class BusinessController {
 
   @Post('stories')
   @AddStory()
-  async AddStory(
+  async addStory(
     @Body() createStoryDto: CreateStoryDto,
     @User() user: USER,
     @UploadedFile() file?: Express.Multer.File,
@@ -214,6 +217,7 @@ export default class BusinessController {
       image: file?.path || undefined,
     })
   }
+
   @Put('stories')
   @UpdateStory()
   async updateStory(
@@ -239,15 +243,19 @@ export default class BusinessController {
 
   @Get('stories')
   @GetAllStories()
-  async fetchAllStories() {
-    return this.businessService.getStories()
+  async fetchAllStories(@User() user: USER) {
+    return this.businessService.getStories({ userId: user?.id })
   }
+
   @Get('stories/:businessId')
   @GetBusinessStories()
   async getStories(
     @Param('businessId') businessId: string,
     @User() user: USER,
   ) {
-    return this.businessService.getBusinessStories({ businessId })
+    return this.businessService.getBusinessStories({
+      businessId,
+      userId: user?.id,
+    })
   }
 }

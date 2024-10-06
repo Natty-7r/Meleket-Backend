@@ -6,23 +6,21 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
-import AddReviewDto from './dto/add-review.dto'
 import {
   BaseIdParams,
   BusinessIdParams,
+  StoryIdParams,
   UserIdParams,
-} from 'src/common/util/types/params.type'
+} from 'src/common/types/params.type'
 import BusinessService from 'src/business/business.service'
-import {
-  ApiResponse,
-  BareApiResponse,
-} from 'src/common/util/types/responses.type'
+import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
+import { validateAge } from 'src/common/helpers/validator.helper'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
+import AddReviewDto from './dto/add-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
 import EditReviewDto from './dto/edit-review.dto'
 import AddProfileDto from './dto/add-profile.dto'
 import UpdateProfileDto from './dto/update-profile.dto'
-import { validateAge } from 'src/common/util/helpers/validator.helper'
-import { deleteFileAsync } from 'src/common/util/helpers/file.helper'
 
 @Injectable()
 export default class UserService {
@@ -33,7 +31,7 @@ export default class UserService {
 
   // helpers
 
-  async #checkUserId({ id }: BaseIdParams) {
+  async checkUserId({ id }: BaseIdParams) {
     const user = await this.prismaService.user.findFirst({
       where: { id },
     })
@@ -41,32 +39,45 @@ export default class UserService {
     if (!user) throw new ForbiddenException('User not found')
     return true
   }
-  async #checkProfileLevel({ id }: BaseIdParams) {
+
+  async checkProfileLevel({ id }: BaseIdParams) {
     const user = await this.prismaService.user.findFirst({
       where: { id },
     })
 
     if (user.profileLevel !== 'VERIFIED')
-      throw new ForbiddenException('Not allowed for unverfied user   ')
+      throw new ForbiddenException('Not allowed for unverfied user  ')
     return true
   }
 
   // profile related
+
+  async getUserDetail({ id }: BaseIdParams) {
+    const userDetail = await this.prismaService.user.findFirst({
+      where: { id },
+    })
+    return {
+      status: 'success',
+      message: `user detail fetced  successfully`,
+      data: userDetail,
+    }
+  }
 
   async addProfile({
     userId,
     birthDate,
     ...addProfileDto
   }: AddProfileDto & UserIdParams): Promise<ApiResponse> {
-    await this.#checkUserId({ id: userId })
+    await this.checkUserId({ id: userId })
     let profile = await this.prismaService.profile.findFirst({
       where: { userId },
     })
-    if (profile) return this.updateProfile({ userId, ...addProfileDto })
+    if (profile)
+      return this.updateProfile({ userId, ...addProfileDto, birthDate })
     const age = validateAge(birthDate)
     profile = await this.prismaService.profile.create({
       data: {
-        userId: userId,
+        userId,
         birthDate,
         age,
         ...addProfileDto,
@@ -84,8 +95,8 @@ export default class UserService {
     birthDate,
     ...updateProfileDto
   }: UpdateProfileDto & UserIdParams): Promise<ApiResponse> {
-    let oldProfilePicturePath = undefined
-    await this.#checkUserId({ id: userId })
+    let oldProfilePicturePath
+    await this.checkUserId({ id: userId })
 
     let profile = await this.prismaService.profile.findFirst({
       where: { userId },
@@ -102,7 +113,6 @@ export default class UserService {
         age,
       },
     })
-    console.log(oldProfilePicturePath)
     if (oldProfilePicturePath)
       deleteFileAsync({ filePath: oldProfilePicturePath })
     return {
@@ -119,7 +129,7 @@ export default class UserService {
     businessId,
     review: reviewText,
   }: AddReviewDto & UserIdParams): Promise<ApiResponse> {
-    await this.#checkProfileLevel({ id: userId })
+    await this.checkProfileLevel({ id: userId })
     const business = await this.businessSevice.verifiyBusinessId({
       id: businessId,
     })
@@ -149,7 +159,7 @@ export default class UserService {
     id,
     review: reviewText,
   }: EditReviewDto & UserIdParams): Promise<ApiResponse> {
-    await this.#checkProfileLevel({ id: userId })
+    await this.checkProfileLevel({ id: userId })
     let review = await this.prismaService.review.findFirst({
       where: {
         id,
@@ -170,11 +180,12 @@ export default class UserService {
       data: review,
     }
   }
+
   async deleteReview({
     userId,
     id,
   }: BaseIdParams & UserIdParams): Promise<ApiResponse> {
-    await this.#checkProfileLevel({ id: userId })
+    await this.checkProfileLevel({ id: userId })
     let review = await this.prismaService.review.findFirst({
       where: {
         id,
@@ -192,13 +203,14 @@ export default class UserService {
       data: review,
     }
   }
+
   // Rating related
   async addRating({
     userId,
     businessId,
     rateValue,
   }: AddRatingDto & UserIdParams): Promise<ApiResponse> {
-    await this.#checkProfileLevel({ id: userId })
+    await this.checkProfileLevel({ id: userId })
     const business = await this.businessSevice.verifiyBusinessId({
       id: businessId,
     })
@@ -226,6 +238,7 @@ export default class UserService {
       data: rating,
     }
   }
+
   // following
   async followBussiness({
     id,
@@ -233,13 +246,46 @@ export default class UserService {
   }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
     return this.businessSevice.addFollower({ id: businessId, userId: id })
   }
+
   async unFollowBussiness({
     id,
     businessId,
   }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
     return this.businessSevice.removeFollower({ id: businessId, userId: id })
   }
+
   async getFollowedBussiness({ id }: BaseIdParams): Promise<ApiResponse> {
     return this.businessSevice.getFollowerBusiness({ userId: id })
+  }
+
+  async viewStory({
+    storyId,
+    userId,
+  }: StoryIdParams & UserIdParams): Promise<BareApiResponse> {
+    let userStoryView = await this.prismaService.userStoryView.findUnique({
+      where: {
+        /* eslint-disable */
+        userId_storyId: {
+          userId,
+          storyId,
+        },
+        /* eslint-disable */
+      },
+    })
+
+    if (!userStoryView) {
+      userStoryView = await this.prismaService.userStoryView.create({
+        data: {
+          userId,
+          storyId,
+        },
+      })
+      await this.businessSevice.updateStoryViewCount({ storyId })
+    }
+
+    return {
+      status: 'success',
+      message: `User added as veiw for story successfully`,
+    }
   }
 }

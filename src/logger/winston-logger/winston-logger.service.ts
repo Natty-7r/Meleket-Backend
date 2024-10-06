@@ -1,7 +1,26 @@
 import { Injectable } from '@nestjs/common'
 import * as Winston from 'winston'
 import * as DailyRotateFile from 'winston-daily-rotate-file'
-import { LoggerType } from 'src/common/util/types/base.type'
+import {
+  LogFile,
+  LogFileFolder,
+  LoggerType,
+  LogType,
+  TimeUnit,
+} from 'src/common/types/base.type'
+import { LogParams } from 'src/common/types/params.type'
+import {
+  calculateTimeFrame,
+  compareDates,
+} from 'src/common/helpers/date.helper'
+import {
+  getFullPath,
+  readFileContent,
+  readFileNamesInFolder,
+} from 'src/common/helpers/file.helper'
+import formatLogFiles from 'src/common/helpers/formatter.helper'
+import { parseLogFile } from 'src/common/helpers/parser.helper'
+import { LogFileData } from 'src/common/types/responses.type'
 import LoggerStrategy from './interfaces/logger-strategy.interface'
 
 @Injectable()
@@ -49,7 +68,7 @@ export default class WinstonLoggerService {
   }
 
   error(message: string, metadata?: Record<string, unknown>) {
-    this.logger.error(message, { ...metadata })
+    this.logger.error(message, metadata)
   }
 
   warn(message: string, metadata?: Record<string, unknown>) {
@@ -62,5 +81,85 @@ export default class WinstonLoggerService {
 
   verbose(message: string, metadata?: Record<string, unknown>) {
     this.logger.verbose(message, metadata)
+  }
+
+  async getFileLogs(params: LogParams) {
+    if (params.logType) return this.readLogFile(params)
+    return [
+      {
+        logType: LogType.ERROR,
+        logs: await this.readLogFile({ ...params, logType: LogType.ERROR }),
+      },
+      {
+        logType: LogType.ACTIVITY,
+        logs: await this.readLogFile({ ...params, logType: LogType.ACTIVITY }),
+      },
+    ]
+  }
+
+  async readLogFile({
+    logType,
+    endDate,
+    startDate,
+    timeUnit = TimeUnit.d,
+    timeFrame = 1,
+  }: LogParams) {
+    const folderName = LogFileFolder[logType]
+    let logFileDatas: LogFileData[] = []
+    let [initialDate, finalDate] = [new Date(), new Date()]
+
+    // check end date or calculate time frame
+    if (!endDate)
+      [initialDate, finalDate] = calculateTimeFrame({
+        startDate,
+        timeFrame,
+        timeUnit,
+      })
+
+    //  get log folder paths
+    const logFolderPath = await getFullPath({
+      filePath: `/logs/${folderName}`,
+    })
+
+    // read all log files
+    const logFileNames = await readFileNamesInFolder({
+      folderPath: logFolderPath,
+    })
+
+    logFileDatas.push(
+      ...(await formatLogFiles({
+        logType,
+        fileNames: logFileNames,
+      })),
+    )
+
+    // filter by time frame
+    logFileDatas = logFileDatas
+      .filter((logFileData) => {
+        const stratDateComparation = compareDates(initialDate, logFileData.date)
+        const endDateComparation = compareDates(finalDate, logFileData.date)
+
+        return (
+          (stratDateComparation === 1 || stratDateComparation === 0) &&
+          (endDateComparation === 1 || endDateComparation === 0)
+        )
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+    // read log file content
+    const rawLogs: LogFile[] = await Promise.all(
+      logFileDatas.map(async (logFileData) => ({
+        logType: logFileData.logType,
+        content: await readFileContent({ filePath: logFileData.fullPath }),
+      })),
+    )
+
+    // parse logs
+    const logs = rawLogs
+      .filter((rawLog) => rawLog.content.trim() !== '')
+      .map((rawLog) => parseLogFile(rawLog))
+      .flat()
+
+    return logs
   }
 }

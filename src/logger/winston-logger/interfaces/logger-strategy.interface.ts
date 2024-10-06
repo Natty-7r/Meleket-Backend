@@ -1,4 +1,4 @@
-import { LoggerType } from 'src/common/util/types/base.type'
+import { LoggerType } from 'src/common/types/base.type'
 
 export default interface LoggerStrategy {
   getLoggerConfig(): any

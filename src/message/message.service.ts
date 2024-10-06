@@ -3,7 +3,7 @@ import {
   SendAccountCreationParams,
   SendMessageParams,
   SendOTPParams,
-} from 'src/common/util/types/params.type'
+} from 'src/common/types/params.type'
 import MessageStrategy from './interfaces/message-strategry.interface'
 
 @Injectable()

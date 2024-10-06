@@ -1,4 +1,4 @@
-import { Config } from 'src/common/util/types/base.type'
+import { Config } from 'src/common/types/base.type'
 
 export default (): Config => ({
   server: {
@@ -40,5 +40,12 @@ export default (): Config => ({
     lastName: process.env.SUPER_ADMIN_LAST_NAME,
     email: process.env.SUPER_ADMIN_EMAIL,
     password: process.env.SUPER_ADMIN_PASSWORD,
+  },
+  chapa: {
+    secretKey: process.env.CHAPA_SECRET_KEY || '', // Added Chapa secret key
+    baseUrl: process.env.CHAPA_BASE_URL || 'https://api.chapa.co/v1', // Default base URL for Chapa API
+    initializePath:
+      process.env.CHAPA_INITIALIZE_PATH || '/transaction/initialize', // Default initialize path
+    verifyPath: process.env.CHAPA_VERIFY_PATH || '/transaction/verify/', // Default verify path
   },
 })

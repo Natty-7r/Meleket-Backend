@@ -1,35 +1,28 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import * as handlbars from 'handlebars'
 import {
   SendAccountCreationParams,
   SendEmailParams,
   SendMessageParams,
   SendOTPParams,
-} from 'src/common/util/types/params.type'
-import {
-  generateAccountCreationEmailMessage,
-  generateResetEmailOTPMessage,
-  generateVerifyEmailOTPMessage,
-} from 'src/common/util/helpers/string-util'
+} from 'src/common/types/params.type'
+
 import { MailerService } from '@nestjs-modules/mailer'
+import LoggerService from 'src/logger/logger.service'
+import { readFileContent } from 'src/common/helpers/file.helper'
+import { EMAIL_TEMPLATE_FOLDER_PATH } from 'src/common/constants'
 import MessageStrategy from '../interfaces/message-strategry.interface'
-import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
-import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
-import ActivityLoggerStrategry from 'src/logger/winston-logger/strategies/activity-logger.strategry'
 
 @Injectable()
 export default class EmailStrategy implements MessageStrategy {
   constructor(
     private mailerService: MailerService,
     private configService: ConfigService,
-    private errorLogger: WinstonLoggerService,
-    private activityrLogger: WinstonLoggerService,
-  ) {
-    this.errorLogger.configure(new ErrorLoggerStrategry())
-    this.activityrLogger.configure(new ActivityLoggerStrategry())
-  }
+    private loggerService: LoggerService,
+  ) {}
 
-  async #sendEmail({ address, subject, body }: SendEmailParams) {
+  async sendEmail({ address, subject, body }: SendEmailParams) {
     try {
       const message = await this.mailerService.sendMail({
         sender: this.configService.get<string>('email.sender'),
@@ -38,7 +31,7 @@ export default class EmailStrategy implements MessageStrategy {
         text: subject,
         html: body,
       })
-      this.activityrLogger.log('', { ...message, to: address, subject })
+      this.loggerService.log('', { ...message, to: address, subject })
       return message
     } catch (error) {
       const emailError = {
@@ -47,11 +40,14 @@ export default class EmailStrategy implements MessageStrategy {
         subject,
         ...error,
       }
-      this.errorLogger.error('', emailError)
+      this.loggerService.error('', emailError, error?.response)
+      return null
     }
   }
 
-  async sendMessage(params: SendMessageParams): Promise<void> {}
+  async sendMessage(params: SendMessageParams): Promise<void> {
+    console.log(params)
+  }
 
   async sendOTP({
     otp,
@@ -59,19 +55,22 @@ export default class EmailStrategy implements MessageStrategy {
     firstName,
     address,
   }: SendOTPParams): Promise<void> {
-    const emailBody =
-      otpType === 'VERIFICATION'
-        ? generateVerifyEmailOTPMessage({ firstName, otp })
-        : generateResetEmailOTPMessage({ firstName, otp })
-
-    await this.#sendEmail({
-      address,
-      body: emailBody,
-      subject:
+    const emailBody = await this.getTemplate({
+      fileName:
         otpType === 'VERIFICATION'
-          ? 'Verify Your Account'
-          : 'Reset Your Account',
+          ? 'verify-email.template.html'
+          : 'reset-otp.template.html',
+      data: { firstName, otp },
     })
+    if (emailBody)
+      await this.sendEmail({
+        address,
+        body: emailBody,
+        subject:
+          otpType === 'VERIFICATION'
+            ? 'Verify Your Account'
+            : 'Reset Your Account',
+      })
   }
 
   async sendAccountCreationMessage({
@@ -79,14 +78,40 @@ export default class EmailStrategy implements MessageStrategy {
     address,
     password,
   }: SendAccountCreationParams): Promise<void> {
-    const emailBody = generateAccountCreationEmailMessage({
-      firstName,
-      password,
+    const emailBody = await this.getTemplate({
+      fileName: 'account-creation.template.html',
+      data: {
+        firstName,
+        password,
+      },
     })
-    await this.#sendEmail({
+    await this.sendEmail({
       address,
       body: emailBody,
       subject: 'New Account Creation',
     })
+  }
+
+  async getTemplate({
+    fileName,
+    data,
+  }: {
+    fileName: string
+    data: any
+  }): Promise<string> {
+    try {
+      const templateString = await readFileContent({
+        filePath: EMAIL_TEMPLATE_FOLDER_PATH + fileName,
+      })
+      const template = handlbars.compile(templateString, data)
+      return template(data)
+    } catch (error) {
+      const emailError = {
+        message: error?.message || 'Unable to read email tempalate',
+        ...error,
+      }
+      this.loggerService.error('', emailError, error?.response)
+      return undefined
+    }
   }
 }

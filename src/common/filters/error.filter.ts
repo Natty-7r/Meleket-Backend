@@ -4,31 +4,32 @@ import {
   ExceptionFilter,
   HttpException,
 } from '@nestjs/common'
-import WinstonLoggerService from 'src/logger/winston-logger/winston-logger.service'
 import { v4 as uuid } from 'uuid'
-import ErrorLoggerStrategry from 'src/logger/winston-logger/strategies/error-logger.strategry'
 import { Request, Response } from 'express'
-import CustomeException from '../util/exception/custome-exception'
-import { ExceptionResponse } from '../util/types/responses.type'
-import parseStackTrace from '../util/helpers/stack-trace-parser'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { ErrorLogData, StackTraceInfo } from '../types/base.type'
+import { parseStackTrace } from '../helpers/parser.helper'
+import LoggerService from '../../logger/logger.service'
 
-@Catch(CustomeException)
+@Catch()
 export default class ErrorExceptionFilter implements ExceptionFilter {
-  constructor(private logger: WinstonLoggerService) {
-    this.logger.configure(new ErrorLoggerStrategry())
-  }
+  constructor(private loggerService: LoggerService) {}
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
     const request = ctx.getRequest<Request>()
     const response = ctx.getResponse<Response>()
-    const { message: messageResponse, property } =
-      exception.getResponse() as ExceptionResponse
+    const messageResponse = exception.message
+    const { property } = exception
+    let stackInfo: StackTraceInfo
 
-    let stackInfo: any
     if (exception instanceof Error) {
       stackInfo = parseStackTrace(exception.stack)
     }
+    if (exception instanceof PrismaClientKnownRequestError) {
+      stackInfo = parseStackTrace(exception.stack)
+    }
+
     const { message, statusCode } =
       exception instanceof HttpException
         ? {
@@ -40,24 +41,30 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
             statusCode: 500,
           }
 
-    const loggerResponse = {
+    const loggerResponse: ErrorLogData = {
       id: uuid(),
       status: statusCode,
-      path: request.url,
+      url: request.url,
       method: request.method,
       ip: request.ip,
       timestamp: new Date().toISOString(),
       stack: exception instanceof Error ? exception.stack : '',
     }
-    this.logger.error(
-      typeof message !== 'string' ? (message as any).message : message,
-      {
-        ...stackInfo,
-        ...loggerResponse,
-      },
-    )
-    response.status(exception.getStatus()).json({
-      statusCode: exception.getStatus(),
+    if (statusCode >= 400 && statusCode < 500) {
+      // take user error as activity
+
+      this.loggerService.log(
+        typeof message !== 'string' ? (message as any).message : message,
+        { ...loggerResponse },
+      )
+    } else {
+      this.loggerService.error(
+        typeof message !== 'string' ? (message as any).message : message,
+        { ...loggerResponse, ...stackInfo },
+      )
+    }
+    response.status(statusCode).json({
+      statusCode,
       message: messageResponse,
       property,
     })

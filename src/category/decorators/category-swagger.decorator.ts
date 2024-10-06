@@ -33,7 +33,7 @@ const categoryTreeExample = {
 
 export const CreateCategorySwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Create Category ' }),
+    ApiOperation({ summary: 'Create Category ' }),
     ApiCreatedResponse({
       description: 'Category  created succefully',
     }),
@@ -44,7 +44,7 @@ export const CreateCategorySwaggerDefinition = () =>
 
 export const DeleteCategorySwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Delete category ' }),
+    ApiOperation({ summary: 'Delete category ' }),
     ApiResponse({ description: 'Category deleted succefully' }),
     ApiNotFoundResponse({ description: 'Invalid category id  ' }),
     ApiBadRequestResponse({ description: 'Invalid parent id' }),
@@ -52,7 +52,7 @@ export const DeleteCategorySwaggerDefinition = () =>
 
 export const UpdateCategorySwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update category' }),
+    ApiOperation({ summary: 'Update category' }),
     ApiResponse({ description: 'Category  updated succefully' }),
     ApiNotFoundResponse({ description: 'Invalid category id  ' }),
     ApiBadRequestResponse({ description: 'Invalid parent id' }),
@@ -63,7 +63,7 @@ export const UpdateCategoryImageSwaggerDefinition = (
   ...optionalDecorators: Function[]
 ) =>
   applyDecorators(
-    ApiOperation({ description: 'Update category image' }),
+    ApiOperation({ summary: 'Update category image' }),
     ApiCreatedResponse({
       type: CategoryTreeResponse,
       description: 'Category  image  updated succefully',
@@ -83,7 +83,7 @@ export const UpdateCategoryImageSwaggerDefinition = (
   )
 export const UpdateCategoryParentSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Update category parent' }),
+    ApiOperation({ summary: 'Update category parent' }),
     ApiResponse({ description: 'Category  parent  updated succefully' }),
     ApiNotFoundResponse({ description: 'Invalid category id  ' }),
     ApiNotFoundResponse({ description: 'Invalid parent category id  ' }),
@@ -91,13 +91,13 @@ export const UpdateCategoryParentSwaggerDefinition = () =>
 
 export const VerifyCategorySwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Verify  category' }),
+    ApiOperation({ summary: 'Verify  category' }),
     ApiResponse({ description: 'Category verified succefully' }),
     ApiNotFoundResponse({ description: 'Invalid category id  ' }),
   )
 
 export const GetCategoriesSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ description: 'Get  category' }),
+    ApiOperation({ summary: 'Get  category' }),
     ApiResponse({ description: 'Categories fetched succefully' }),
   )

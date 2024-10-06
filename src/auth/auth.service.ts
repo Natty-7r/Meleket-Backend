@@ -11,11 +11,13 @@ import PrismaService from 'src/prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { OTPType, UserType, Admin } from '@prisma/client'
-import { SignUpType, USER } from 'src/common/util/types/base.type'
-import { generateOTP } from 'src/common/util/helpers/numbers.helper'
+import { SignUpType, USER } from 'src/common/types/base.type'
+import { generateOTP } from 'src/common/helpers/numbers.helper'
 import MessageService from 'src/message/message.service'
 import { ConfigService } from '@nestjs/config'
 import EmailStrategy from 'src/message/strategies/email.strategy'
+import { BaseIdParams } from 'src/common/types/params.type'
+import LoggerService from 'src/logger/logger.service'
 import {
   CreateAccountDto,
   CreateAdminDto,
@@ -27,7 +29,6 @@ import CreateOTPDto from './dto/create-otp.dto'
 import VerifyUserDto from './dto/verify-user.dto'
 import SmsStrategy from '../message/strategies/sms.strategy'
 import UpdatePasswordDto from './dto/update-passowrd.dto'
-import { BaseIdParams } from 'src/common/util/types/params.type'
 
 @Injectable()
 export default class AuthService {
@@ -39,18 +40,21 @@ export default class AuthService {
     private readonly smsStrategy: SmsStrategy,
     private readonly emailStrategy: EmailStrategy,
     private readonly configService: ConfigService,
+    private readonly loggerSerive: LoggerService,
   ) {
-    this.#createSuperAdminAccount()
+    this.createSuperAdminAccount()
   }
 
-  async #createSuperAdminAccount() {
+  async createSuperAdminAccount() {
     const admins = await this.prismaService.admin.findMany({})
     if (admins.length === 0)
       this.createAdminAccount({
-        firstName: this.configService.get<string>('superAdmin.firstName'),
-        lastName: this.configService.get<string>('superAdmin.lastName'),
-        email: this.configService.get<string>('superAdmin.email'),
-        password: this.configService.get<string>('superAdmin.password'),
+        firstName: this.configService
+          .get<string>('superAdmin.firstName')
+          .trim(),
+        lastName: this.configService.get<string>('superAdmin.lastName').trim(),
+        email: this.configService.get<string>('superAdmin.email').trim(),
+        password: this.configService.get<string>('superAdmin.password').trim(),
         role: 'SUPER_ADMIN',
       })
   }
@@ -73,10 +77,11 @@ export default class AuthService {
           signUpType === SignUpType.BY_EMAIL ? 'CREATED' : 'VERIFIED',
       },
     })
-
+    /* eslint-disable */
     const { password: _, ...rest } = userCreated
+    /* eslint-disable */
     if (signUpType === SignUpType.BY_EMAIL) {
-      const { otpCode } = await this.#createOTP({
+      const { otpCode } = await this.createOTP({
         channelType: 'EMAIL',
         email,
         type: 'VERIFICATION',
@@ -92,7 +97,12 @@ export default class AuthService {
         address: email,
       })
     }
-
+    this.loggerSerive.createLog({
+      logType: 'USER_ACTIVITY',
+      message: `user account created for ${email}, ${firstName}, ${lastName} with ID${rest.id}`,
+      context: 'user account creation',
+      userId: rest.id,
+    })
     return {
       status: 'success',
       message: 'Account created successfully',
@@ -111,7 +121,7 @@ export default class AuthService {
   }: CreateAdminDto) {
     const admin = await this.prismaService.admin.findFirst({ where: { email } })
     if (admin) throw new ConflictException('Email is already in use!')
-    const hashedPassword = await bcrypt.hash('password', 12)
+    const hashedPassword = await bcrypt.hash(password, 12)
 
     const adminCreated = await this.prismaService.admin.create({
       data: {
@@ -132,8 +142,16 @@ export default class AuthService {
       address: email,
     })
 
+    /* eslint-disable */
     const { password: _, ...rest } = adminCreated
+    /* eslint-disable */
 
+    this.loggerSerive.createLog({
+      logType: 'ADMIN_ACTIVITY',
+      message: `${role == 'SUPER_ADMIN' && 'Super'} admin account created for email:${email}, name: ${firstName}, ${lastName} with ID ${rest.id}`,
+      context: 'admin account creation',
+      adminId: rest.id,
+    })
     return {
       status: 'success',
       message: 'Admin created successfully',
@@ -152,6 +170,7 @@ export default class AuthService {
       userType = 'ADMIN'
       user = await this.prismaService.admin.findFirst({ where: { email } })
     }
+
     if (!user)
       throw new NotFoundException(`No user is registered with ${email} email`)
 
@@ -161,8 +180,9 @@ export default class AuthService {
 
     if (userType !== 'CLIENT_USER' && (user as any).status !== 'ACTIVE')
       throw new UnauthorizedException('Admin is Inactive currenlty ')
-
+    /* eslint-disable */
     const { password: _, ...result } = user
+    /* eslint-disable */
     return result
   }
 
@@ -174,14 +194,14 @@ export default class AuthService {
             sub: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
-            UserType: user.userType,
+            userType: user.userType,
           }
         : {
             email: user.email,
             sub: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
-            UserType: user.userType,
+            userType: user.userType,
             status: (user as Admin).status,
           }
 
@@ -195,13 +215,7 @@ export default class AuthService {
   }
 
   // private method to create otp
-  async #createOTP({
-    type,
-    email,
-    phone,
-    channelType,
-    userType,
-  }: CreateOTPDto) {
+  async createOTP({ type, email, phone, channelType, userType }: CreateOTPDto) {
     const otpCode = generateOTP()
     let colSpecification = {}
     let channelValue = 'EMAIL'
@@ -256,7 +270,7 @@ export default class AuthService {
   // to request otp for verification and reset
   async requestOTP(createOTPDto: CreateOTPDto) {
     const { channelType, channelValue, otpCode, user, type } =
-      await this.#createOTP(createOTPDto)
+      await this.createOTP(createOTPDto)
 
     // sending otp via appropriate channel
     channelType === 'EMAIL'
@@ -352,7 +366,7 @@ export default class AuthService {
     }
   }
 
-  async #checkOTPVerification({
+  async checkOTPVerification({
     type,
     userId,
   }: {
@@ -388,7 +402,7 @@ export default class AuthService {
           })
     if (!user) throw new BadRequestException('Invalid user id ')
 
-    await this.#checkOTPVerification({ type: 'RESET', userId })
+    await this.checkOTPVerification({ type: 'RESET', userId })
 
     const hashedPassword = await bcrypt.hash(password, 12)
 
@@ -414,6 +428,13 @@ export default class AuthService {
         },
       })
     }
+    this.loggerSerive.createLog({
+      logType: userType === 'CLIENT_USER' ? 'USER_ACTIVITY' : 'ADMIN_ACTIVITY',
+      message: `${userType == 'CLIENT_USER' ? 'user ' : 'admin'} with  id: ${user.id} name: ${user.firstName.concat(' ').concat(user.lastName)}  update password`,
+      context: 'password update',
+      userId: userType === 'CLIENT_USER' && user.id,
+      adminId: userType !== 'CLIENT_USER' && user.id,
+    })
     return {
       status: 'success',
       message: 'Password updated successfully',
