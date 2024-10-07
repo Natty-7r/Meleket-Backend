@@ -182,3 +182,11 @@ export type LogFile = {
   logType: LogType
   content: string
 }
+
+export enum PermissionWeight {
+  READ = 1,
+  CREATE = 2,
+  UPDATE = 3,
+  WRITE = 4,
+  DELETE = 5,
+}

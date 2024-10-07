@@ -61,8 +61,17 @@ enum LogType {
   ERROR
   WARNING
   SYSTEM_ACTIVITY
-
 }
+// Enum to define possible actions for permissions
+enum RoleAction {
+  READ
+  WRITE
+  DELETE
+  UPDATE
+  CREATE
+}
+
+
 
 model User {
   id                 String           @id @default(uuid())
@@ -71,7 +80,6 @@ model User {
   email              String           @unique
   phoneNumber        String?
   profileLevel       UserProfileLevel @default(CREATED)
-  userType           UserType         @default(CLIENT_USER)
   password           String
   profile            Profile?
   reviews            Review[]
@@ -79,8 +87,9 @@ model User {
   bills              Bill[]
   businesses         Business[]       @relation("UserOwnsBusiness")
   followedBusinesses Business[]       @relation("UserFollowsBusiness")
-  createdAt         DateTime @default(now())
-  passwordUpdatedAt DateTime @updatedAt
+  createdAt          DateTime         @default(now())
+  passwordUpdatedAt  DateTime         @updatedAt
+  roles              UserRole[] // New relation to UserRole
 
   // New relation to UserStoryView
   storyViews UserStoryView[]
@@ -104,11 +113,12 @@ model Admin {
   lastName       String
   email          String      @unique
   password       String
-  userType       UserType    @default(ADMIN)
   status         AdminStatus @default(CREATED)
   inactiveReason String?     @default("new account")
-  createdAat     DateTime    @default(now()) @map("created_at")
-  updatedAat     DateTime    @updatedAt @map("updated_at")
+  roles          AdminRole[]
+
+  createdAat DateTime @default(now()) @map("created_at")
+  updatedAat DateTime @updatedAt @map("updated_at")
 }
 
 model Profile {
@@ -327,8 +337,6 @@ model Bill {
   updatedAt DateTime @default(now())
 }
 
-//    notificaiton related
-
 // log related 
 
 model Log {
@@ -341,5 +349,60 @@ model Log {
   archivedAt DateTime?
   userId     String?
   adminId    String?
+}
 
-  }
+
+// Role-Based Access Control (RBAC) Schema
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  permissions RolePermission[]
+  users       UserRole[]
+  admins      AdminRole[]
+}
+
+model Permission {
+  id          String     @id @default(uuid())
+  model       String // The name of the model (e.g., "User", "Business")
+  weight      Int    // weight of permission
+  action      RoleAction // The action allowed on the model (e.g., READ, WRITE, DELETE)
+  description String?
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  id           String @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
+// Join table to associate User with Role (Many-to-Many)
+model UserRole {
+  id     String @id @default(uuid())
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+}
+
+// Join table to associate Admin with Role (Many-to-Many)
+model AdminRole {
+  id      String @id @default(uuid())
+  adminId String
+  roleId  String
+
+  admin Admin @relation(fields: [adminId], references: [id])
+  role  Role  @relation(fields: [roleId], references: [id])
+
+  @@unique([adminId, roleId])
+}

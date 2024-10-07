@@ -3,6 +3,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import { ConfigModule } from '@nestjs/config'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
+import RoleModule from './role/role.module'
 import PaymentModule from './payment/payment.module'
 import AppController from './app.controller'
 import AppService from './app.service'
@@ -39,6 +40,7 @@ import JwtAuthGuard from './auth/guards/jwt.guard'
     BusinessModule,
     UserModule,
     PaymentModule,
+    RoleModule,
   ],
 
   providers: [
