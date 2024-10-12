@@ -12,10 +12,10 @@ import {
   StoryIdParams,
   UserIdParams,
 } from 'src/common/types/params.type'
-import BusinessService from 'src/business/business.service'
 import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import { validateAge } from 'src/common/helpers/validator.helper'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
+import BusinessService from 'src/business-module/business/business.service'
 import AddReviewDto from './dto/add-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
 import EditReviewDto from './dto/edit-review.dto'

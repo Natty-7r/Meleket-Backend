@@ -14,10 +14,10 @@ import ActivityInterceptor from './common/interceptors/activity.interceptor'
 import CategoryModule from './category/category.module'
 import configuration from './config/configuration'
 import UserModule from './user/user.module'
-import BusinessModule from './business/business.module'
 import LoggerModule from './logger/logger.module'
 import JwtAuthGuard from './auth/guards/jwt.guard'
 import AccessControlModule from './access-control/access-control.module'
+import BusinessBaseModule from './business-module/base-business.module'
 
 @Module({
   imports: [
@@ -37,7 +37,7 @@ import AccessControlModule from './access-control/access-control.module'
     CategoryModule,
     AuthModule,
     MessageModule,
-    BusinessModule,
+    BusinessBaseModule,
     UserModule,
     PaymentModule,
     AccessControlModule,

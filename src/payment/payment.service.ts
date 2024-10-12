@@ -5,7 +5,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common'
-import BusinessService from 'src/business/business.service'
 import {
   AdminIdParams,
   BaseNameParams,
@@ -28,6 +27,7 @@ import {
 } from 'src/common/helpers/date.helper'
 import LoggerService from 'src/logger/logger.service'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import BusinessService from 'src/business-module/business/business.service'
 import CreatePackageDto from './dto/create-package.dto'
 import PurchasePackageDto from './dto/purchase-package.dto'
 import Chapa from './payment-strategies/chapa.strategy'
