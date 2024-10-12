@@ -21,7 +21,7 @@ import {
   generateRandomString,
 } from 'src/common/helpers/string.helper'
 import UserService from 'src/user/user.service'
-import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/constants'
+import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/constants/base.constants'
 import {
   calculatePackageExpireDate,
   calculatePackageStartDate,

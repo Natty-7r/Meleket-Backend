@@ -61,8 +61,9 @@ enum LogType {
   ERROR
   WARNING
   SYSTEM_ACTIVITY
-
 }
+
+
 
 model User {
   id                 String           @id @default(uuid())
@@ -71,7 +72,6 @@ model User {
   email              String           @unique
   phoneNumber        String?
   profileLevel       UserProfileLevel @default(CREATED)
-  userType           UserType         @default(CLIENT_USER)
   password           String
   profile            Profile?
   reviews            Review[]
@@ -79,8 +79,10 @@ model User {
   bills              Bill[]
   businesses         Business[]       @relation("UserOwnsBusiness")
   followedBusinesses Business[]       @relation("UserFollowsBusiness")
-  createdAt         DateTime @default(now())
-  passwordUpdatedAt DateTime @updatedAt
+  createdAt          DateTime         @default(now())
+  passwordUpdatedAt  DateTime         @updatedAt
+  roleId             String
+  role               Role             @relation(name: "UserRoles",fields: [roleId], references: [id])
 
   // New relation to UserStoryView
   storyViews UserStoryView[]
@@ -104,11 +106,14 @@ model Admin {
   lastName       String
   email          String      @unique
   password       String
-  userType       UserType    @default(ADMIN)
   status         AdminStatus @default(CREATED)
   inactiveReason String?     @default("new account")
-  createdAat     DateTime    @default(now()) @map("created_at")
-  updatedAat     DateTime    @updatedAt @map("updated_at")
+  roleId          String?
+  createRoles     Role[]   @relation(name: "CreatedBy")
+  role            Role?            @relation(name: "AdminRoles",fields: [roleId], references: [id])
+
+  createdAat DateTime @default(now()) @map("created_at")
+  updatedAat DateTime @updatedAt @map("updated_at")
 }
 
 model Profile {
@@ -327,8 +332,6 @@ model Bill {
   updatedAt DateTime @default(now())
 }
 
-//    notificaiton related
-
 // log related 
 
 model Log {
@@ -341,5 +344,72 @@ model Log {
   archivedAt DateTime?
   userId     String?
   adminId    String?
+}
 
-  }
+
+// Role-Based Access Control (RBAC) Schema
+enum RoleType {
+  CLIENT
+  ADMIN
+}
+// Enum to define possible actions for permissions
+enum PermissionType {
+  READ
+  DELETE
+  UPDATE
+  CREATE
+}
+enum ModuleName {
+  ROLE
+  PERMISSION
+  APPLICANT
+  ADMIN
+  USER
+  PROFILE
+  BUSINESS
+  BUSINESS_SERVICE
+  BUSINESS_ADDRESS
+  BUSINESS_CONTACT
+  CATEGORY
+  BILL
+  PACKAGE
+  BUSINESS_PACKAGE
+  STORY
+  STORY_VIEW
+  REVIEW
+  RATING
+  OTP
+  LOG
+}
+
+
+model Role {
+  id        String @id @default(uuid())
+  name  String @unique
+  roleType  RoleType 
+  creatorId  String? 
+
+  permissions Permission[]
+  admins      Admin[]    @relation(name: "AdminRoles")
+  users       User[]      @relation(name: "UserRoles")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now())
+  deletedAt   DateTime?
+
+  createdBy    Admin? @relation(name: "CreatedBy", fields: [creatorId], references: [id])
+  @@map("roles")
+}
+
+model Permission {
+  id               String         @id @default(uuid())
+  moduleName       ModuleName
+  permissionName   PermissionType
+  permissionWeight Int            @default(0)
+
+  Roles     Role[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@unique([moduleName, permissionName])
+  @@map("permissions")
+}

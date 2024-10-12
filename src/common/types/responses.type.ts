@@ -1,4 +1,5 @@
-import { LogType } from './base.type'
+import { User } from '@prisma/client'
+import { BusinessSubEntity, LogType } from './base.type'
 
 export type ExceptionResponse = {
   message: string
@@ -37,4 +38,11 @@ export type LogFileData = {
   fileName: string
   fullPath: string
   date: Date
+}
+
+export type VerifyOwnershipResponse = {
+  entity: BusinessSubEntity
+  isBussiness: boolean // is the entity business it self
+  user: User
+  businessId: string
 }

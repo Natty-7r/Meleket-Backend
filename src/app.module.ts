@@ -17,6 +17,7 @@ import UserModule from './user/user.module'
 import BusinessModule from './business/business.module'
 import LoggerModule from './logger/logger.module'
 import JwtAuthGuard from './auth/guards/jwt.guard'
+import AccessControlModule from './access-control/access-control.module'
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import JwtAuthGuard from './auth/guards/jwt.guard'
     BusinessModule,
     UserModule,
     PaymentModule,
+    AccessControlModule,
   ],
 
   providers: [

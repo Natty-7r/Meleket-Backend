@@ -11,7 +11,7 @@ import {
 import { MailerService } from '@nestjs-modules/mailer'
 import LoggerService from 'src/logger/logger.service'
 import { readFileContent } from 'src/common/helpers/file.helper'
-import { EMAIL_TEMPLATE_FOLDER_PATH } from 'src/common/constants'
+import { EMAIL_TEMPLATE_FOLDER_PATH } from 'src/common/constants/base.constants'
 import MessageStrategy from '../interfaces/message-strategry.interface'
 
 @Injectable()

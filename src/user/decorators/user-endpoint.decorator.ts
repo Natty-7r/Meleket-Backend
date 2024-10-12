@@ -1,5 +1,4 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
-import Roles from 'src/common/decorators/roles.decorator'
 import {
   AddProfileSwaggerDefinition,
   AddRatingSwaggerDefinition,
@@ -17,10 +16,11 @@ import { ApiForbiddenResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
+import Permissions from 'src/common/decorators/permission.decorator'
 
 const ClientRole = () =>
   applyDecorators(
-    Roles('CLIENT_USER'),
+    Permissions(),
     ApiForbiddenResponse({
       description: 'Only client can user has privilage ',
     }),

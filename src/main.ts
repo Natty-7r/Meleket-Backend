@@ -10,6 +10,7 @@ async function bootstrap() {
     .setTitle('Meleket Backend')
     .setDescription('API Docs for Meleket web application')
     .setVersion('1.0')
+    .addBearerAuth()
     .build()
 
   const document = SwaggerModule.createDocument(app, config)

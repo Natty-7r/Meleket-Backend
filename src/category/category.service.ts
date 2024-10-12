@@ -248,27 +248,23 @@ export default class CategoryService {
   async deleteCategory({ id }: BaseIdParams): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
+      /*eslint-disable*/
+      include: { _count: { select: { business: true, children: true } } },
+      /*eslint-disable*/
     })
 
     if (!category) throw new NotFoundException('Invalid category id')
 
-    const childrenCategory = await this.prismaService.category.findMany({
-      where: {
-        AND: [
-          {
-            parentId: { not: null },
-          },
-          {
-            parentId: id,
-          },
-        ],
-      },
-    })
-
-    if (childrenCategory && childrenCategory.length > 0)
+    /*eslint-disable*/
+    if (category._count.children)
       throw new BadRequestException(
-        `Category has ${childrenCategory.length} children first move childrens to other parent`,
+        `Category has ${category._count.children} children first move childrens to other parent`,
       )
+    if (category._count.business > 0)
+      throw new BadRequestException(
+        `Category has ${category._count.business} business atached to it`,
+      )
+    /*eslint-disable*/
     await this.prismaService.category.delete({
       where: {
         id,
