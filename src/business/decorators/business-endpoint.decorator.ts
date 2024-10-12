@@ -32,7 +32,7 @@ const ClientRole = () =>
   )
 export const CreateBusiness = () =>
   applyDecorators(
-    ClientRole(),
+    Permissions({ model: 'BUSINESS', action: 'CREATE' }),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'business', filePrefix: 'b' }),
@@ -48,7 +48,7 @@ export const CreateBusiness = () =>
 
 export const UpdateBusinessImage = () =>
   applyDecorators(
-    ClientRole(),
+    Permissions({ model: 'BUSINESS', action: 'UPDATE' }),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'business', filePrefix: 'b' }),
@@ -59,11 +59,14 @@ export const UpdateBusinessImage = () =>
   )
 
 export const UpdateBusiness = () =>
-  applyDecorators(Permissions(), UpdateBusinessSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS', action: 'UPDATE' }),
+    UpdateBusinessSwaggerDefinition(),
+  )
 
 export const AddBusinessService = () =>
   applyDecorators(
-    ClientRole(),
+    Permissions({ model: 'BUSINESS_SERVICE', action: 'CREATE' }),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({
@@ -81,14 +84,20 @@ export const AddBusinessService = () =>
   )
 
 export const UpdateBusinessServices = () =>
-  applyDecorators(ClientRole, UpdateBusinessServiceSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS_SERVICE', action: 'UPDATE' }),
+    UpdateBusinessServiceSwaggerDefinition(),
+  )
 
 export const DeleteBusinessService = () =>
-  applyDecorators(ClientRole, DeleteBusinessServiceSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS_SERVICE', action: 'DELETE' }),
+    DeleteBusinessServiceSwaggerDefinition(),
+  )
 
 export const UpdateBusinessServiceImage = () =>
   applyDecorators(
-    ClientRole(),
+    Permissions({ model: 'BUSINESS_SERVICE', action: 'UPDATE' }),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({
@@ -108,10 +117,16 @@ export const GetBusinesses = () =>
   applyDecorators(Public(), GetBusinessSwaggerDefinition())
 
 export const GetUserBusinesses = () =>
-  applyDecorators(ClientRole(), GetBusinessSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS', action: 'READ' }),
+    GetBusinessSwaggerDefinition(),
+  )
 
 export const GetBusinessDetail = () =>
-  applyDecorators(Public(), GetBussinesDetailSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS', action: 'READ' }),
+    GetBussinesDetailSwaggerDefinition(),
+  )
 
 export const SearchBusiness = () =>
   applyDecorators(Public(), SearchBusinessSwaggerDefinition())
@@ -119,24 +134,36 @@ export const SearchBusiness = () =>
 // business address related
 
 export const CreateBusinessAddress = () =>
-  applyDecorators(ClientRole(), CreateBusinessAddressSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS_ADDRESS', action: 'CREATE' }),
+    CreateBusinessAddressSwaggerDefinition(),
+  )
 
 export const UpdateBusinessAddress = () =>
-  applyDecorators(ClientRole(), UpdateBusinessAddressSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS_ADDRESS', action: 'UPDATE' }),
+    UpdateBusinessAddressSwaggerDefinition(),
+  )
 
 export const DeleteBusinessAddress = () =>
-  applyDecorators(ClientRole(), DeleteBusinessAddressSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS_ADDRESS', action: 'DELETE' }),
+    DeleteBusinessAddressSwaggerDefinition(),
+  )
 
 // bussiness contact
 
 export const UpdateBusinessContact = () =>
-  applyDecorators(ClientRole(), UpdateBusinessContactSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS_CONTACT', action: 'UPDATE' }),
+    UpdateBusinessContactSwaggerDefinition(),
+  )
 
 // story related
 
 export const AddStory = () =>
   applyDecorators(
-    ClientRole(),
+    Permissions({ model: 'STORY', action: 'CREATE' }),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'story', filePrefix: 's' }),
@@ -151,7 +178,7 @@ export const AddStory = () =>
   )
 export const UpdateStory = () =>
   applyDecorators(
-    ClientRole(),
+    Permissions({ model: 'STORY', action: 'UPDATE' }),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'story', filePrefix: 's' }),
@@ -165,10 +192,13 @@ export const UpdateStory = () =>
     AddStorySwaggerDefinition(),
   )
 export const DeleteStory = () =>
-  applyDecorators(ClientRole(), DeleteStorySwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'STORY', action: 'DELETE' }),
+    DeleteStorySwaggerDefinition(),
+  )
 
 export const GetAllStories = () =>
-  applyDecorators(Permissions(), GetAllStoriesSwaggerDefinition())
+  applyDecorators(Public(), GetAllStoriesSwaggerDefinition())
 
 export const GetBusinessStories = () =>
-  applyDecorators(Permissions(), GetBusinessStoriesSwaggerDefinition())
+  applyDecorators(Public(), GetBusinessStoriesSwaggerDefinition())
