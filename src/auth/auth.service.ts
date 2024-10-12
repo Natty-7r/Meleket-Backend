@@ -17,6 +17,7 @@ import { ConfigService } from '@nestjs/config'
 import EmailStrategy from 'src/message/strategies/email.strategy'
 import { BaseIdParams } from 'src/common/types/params.type'
 import LoggerService from 'src/logger/logger.service'
+import AccessControlService from 'src/access-control/access-control.service'
 import {
   CreateAccountDto,
   CreateAdminDto,
@@ -28,7 +29,6 @@ import CreateOTPDto from './dto/create-otp.dto'
 import VerifyUserDto from './dto/verify-user.dto'
 import SmsStrategy from '../message/strategies/sms.strategy'
 import UpdatePasswordDto from './dto/update-passowrd.dto'
-import AccessControlService from 'src/access-control/access-control.service'
 
 @Injectable()
 export default class AuthService {
@@ -68,6 +68,8 @@ export default class AuthService {
     if (user) throw new ConflictException('Email is already in use!')
     const hashedPassword = await bcrypt.hash(password, 12)
 
+    const userRole = await this.accessContolService.getUserRole()
+
     const userCreated = await this.prismaService.user.create({
       data: {
         firstName,
@@ -76,7 +78,7 @@ export default class AuthService {
         password: hashedPassword,
         profileLevel:
           signUpType === SignUpType.BY_EMAIL ? 'CREATED' : 'VERIFIED',
-        roleId: '',
+        roleId: userRole.id,
       },
     })
     /* eslint-disable */

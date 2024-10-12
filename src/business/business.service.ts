@@ -53,12 +53,14 @@ import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 import CreateStoryDto from './dto/create-story.dto'
 import UpdateStoryDto from './dto/update-store.dto'
 import UpdateBusinessServicesDto from './dto/update-business-services.dto'
+import AccessControlService from 'src/access-control/access-control.service'
 
 @Injectable()
 export default class BusinessService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly loggerService: LoggerService,
+    private readonly accessControlService: AccessControlService,
   ) {}
 
   // helper methods
@@ -301,6 +303,7 @@ export default class BusinessService {
         category: { select: { name: true, id: true } },
       },
     })
+    this.accessControlService.assignClientRole({ id: userId })
     this.loggerService.createLog({
       logType: 'USER_ACTIVITY',
       message: `${business.owner.firstName.concat(' ').concat(business.owner.lastName)} created bussines with name:${business.name} under category:${business.category.name}`,

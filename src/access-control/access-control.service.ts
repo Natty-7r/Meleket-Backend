@@ -287,7 +287,7 @@ export default class AccessControlService {
     })
   }
 
-  async getUserRole() {
+  async getUserRole(): Promise<Role> {
     let clientRole = await this.getRoleByName({
       name: USER_ROLE_NAME,
     })
@@ -305,7 +305,8 @@ export default class AccessControlService {
       adminId: null,
     })
   }
-  async getClientRole() {
+
+  async getClientRole(): Promise<Role> {
     // business owner
     let clientRole = await this.getRoleByName({
       name: CLIENT_ROLE_NAME,
@@ -322,6 +323,15 @@ export default class AccessControlService {
       permissions: permissionIds,
       roleType: 'CLIENT',
       adminId: null,
+    })
+  }
+
+  async assignClientRole({ id }: BaseIdParams) {
+    await this.verifyUserId({ id })
+    const clientRole = await this.getClientRole()
+    return this.prismaService.user.update({
+      where: { id },
+      data: { roleId: clientRole.id },
     })
   }
 }
