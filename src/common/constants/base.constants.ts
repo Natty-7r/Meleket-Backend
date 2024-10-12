@@ -1,5 +1,7 @@
 export const ROLES_KEY: string = 'ROLES'
 
+export const PERMISSIONS_KEY: string = 'PERMISSIONS'
+
 export const IS_PUBLIC_KEY: string = 'isPublic'
 
 export const IS_OPTIONAL_PUBLIC_KEY: string = 'isPublicOptional'

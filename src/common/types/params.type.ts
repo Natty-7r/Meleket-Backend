@@ -7,7 +7,7 @@ import {
   StoryContentType,
   User,
 } from '@prisma/client'
-import { ChapaCustomerInfo, LogType, TimeUnit } from './base.type'
+import { ChapaCustomerInfo, LogType, Selector, TimeUnit } from './base.type'
 
 export type SendSMSParams = {
   smsAddress: string
@@ -74,6 +74,22 @@ export type ImageUrlParams = {
 export type BaseIdParams = {
   id: string
 }
+
+export type BaseUserIdParams = { userId: string }
+
+export type BaseIdListParams = { ids: string[] }
+
+export type OptionalAdminIdParams = { id?: string }
+
+export type BaseAdminIdParams = { adminId: string }
+
+export type OptionalBaseIdParams = { adminId?: string }
+
+export type BaseRoleIdParams = { roleId: string }
+
+export type BaseCompanyIdParams = { companyId: string }
+
+export type BaseOptionalCompanyIdParams = { companyId?: string }
 
 export type StoryIdParams = {
   storyId: string
@@ -275,4 +291,14 @@ export type LogParams = {
 export type LogFileFormatterParams = {
   logType: LogType
   fileNames: string[]
+}
+
+/** Acccess contorl related  */
+
+export type BaseSelectorParams = { selector: Selector } // to pass query condition
+
+export type CheckRoleNameParams = BaseNameParams & {
+  forUpdate?: {
+    roleId: string
+  }
 }

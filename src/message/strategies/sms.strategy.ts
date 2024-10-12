@@ -9,7 +9,7 @@ import {
   SendSMSParams,
 } from 'src/common/types/params.type'
 import LoggerService from 'src/logger/logger.service'
-import { SMS_TEMPLATE_FOLDER_PATH } from 'src/common/constants'
+import { SMS_TEMPLATE_FOLDER_PATH } from 'src/common/constants/base.constants'
 import { readFileContent } from 'src/common/helpers/file.helper'
 import MessageStrategy from '../interfaces/message-strategry.interface'
 

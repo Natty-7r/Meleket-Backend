@@ -1,5 +1,4 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
-import Roles from 'src/common/decorators/roles.decorator'
 import {
   UpdateBusinessImageSwaggerDefinition,
   CreateBusinessSwaggerDefinition,
@@ -24,11 +23,11 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import { ApiForbiddenResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
-import RolesOptional from 'src/common/decorators/optianal-roles.decorator'
+import Permissions from 'src/common/decorators/permission.decorator'
 
 const ClientRole = () =>
   applyDecorators(
-    Roles('CLIENT_USER'),
+    Permissions(),
     ApiForbiddenResponse({ description: 'Only owner can manupulate' }),
   )
 export const CreateBusiness = () =>
@@ -60,7 +59,7 @@ export const UpdateBusinessImage = () =>
   )
 
 export const UpdateBusiness = () =>
-  applyDecorators(Roles('CLIENT_USER'), UpdateBusinessSwaggerDefinition())
+  applyDecorators(Permissions(), UpdateBusinessSwaggerDefinition())
 
 export const AddBusinessService = () =>
   applyDecorators(
@@ -169,7 +168,7 @@ export const DeleteStory = () =>
   applyDecorators(ClientRole(), DeleteStorySwaggerDefinition())
 
 export const GetAllStories = () =>
-  applyDecorators(RolesOptional(), GetAllStoriesSwaggerDefinition())
+  applyDecorators(Permissions(), GetAllStoriesSwaggerDefinition())
 
 export const GetBusinessStories = () =>
-  applyDecorators(RolesOptional(), GetBusinessStoriesSwaggerDefinition())
+  applyDecorators(Permissions(), GetBusinessStoriesSwaggerDefinition())

@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common'
-import { MIN_USER_AGE } from '../constants'
+import { MIN_USER_AGE } from '../constants/base.constants'
 import { ValidateStory } from '../types/params.type'
 
 export const validateAge = (birthDate: Date): number => {

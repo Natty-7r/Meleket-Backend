@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { ChannelType, OTPType, UserType } from '@prisma/client'
+import { ChannelType, OTPType } from '@prisma/client'
 import {
   IsEmail,
   IsNotEmpty,
@@ -17,7 +17,7 @@ export default class CreateOTPDto {
   })
   @IsString()
   @IsNotEmpty()
-  userType: UserType
+  userType: any
 
   @ApiProperty({
     type: String,

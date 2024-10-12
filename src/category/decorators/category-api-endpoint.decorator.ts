@@ -2,7 +2,6 @@ import { applyDecorators, UseInterceptors } from '@nestjs/common'
 
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
-import Roles from 'src/common/decorators/roles.decorator'
 import {
   CreateCategorySwaggerDefinition,
   DeleteCategorySwaggerDefinition,
@@ -15,10 +14,11 @@ import {
 import { GetCategoryBusinessSwaggerDefinition } from 'src/business/decorators/business-swagger.decorator'
 import { ApiUnauthorizedResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
+import Permissions from 'src/common/decorators/permission.decorator'
 
 const AdminRole = () =>
   applyDecorators(
-    Roles('ADMIN', 'SUPER_ADMIN'),
+    Permissions(),
     ApiUnauthorizedResponse({ description: 'Insucffincent permission' }),
   )
 

@@ -1,5 +1,9 @@
 import { Request } from 'express'
-import { Admin, User } from '@prisma/client'
+import { Admin, ModuleName, PermissionType, Role, User } from '@prisma/client'
+import {
+  ADMIN_PERMISSION_SELECTOR,
+  USER_PERMISSION_SELECTOR,
+} from '../constants/access-control.contants'
 
 export type Module = {
   id: number
@@ -21,10 +25,10 @@ export interface FunctionCallResponse {
   data: any
 }
 
-export type USER = User | Admin
+export type RequestUser = User | Admin
 
 export interface RequestWithUser extends Request {
-  user: USER
+  user: User | Admin
 }
 
 export type MulterStorageConfig = {
@@ -189,4 +193,21 @@ export enum PermissionWeight {
   UPDATE = 3,
   WRITE = 4,
   DELETE = 5,
+}
+
+export type Selector =
+  | typeof USER_PERMISSION_SELECTOR
+  | typeof ADMIN_PERMISSION_SELECTOR
+
+export type RoleUserCountInfo = {
+  _count: {
+    admins: number
+    users: number
+  }
+}
+export type RoleWithCountInfo = Role & RoleUserCountInfo
+
+export type PermisionSet = {
+  model: ModuleName
+  action: PermissionType
 }

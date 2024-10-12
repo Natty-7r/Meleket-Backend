@@ -8,9 +8,9 @@ import {
   Put,
   UploadedFile,
 } from '@nestjs/common'
-import { USER } from 'src/common/types/base.type'
 import User from 'src/common/decorators/user.decorator'
 import { ApiTags } from '@nestjs/swagger'
+import { RequestUser } from 'src/common/types/base.type'
 import UserService from './user.service'
 import AddReviewDto from './dto/add-review.dto'
 import {
@@ -38,7 +38,7 @@ export default class UserController {
   @AddProfile()
   async addProfile(
     @Body() addProfileDto: AddProfileDto,
-    @User() user: USER,
+    @User() user: RequestUser,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     return this.userService.addProfile({
@@ -52,7 +52,7 @@ export default class UserController {
   @UpdateProfile()
   async updateProfile(
     @Body() addProfileDto: AddProfileDto,
-    @User() user: USER,
+    @User() user: RequestUser,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     return this.userService.updateProfile({
@@ -64,7 +64,7 @@ export default class UserController {
 
   @Post('review')
   @AddReveiw()
-  addReview(@Body() addReviewDto: AddReviewDto, @User() user: USER) {
+  addReview(@Body() addReviewDto: AddReviewDto, @User() user: RequestUser) {
     return this.userService.addReview({
       ...addReviewDto,
       userId: user.id,
@@ -73,7 +73,10 @@ export default class UserController {
 
   @Put('review')
   @UpdateReview()
-  updateReview(@Body() editReviewDto: EditReviewDto, @User() user: USER) {
+  updateReview(
+    @Body() editReviewDto: EditReviewDto,
+    @User() user: RequestUser,
+  ) {
     return this.userService.updateReview({
       ...editReviewDto,
       userId: user.id,
@@ -82,7 +85,7 @@ export default class UserController {
 
   @Delete('review/:id')
   @DeleteReview()
-  deleteReview(@Param('id') id: string, @User() user: USER) {
+  deleteReview(@Param('id') id: string, @User() user: RequestUser) {
     return this.userService.deleteReview({
       id,
       userId: user.id,
@@ -91,7 +94,7 @@ export default class UserController {
 
   @AddRating()
   @Post('rating')
-  addRaging(@Body() addRatingDto: AddRatingDto, @User() user: USER) {
+  addRaging(@Body() addRatingDto: AddRatingDto, @User() user: RequestUser) {
     return this.userService.addRating({
       ...addRatingDto,
       userId: user.id,
@@ -100,7 +103,10 @@ export default class UserController {
 
   @Post('following-businesses')
   @FollowBusiness()
-  followBusiness(@Param('businessId') businessId: string, @User() user: USER) {
+  followBusiness(
+    @Param('businessId') businessId: string,
+    @User() user: RequestUser,
+  ) {
     return this.userService.followBussiness({ id: user.id, businessId })
   }
 
@@ -108,20 +114,20 @@ export default class UserController {
   @UnFollowBusiness()
   unFollowBusiness(
     @Param('businessId') businessId: string,
-    @User() user: USER,
+    @User() user: RequestUser,
   ) {
     return this.userService.unFollowBussiness({ id: user.id, businessId })
   }
 
   @Get('following-business')
   @GetFollowedBusiness()
-  getFollowedBusiness(@User() user: USER) {
+  getFollowedBusiness(@User() user: RequestUser) {
     return this.userService.getFollowedBussiness({ id: user.id })
   }
 
   @Put('story/:storyId')
   @ViewStory()
-  viewStory(@Param('storyId') storyId: string, @User() user: USER) {
+  viewStory(@Param('storyId') storyId: string, @User() user: RequestUser) {
     return this.userService.viewStory({ userId: user.id, storyId })
   }
 }

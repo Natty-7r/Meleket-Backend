@@ -1,6 +1,5 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
 import { ApiForbiddenResponse } from '@nestjs/swagger'
-import Roles from 'src/common/decorators/roles.decorator'
 import Public from 'src/common/decorators/public.decorator'
 import {
   BillPackageSwaggerDefinition,
@@ -9,15 +8,16 @@ import {
   PurchasePackageSwaggerDefinition,
   UpdatePackageSwaggerDefinition,
 } from './payment-swagger.decorator'
+import Permissions from 'src/common/decorators/permission.decorator'
 
 const ClientRole = () =>
   applyDecorators(
-    Roles('CLIENT_USER'),
+    Permissions(),
     ApiForbiddenResponse({ description: 'Only owner can manupulate' }),
   )
 const AdminRole = () =>
   applyDecorators(
-    Roles('ADMIN', 'SUPER_ADMIN'),
+    Permissions(),
     ApiForbiddenResponse({ description: 'Only Admin have access ' }),
   )
 

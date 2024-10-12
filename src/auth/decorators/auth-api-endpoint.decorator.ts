@@ -1,5 +1,4 @@
 import { applyDecorators } from '@nestjs/common'
-import Roles from 'src/common/decorators/roles.decorator'
 import {
   CreateAdminSwaggerDefinition,
   CreateUserAccountSwaggerDefinition,
@@ -13,20 +12,21 @@ import {
   VerifyUserSwaggerDefinition,
 } from './auth-swagger-definition.decorator'
 import Public from 'src/common/decorators/public.decorator'
+import Permissions from 'src/common/decorators/permission.decorator'
 
 export const CreateUserAccount = () =>
   applyDecorators(Public(), CreateUserAccountSwaggerDefinition())
 
 export const CreateAdminAccount = () =>
-  applyDecorators(Roles('SUPER_ADMIN'), CreateAdminSwaggerDefinition())
+  applyDecorators(Permissions(), CreateAdminSwaggerDefinition())
 
 export const DeleteAdminAccount = () =>
-  applyDecorators(Roles('SUPER_ADMIN'), DeleteAdminAccountSwaggerDefinition)
+  applyDecorators(Permissions(), DeleteAdminAccountSwaggerDefinition)
 export const UpdateAdminStatus = () =>
-  applyDecorators(Roles('SUPER_ADMIN'), UpdateAdminStatusSwaggerDefinition())
+  applyDecorators(Permissions(), UpdateAdminStatusSwaggerDefinition())
 
 export const GetAdmins = () =>
-  applyDecorators(Roles('SUPER_ADMIN'), GetAdminsSwaggerDefinition())
+  applyDecorators(Permissions(), GetAdminsSwaggerDefinition())
 
 export const SignIn = () => applyDecorators(Public(), SignInSwaggerDefinition())
 

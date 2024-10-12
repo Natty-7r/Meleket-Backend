@@ -5,13 +5,12 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
-import { OTPType, UserType, Admin } from '@prisma/client'
-import { SignUpType, USER } from 'src/common/types/base.type'
+import { OTPType, Admin } from '@prisma/client'
+import { RequestUser, SignUpType } from 'src/common/types/base.type'
 import { generateOTP } from 'src/common/helpers/numbers.helper'
 import MessageService from 'src/message/message.service'
 import { ConfigService } from '@nestjs/config'
@@ -42,7 +41,7 @@ export default class AuthService {
     private readonly configService: ConfigService,
     private readonly loggerSerive: LoggerService,
   ) {
-    this.createSuperAdminAccount()
+    // this.createSuperAdminAccount()
   }
 
   async createSuperAdminAccount() {
@@ -75,6 +74,7 @@ export default class AuthService {
         password: hashedPassword,
         profileLevel:
           signUpType === SignUpType.BY_EMAIL ? 'CREATED' : 'VERIFIED',
+        roleId: '',
       },
     })
     /* eslint-disable */
@@ -129,7 +129,7 @@ export default class AuthService {
         lastName,
         email,
         password: hashedPassword,
-        userType: role,
+        roleId: role,
         status: 'CREATED',
         inactiveReason: 'new account',
       },
@@ -162,12 +162,12 @@ export default class AuthService {
   }
 
   async validateUser({ email, password }: SignInDto): Promise<any> {
-    let userType: UserType = 'CLIENT_USER'
-    let user: USER = await this.prismaService.user.findFirst({
+    // let userType: UserType = 'CLIENT_USER'
+    let user: RequestUser = await this.prismaService.user.findFirst({
       where: { email },
     })
     if (!user) {
-      userType = 'ADMIN'
+      // userType = 'ADMIN'
       user = await this.prismaService.admin.findFirst({ where: { email } })
     }
 
@@ -178,32 +178,31 @@ export default class AuthService {
     if (!doesPasswordMatch)
       throw new BadRequestException('Invalid Email or Password')
 
-    if (userType !== 'CLIENT_USER' && (user as any).status !== 'ACTIVE')
-      throw new UnauthorizedException('Admin is Inactive currenlty ')
+    // if (userType !== 'CLIENT_USER' && (user as any).status !== 'ACTIVE')
+    // throw new UnauthorizedException('Admin is Inactive currenlty ')
     /* eslint-disable */
     const { password: _, ...result } = user
     /* eslint-disable */
     return result
   }
 
-  async login(user: USER) {
-    const payload =
-      user.userType == 'CLIENT_USER'
-        ? {
-            email: user.email,
-            sub: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            userType: user.userType,
-          }
-        : {
-            email: user.email,
-            sub: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            userType: user.userType,
-            status: (user as Admin).status,
-          }
+  async login(user: RequestUser) {
+    const payload = true
+      ? {
+          email: user.email,
+          sub: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          // userType: user.userType,
+        }
+      : {
+          email: user.email,
+          sub: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          // userType: user.userType,
+          status: (user as Admin).status,
+        }
 
     if (payload?.status === 'CREATED' || payload?.status === 'INACTIVE')
       throw new ForbiddenException('User not active')

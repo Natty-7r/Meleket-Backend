@@ -11,7 +11,7 @@ import {
   UploadedFile,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { USER } from 'src/common/types/base.type'
+import { RequestUser } from 'src/common/types/base.type'
 import User from 'src/common/decorators/user.decorator'
 import CreateBusinessDto from './dto/create-business.dto'
 import BusinessService from './business.service'
@@ -53,7 +53,7 @@ export default class BusinessController {
   @CreateBusiness()
   async createBusiness(
     @Body() createBusinessDto: CreateBusinessDto,
-    @User() user: USER,
+    @User() user: RequestUser,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     return this.businessService.createBusiness({
@@ -67,7 +67,7 @@ export default class BusinessController {
   @UpdateBusinessImage()
   async updateBusinessImage(
     @Param('id') id: string,
-    @User() user: USER,
+    @User() user: RequestUser,
     @UploadedFile('image') image: Express.Multer.File,
   ) {
     return this.businessService.updateBusinessImage({
@@ -81,7 +81,7 @@ export default class BusinessController {
   @UpdateBusiness()
   async updateBusiness(
     @Body() updateBusinessDto: UpdateBusinessDto,
-    @User() user: USER,
+    @User() user: RequestUser,
   ) {
     return this.businessService.updateBusiness({
       ...updateBusinessDto,
@@ -94,7 +94,7 @@ export default class BusinessController {
   @AddBusinessService()
   async addBusinessService(
     @Body() createBusinessServiceDto: CreateBusinessServiceDto,
-    @User() user: USER,
+    @User() user: RequestUser,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     return this.businessService.addBussinessService({
@@ -108,7 +108,7 @@ export default class BusinessController {
   @UpdateBusinessServiceImage()
   async updateBusinessServiceImage(
     @Param('id') id: string,
-    @User() user: USER,
+    @User() user: RequestUser,
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.businessService.updateBusinessServiceImage({
@@ -122,7 +122,7 @@ export default class BusinessController {
   @UpdateBusinessServices()
   async updateBusinessServices(
     @Body() updateBusinessServiceDto: UpdateBusinessServicesDto,
-    @User() user: USER,
+    @User() user: RequestUser,
   ) {
     return this.businessService.updateBusinessServices({
       ...updateBusinessServiceDto,
@@ -132,7 +132,7 @@ export default class BusinessController {
 
   @Delete('services/:id')
   @DeleteBusinessService()
-  deleteService(@Param('id') id: string, @User() { id: userId }: USER) {
+  deleteService(@Param('id') id: string, @User() { id: userId }: RequestUser) {
     return this.businessService.deleteBusinessServices({
       userId,
       id,
@@ -145,7 +145,7 @@ export default class BusinessController {
   @CreateBusinessAddress()
   createBusinessAddress(
     @Body() createBusinessAddressDto: CreateBusinessAddressDto,
-    @User() user: USER,
+    @User() user: RequestUser,
   ) {
     return this.businessService.createBusinessAddress({
       ...createBusinessAddressDto,
@@ -157,7 +157,7 @@ export default class BusinessController {
   @UpdateBusinessAddress()
   updateBusinessAddress(
     @Body() updateBusinessAddressDto: UpdateBusinessAddressDto,
-    @User() user: USER,
+    @User() user: RequestUser,
   ) {
     return this.businessService.updateBusinessAddress({
       ...updateBusinessAddressDto,
@@ -170,7 +170,7 @@ export default class BusinessController {
   deleteBusinessAddress(
     @Request() req: any,
     @Param('id') id: string,
-    @User() user: USER,
+    @User() user: RequestUser,
   ) {
     return this.businessService.deleteBusinessAddress({
       id,
@@ -182,7 +182,7 @@ export default class BusinessController {
   @UpdateBusinessContact()
   updateBusinessContact(
     @Body() updateBusinessContactDto: UpdateBusinessContactDto,
-    @User() user: USER,
+    @User() user: RequestUser,
   ) {
     return this.businessService.updateBusinessContact({
       ...updateBusinessContactDto,
@@ -208,7 +208,7 @@ export default class BusinessController {
   @AddStory()
   async addStory(
     @Body() createStoryDto: CreateStoryDto,
-    @User() user: USER,
+    @User() user: RequestUser,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     return this.businessService.addStory({
@@ -222,7 +222,7 @@ export default class BusinessController {
   @UpdateStory()
   async updateStory(
     @Body() updateStoryDto: UpdateStoryDto,
-    @User() user: USER,
+    @User() user: RequestUser,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     return this.businessService.updateStory({
@@ -234,7 +234,7 @@ export default class BusinessController {
 
   @Delete('stories/:id')
   @DeleteStory()
-  async deleteStory(@Param('id') id: string, @User() user: USER) {
+  async deleteStory(@Param('id') id: string, @User() user: RequestUser) {
     return this.businessService.deleteStory({
       userId: user.id,
       id,
@@ -243,7 +243,7 @@ export default class BusinessController {
 
   @Get('stories')
   @GetAllStories()
-  async fetchAllStories(@User() user: USER) {
+  async fetchAllStories(@User() user: RequestUser) {
     return this.businessService.getStories({ userId: user?.id })
   }
 
@@ -251,7 +251,7 @@ export default class BusinessController {
   @GetBusinessStories()
   async getStories(
     @Param('businessId') businessId: string,
-    @User() user: USER,
+    @User() user: RequestUser,
   ) {
     return this.businessService.getBusinessStories({
       businessId,
