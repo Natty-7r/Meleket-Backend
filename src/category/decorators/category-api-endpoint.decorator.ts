@@ -24,6 +24,7 @@ const AdminRole = () =>
 
 export const CreateCategory = () =>
   applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'CREATE' }),
     CreateCategorySwaggerDefinition(),
     UseInterceptors(
       FileInterceptor('image', {
@@ -35,7 +36,7 @@ export const CreateCategory = () =>
 
 export const UpdateCategory = () =>
   applyDecorators(
-    AdminRole(),
+    Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
     UpdateCategorySwaggerDefinition(),
     UseInterceptors(
       FileInterceptor('image', {
@@ -45,7 +46,7 @@ export const UpdateCategory = () =>
   )
 export const UpdateCategoryImage = () =>
   applyDecorators(
-    AdminRole(),
+    Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
     UpdateCategoryImageSwaggerDefinition(),
     UseInterceptors(
       FileInterceptor('image', {
@@ -56,16 +57,25 @@ export const UpdateCategoryImage = () =>
   )
 
 export const VerifyCategory = () =>
-  applyDecorators(AdminRole(), VerifyCategorySwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
+    VerifyCategorySwaggerDefinition(),
+  )
 
 export const GetCategories = () =>
   applyDecorators(Public(), GetCategoriesSwaggerDefinition())
 
 export const DeleteCategory = () =>
-  applyDecorators(AdminRole(), DeleteCategorySwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'CREATE' }),
+    DeleteCategorySwaggerDefinition(),
+  )
 
 export const UpdateCategoryParent = () =>
-  applyDecorators(AdminRole(), UpdateCategoryParentSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
+    UpdateCategoryParentSwaggerDefinition(),
+  )
 
 export const GetCategoryBusinesses = () =>
   applyDecorators(Public(), GetCategoryBusinessSwaggerDefinition())
