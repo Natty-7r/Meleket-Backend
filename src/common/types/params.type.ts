@@ -80,6 +80,9 @@ export type ImageUrlParams = {
 export type BaseIdParams = {
   id: string
 }
+export type BaseBusinessIdParams = {
+  businessId: string
+}
 
 export type BaseUserIdParams = { userId: string }
 

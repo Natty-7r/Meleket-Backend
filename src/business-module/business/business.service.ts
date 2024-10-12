@@ -14,18 +14,14 @@ import {
 } from '@prisma/client'
 import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import { validateStory } from 'src/common/helpers/validator.helper'
 import { generateBusinessSorting } from 'src/common/helpers/sorting.helper'
 import LoggerService from 'src/logger/logger.service'
 import AccessControlService from 'src/access-control/access-control.service'
-import { createPagination } from '../common/helpers/pagination.helper'
+import { createPagination } from '../../common/helpers/pagination.helper'
 
-import { ApiResponseWithPagination } from '../common/types/responses.type'
+import { ApiResponseWithPagination } from '../../common/types/responses.type'
 import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
-import CreateBusinessServiceDto from './dto/create-business-service.dto'
-import CreateBusinessAddressDto from './dto/create-business-address.dto'
-import UpdateBusinessAddressDto from './dto/update-business-address.dto'
 import {
   CheckBusinessAddressParams,
   CheckBusinessNameParams,
@@ -36,21 +32,14 @@ import {
   VerifyBusinessServiceIdParams,
   BusinessIdParams,
   CategoryIdParams,
-  DeleteBusinessAddressParams,
-  DeleteBusinessServicesParams,
-  ImageUrlParams,
   SearchBusinessParams,
   UserIdParams,
   BaseIdParams,
   StoryIdParams,
-  OptionalUserIdParams,
   PaginationParams,
   BaseNameParams,
-} from '../common/types/params.type'
+} from '../../common/types/params.type'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
-import CreateStoryDto from './dto/create-story.dto'
-import UpdateStoryDto from './dto/update-store.dto'
-import UpdateBusinessServicesDto from './dto/update-business-services.dto'
 
 @Injectable()
 export default class BusinessService {
@@ -101,9 +90,6 @@ export default class BusinessService {
     })
   }
 
-  // Private method to verify the business ID by querying the database.
-  // Throws a BadRequestException if the business is not found.
-
   async checkUserProfileLevel({ userId }: UserIdParams): Promise<boolean> {
     const user = await this.prismaService.user.findFirst({
       where: { id: userId },
@@ -138,9 +124,6 @@ export default class BusinessService {
     return business
   }
 
-  // Private method to check if a business address already exists.
-  // Prevents duplicate addresses from being registered for the same business.
-  // Throws a ConflictException if the address is already registered.
   async checkBusinessAddress({
     country,
     state,
@@ -178,9 +161,6 @@ export default class BusinessService {
     return true
   }
 
-  // Private method to check if a service name exists for a business.
-  // Ensures that service names within a business are unique.
-  // Throws a ConflictException if the service name exists.
   async checkBusinessServiceName({
     businessId,
     name,
@@ -205,8 +185,6 @@ export default class BusinessService {
     return service
   }
 
-  // Private method to verify the business service ID.
-  // Throws a NotFoundException if the service is not found.
   async verifyBusinessServiceId({
     id,
   }: VerifyBusinessServiceIdParams): Promise<BussinesServiceModelType> {
@@ -216,9 +194,6 @@ export default class BusinessService {
     if (!service) throw new NotFoundException('Invalid business Service ID')
     return service
   }
-
-  // Private method to verify the business address ID.
-  // Throws a NotFoundException if the address is not found.
 
   async verifyBusinessStoryId({ id }: BaseIdParams): Promise<Story> {
     const story = await this.prismaService.story.findFirst({
@@ -346,235 +321,6 @@ export default class BusinessService {
       },
     }
   }
-
-  // business service related
-
-  async addBussinessService({
-    name,
-    description,
-    businessId,
-    specifications,
-    userId,
-    imageUrl,
-  }: CreateBusinessServiceDto &
-    UserIdParams &
-    ImageUrlParams): Promise<ApiResponse> {
-    await this.accessControlService.verifyBussinessOwnerShip({
-      id: businessId,
-      model: 'BUSINESS',
-      userId,
-    })
-
-    await this.checkBusinessServiceName({
-      businessId,
-      name,
-    })
-
-    const buinessService = await this.prismaService.bussinessService.create({
-      data: {
-        name,
-        businessId,
-        description,
-        specifications: specifications as any,
-        image: imageUrl,
-      },
-    })
-    return {
-      status: 'success',
-      message: 'Buisness Service added successfully',
-      data: {
-        ...buinessService,
-      },
-    }
-  }
-
-  async updateBusinessServiceImage({
-    id,
-    imageUrl,
-    userId,
-  }: UpdateBusinessImageParams): Promise<ApiResponse> {
-    const { entity: service } =
-      await this.accessControlService.verifyBussinessOwnerShip({
-        id,
-        model: 'BUSINESS_SERVICE',
-        userId,
-      })
-
-    if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
-    const updatedBusiness = await this.prismaService.bussinessService.update({
-      where: { id },
-      data: { image: imageUrl },
-    })
-    deleteFileAsync({ filePath: (service as BussinesServiceModelType).image })
-    return {
-      status: 'success',
-      message: 'Buisness image updated successfully',
-      data: {
-        ...updatedBusiness,
-      },
-    }
-  }
-
-  async updateBusinessServices({
-    services,
-    businessId,
-    userId,
-  }: UpdateBusinessServicesDto & UserIdParams): Promise<ApiResponse> {
-    for (const { id } of services) await this.verifyBusinessServiceId({ id })
-
-    for (const { id, description, name, specifications } of services) {
-      const { entity: service } =
-        await this.accessControlService.verifyBussinessOwnerShip({
-          id,
-          model: 'BUSINESS_SERVICE',
-          userId,
-        })
-
-      await this.prismaService.bussinessService.update({
-        where: { id },
-        data: {
-          name: name || (service as BussinesServiceModelType).description,
-          description:
-            description || (service as BussinesServiceModelType).description,
-          specifications:
-            specifications ||
-            ((service as BussinesServiceModelType).specifications as any),
-        },
-      })
-    }
-
-    const business = await this.prismaService.business.findFirst({
-      where: { id: businessId },
-    })
-
-    return {
-      status: 'success',
-      message: 'Buisness services updated successfully',
-      data: { ...business },
-    }
-  }
-
-  async deleteBusinessServices({
-    id,
-    userId,
-  }: DeleteBusinessServicesParams): Promise<BareApiResponse> {
-    const { businessId } =
-      await this.accessControlService.verifyBussinessOwnerShip({
-        id,
-        model: 'BUSINESS_SERVICE',
-        userId,
-      })
-
-    await this.prismaService.bussinessService.delete({
-      where: {
-        businessId,
-        id,
-      },
-    })
-    return {
-      status: 'success',
-      message: 'Buisness services deleted successfully',
-    }
-  }
-
-  // business address related
-  async createBusinessAddress({
-    businessId,
-    country,
-    city,
-    state,
-    specificLocation,
-    streetAddress,
-    userId,
-  }: CreateBusinessAddressDto & UserIdParams): Promise<ApiResponse> {
-    await this.accessControlService.verifyBussinessOwnerShip({
-      id: businessId,
-      model: 'BUSINESS',
-      userId,
-    })
-    await this.checkBusinessAddress({
-      country,
-      city,
-      state,
-      specificLocation,
-      streetAddress,
-      businessId,
-    })
-
-    const buinessAddress = await this.prismaService.businessAddress.create({
-      data: {
-        businessId,
-        country,
-        state,
-        city,
-        streetAddress: streetAddress || undefined,
-        specificLocation: specificLocation || undefined,
-      },
-    })
-    return {
-      status: 'success',
-      message: 'Buisness address added successfully',
-      data: {
-        ...buinessAddress,
-      },
-    }
-  }
-
-  async updateBusinessAddress({
-    addressId,
-    city,
-    country,
-    state,
-    specificLocation,
-    streetAddress,
-    userId,
-  }: UpdateBusinessAddressDto & UserIdParams): Promise<ApiResponse> {
-    const { businessId } =
-      await this.accessControlService.verifyBussinessOwnerShip({
-        id: addressId,
-        model: 'BUSINESS_ADDRESS',
-        userId,
-      })
-    const updatedBuinessAddress =
-      await this.prismaService.businessAddress.update({
-        where: { id: addressId, businessId },
-        data: {
-          country: country && country,
-          state: state && state,
-          city: city && city,
-          streetAddress: streetAddress && streetAddress,
-          specificLocation: specificLocation && specificLocation,
-        },
-      })
-    return {
-      status: 'success',
-      message: 'Buisness address updated successfully',
-      data: {
-        ...updatedBuinessAddress,
-      },
-    }
-  }
-
-  async deleteBusinessAddress({
-    id,
-    userId,
-  }: DeleteBusinessAddressParams): Promise<BareApiResponse> {
-    await this.accessControlService.verifyBussinessOwnerShip({
-      id,
-      model: 'BUSINESS_ADDRESS',
-      userId,
-    })
-    await this.prismaService.businessAddress.delete({
-      where: { id },
-    })
-
-    return {
-      status: 'success',
-      message: 'Buisness address deleted successfully',
-    }
-  }
-
-  // bussiness contact related
 
   async updateBusinessContact({
     businessId,
@@ -941,137 +687,4 @@ export default class BusinessService {
       data: businesses,
     }
   }
-  // story related
-
-  async addStory({
-    businessId,
-    userId,
-    ...createStoryDto
-  }: CreateStoryDto & UserIdParams): Promise<ApiResponse> {
-    await this.accessControlService.verifyBussinessOwnerShip({
-      id: businessId,
-      model: 'BUSINESS',
-      userId,
-    })
-    validateStory({ ...createStoryDto })
-    const story = await this.prismaService.story.create({
-      data: {
-        businessId,
-        ...createStoryDto,
-      },
-    })
-
-    return {
-      status: 'success',
-      message: 'story added successfully',
-      data: story,
-    }
-  }
-
-  async updateStory({
-    userId,
-    id,
-    ...updateStoryDto
-  }: UpdateStoryDto & UserIdParams): Promise<ApiResponse> {
-    let oldImageUrl
-    const { entity: story } =
-      await this.accessControlService.verifyBussinessOwnerShip({
-        id,
-        model: 'STORY',
-        userId,
-      })
-    if (updateStoryDto.image) oldImageUrl = (story as Story).image
-    validateStory({ ...updateStoryDto })
-    const updateStory = await this.prismaService.story.update({
-      where: { id },
-      data: {
-        ...updateStoryDto,
-      },
-    })
-    if (oldImageUrl) deleteFileAsync({ filePath: oldImageUrl })
-
-    return {
-      status: 'success',
-      message: 'story updated  successfully',
-      data: updateStory,
-    }
-  }
-
-  async deleteStory({
-    userId,
-    id,
-  }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
-    const { entity: story } =
-      await this.accessControlService.verifyBussinessOwnerShip({
-        id,
-        model: 'STORY',
-        userId,
-      })
-
-    await this.prismaService.story.delete({
-      where: { id },
-    })
-    deleteFileAsync({ filePath: (story as Story)?.image || '' })
-    return {
-      status: 'success',
-      message: 'story deleted  successfully',
-    }
-  }
-  async getStories({ userId }: OptionalUserIdParams): Promise<ApiResponse> {
-    const stories = await this.prismaService.story.findMany({
-      orderBy: [{ createdAt: 'desc' }],
-    })
-
-    let viewedStoryIds: Set<string> = new Set()
-    if (userId) {
-      const userViews = await this.prismaService.userStoryView.findMany({
-        where: { userId },
-        select: { storyId: true },
-      })
-
-      viewedStoryIds = new Set(userViews.map((view) => view.storyId))
-    }
-
-    const enhancedStories = stories.map((story) => ({
-      ...story,
-      viewed: userId ? viewedStoryIds.has(story.id) : false,
-    }))
-
-    return {
-      status: 'success',
-      message: 'Stories fetched successfully',
-      data: enhancedStories,
-    }
-  }
-  async getBusinessStories({
-    userId,
-    businessId,
-  }: BusinessIdParams & OptionalUserIdParams): Promise<ApiResponse> {
-    const stories = await this.prismaService.story.findMany({
-      where: { businessId },
-      orderBy: [{ createdAt: 'desc' }],
-    })
-
-    let viewedStoryIds: Set<string> = new Set()
-    if (userId) {
-      const userViews = await this.prismaService.userStoryView.findMany({
-        where: { userId },
-        select: { storyId: true },
-      })
-
-      viewedStoryIds = new Set(userViews.map((view) => view.storyId))
-    }
-
-    const enhancedStories = stories.map((story) => ({
-      ...story,
-      viewed: userId ? viewedStoryIds.has(story.id) : false,
-    }))
-
-    return {
-      status: 'success',
-      message: 'Stories fetched successfully',
-      data: enhancedStories,
-    }
-  }
-  // package related
 }

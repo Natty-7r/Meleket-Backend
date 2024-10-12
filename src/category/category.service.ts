@@ -8,7 +8,6 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import { CategoryTreeNode } from 'src/common/types/base.type'
-import BusinessService from 'src/business/business.service'
 import { BaseIdParams } from 'src/common/types/params.type'
 import {
   ApiResponse,
@@ -17,6 +16,7 @@ import {
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import { Business } from '@prisma/client'
 import UserService from 'src/user/user.service'
+import BusinessService from 'src/business-module/business/business.service'
 import {
   PaginationParams,
   CreateCategoryParams,
