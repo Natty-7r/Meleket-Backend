@@ -12,6 +12,8 @@ import {
   USER_PERMISSION_SELECTOR,
   USER_ROLE_NAME,
   NULL_ROLE_NAME,
+  CLIENT_ROLE_NAME,
+  CLIENT_PERMISSION_SELECTOR,
 } from 'src/common/constants/access-control.contants'
 import { RoleWithCountInfo } from 'src/common/types/base.type'
 import {
@@ -285,14 +287,33 @@ export default class AccessControlService {
     })
   }
 
-  async getApplicantRole() {
-    let applicantRole = await this.getRoleByName({
+  async getUserRole() {
+    let clientRole = await this.getRoleByName({
       name: USER_ROLE_NAME,
     })
-    if (applicantRole) return applicantRole
+    if (clientRole) return clientRole
 
     const permissions = await this.findPermissionByCondition({
       selector: USER_PERMISSION_SELECTOR,
+    })
+
+    const permissionIds = permissions.map((permission) => permission.id)
+    return this.createRole({
+      name: USER_ROLE_NAME,
+      permissions: permissionIds,
+      roleType: 'CLIENT',
+      adminId: null,
+    })
+  }
+  async getClientRole() {
+    // business owner
+    let clientRole = await this.getRoleByName({
+      name: CLIENT_ROLE_NAME,
+    })
+    if (clientRole) return clientRole
+
+    const permissions = await this.findPermissionByCondition({
+      selector: CLIENT_PERMISSION_SELECTOR,
     })
 
     const permissionIds = permissions.map((permission) => permission.id)

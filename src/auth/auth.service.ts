@@ -28,6 +28,7 @@ import CreateOTPDto from './dto/create-otp.dto'
 import VerifyUserDto from './dto/verify-user.dto'
 import SmsStrategy from '../message/strategies/sms.strategy'
 import UpdatePasswordDto from './dto/update-passowrd.dto'
+import AccessControlService from 'src/access-control/access-control.service'
 
 @Injectable()
 export default class AuthService {
@@ -40,6 +41,7 @@ export default class AuthService {
     private readonly emailStrategy: EmailStrategy,
     private readonly configService: ConfigService,
     private readonly loggerSerive: LoggerService,
+    private readonly accessContolService: AccessControlService,
   ) {
     // this.createSuperAdminAccount()
   }

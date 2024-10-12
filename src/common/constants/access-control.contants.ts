@@ -4,6 +4,8 @@ export const NULL_ROLE_NAME: string = 'NULL_ROLE_NAME' // when admin is revoked
 
 export const USER_ROLE_NAME = 'USER_ROLE'
 
+export const CLIENT_ROLE_NAME = 'CLIENT_ROLE'
+
 export const APPLICANT_PROBATION_PERIOD: number = 2 // number of probation date for applicant
 
 // Define the permission types
