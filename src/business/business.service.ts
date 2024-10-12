@@ -9,7 +9,6 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import {
   Business,
-  BusinessAddress,
   BussinessService as BussinesServiceModelType,
   Story,
 } from '@prisma/client'
@@ -31,10 +30,8 @@ import {
   CheckBusinessAddressParams,
   CheckBusinessNameParams,
   CheckBusinessServiceNameParams,
-  CheckOwnerParams,
   CreateBusinessParams,
   UpdateBusinessImageParams,
-  VerifyBusinessAddressIdParams,
   VerifyBusinessIdParams,
   VerifyBusinessServiceIdParams,
   BusinessIdParams,
@@ -107,7 +104,7 @@ export default class BusinessService {
   // Private method to verify the business ID by querying the database.
   // Throws a BadRequestException if the business is not found.
 
-  async checkUserProfileLevele({ userId }: UserIdParams): Promise<boolean> {
+  async checkUserProfileLevel({ userId }: UserIdParams): Promise<boolean> {
     const user = await this.prismaService.user.findFirst({
       where: { id: userId },
     })
@@ -126,24 +123,6 @@ export default class BusinessService {
     return business
   }
 
-  // Private method to check if the user is the owner of the business.
-  // This ensures that only the owner can modify the business.
-  // Throws a ForbiddenException if the user is not the owner.
-  async checkOwner({
-    userId,
-    businessId,
-  }: CheckOwnerParams): Promise<Business> {
-    await this.verifiyBusinessId({ id: businessId }) // Verify the business ID
-    const business = await this.prismaService.business.findFirst({
-      where: { ownerId: userId, id: businessId },
-    })
-    if (!business)
-      throw new ForbiddenException('Only the owner can manipulate business')
-    return business
-  }
-
-  // Private method to check if the business name already exists.
-  // Ensures business names are unique and throws a ConflictException if the name is taken.
   async checkBusinessName({
     name,
   }: CheckBusinessNameParams): Promise<Business> {
@@ -240,15 +219,6 @@ export default class BusinessService {
 
   // Private method to verify the business address ID.
   // Throws a NotFoundException if the address is not found.
-  async verifyBusinessAddressId({
-    id,
-  }: VerifyBusinessAddressIdParams): Promise<BusinessAddress> {
-    const address = await this.prismaService.businessAddress.findFirst({
-      where: { id },
-    })
-    if (!address) throw new NotFoundException('Invalid business Address ID')
-    return address
-  }
 
   async verifyBusinessStoryId({ id }: BaseIdParams): Promise<Story> {
     const story = await this.prismaService.story.findFirst({
@@ -262,7 +232,7 @@ export default class BusinessService {
     userId,
     ...createBusinessDto
   }: CreateBusinessDto & CreateBusinessParams): Promise<ApiResponse> {
-    await this.checkUserProfileLevele({ userId })
+    await this.checkUserProfileLevel({ userId })
     await this.checkBusinessName({ name: createBusinessDto.name })
 
     const businessMainImage = createBusinessDto.mainImage
@@ -324,7 +294,12 @@ export default class BusinessService {
     imageUrl,
     userId,
   }: UpdateBusinessImageParams): Promise<ApiResponse> {
-    const business = await this.checkOwner({ userId, businessId: id })
+    const { entity: bussiness } =
+      await this.accessControlService.verifyBussinessOwnerShip({
+        id,
+        model: 'BUSINESS',
+        userId,
+      })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
 
@@ -332,7 +307,7 @@ export default class BusinessService {
       where: { id },
       data: { mainImageUrl: imageUrl },
     })
-    deleteFileAsync({ filePath: business.mainImageUrl })
+    deleteFileAsync({ filePath: (bussiness as Business).mainImageUrl })
     return {
       status: 'success',
       message: 'Buisness image updated successfully',
@@ -348,13 +323,18 @@ export default class BusinessService {
     description,
     userId,
   }: UpdateBusinessDto & UserIdParams): Promise<ApiResponse> {
-    const business = await this.checkOwner({ userId, businessId: id })
+    const { entity: bussiness } =
+      await this.accessControlService.verifyBussinessOwnerShip({
+        id,
+        model: 'BUSINESS',
+        userId,
+      })
 
     const updatedBusiness = await this.prismaService.business.update({
       where: { id },
       data: {
-        name: name || business.name,
-        description: description || business.description,
+        name: name || (bussiness as Business).name,
+        description: description || (bussiness as Business).description,
       },
     })
 
@@ -379,7 +359,12 @@ export default class BusinessService {
   }: CreateBusinessServiceDto &
     UserIdParams &
     ImageUrlParams): Promise<ApiResponse> {
-    await this.checkOwner({ userId, businessId })
+    await this.accessControlService.verifyBussinessOwnerShip({
+      id: businessId,
+      model: 'BUSINESS',
+      userId,
+    })
+
     await this.checkBusinessServiceName({
       businessId,
       name,
@@ -408,15 +393,19 @@ export default class BusinessService {
     imageUrl,
     userId,
   }: UpdateBusinessImageParams): Promise<ApiResponse> {
-    await this.checkOwner({ userId, businessId: id })
-    const service = await this.verifyBusinessServiceId({ id })
+    const { entity: service } =
+      await this.accessControlService.verifyBussinessOwnerShip({
+        id,
+        model: 'BUSINESS_SERVICE',
+        userId,
+      })
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
     const updatedBusiness = await this.prismaService.bussinessService.update({
       where: { id },
       data: { image: imageUrl },
     })
-    deleteFileAsync({ filePath: service.image })
+    deleteFileAsync({ filePath: (service as BussinesServiceModelType).image })
     return {
       status: 'success',
       message: 'Buisness image updated successfully',
@@ -434,15 +423,22 @@ export default class BusinessService {
     for (const { id } of services) await this.verifyBusinessServiceId({ id })
 
     for (const { id, description, name, specifications } of services) {
-      await this.checkOwner({ userId, businessId })
-      const businessService = await this.verifyBusinessServiceId({ id })
+      const { entity: service } =
+        await this.accessControlService.verifyBussinessOwnerShip({
+          id,
+          model: 'BUSINESS_SERVICE',
+          userId,
+        })
+
       await this.prismaService.bussinessService.update({
         where: { id },
         data: {
-          name: name || businessService.description,
-          description: description || businessService.description,
+          name: name || (service as BussinesServiceModelType).description,
+          description:
+            description || (service as BussinesServiceModelType).description,
           specifications:
-            specifications || (businessService.specifications as any),
+            specifications ||
+            ((service as BussinesServiceModelType).specifications as any),
         },
       })
     }
@@ -462,8 +458,12 @@ export default class BusinessService {
     id,
     userId,
   }: DeleteBusinessServicesParams): Promise<BareApiResponse> {
-    const { businessId } = await this.verifyBusinessServiceId({ id })
-    await this.checkOwner({ businessId, userId })
+    const { businessId } =
+      await this.accessControlService.verifyBussinessOwnerShip({
+        id,
+        model: 'BUSINESS_SERVICE',
+        userId,
+      })
 
     await this.prismaService.bussinessService.delete({
       where: {
@@ -487,8 +487,9 @@ export default class BusinessService {
     streetAddress,
     userId,
   }: CreateBusinessAddressDto & UserIdParams): Promise<ApiResponse> {
-    await this.checkOwner({
-      businessId,
+    await this.accessControlService.verifyBussinessOwnerShip({
+      id: businessId,
+      model: 'BUSINESS',
       userId,
     })
     await this.checkBusinessAddress({
@@ -528,14 +529,12 @@ export default class BusinessService {
     streetAddress,
     userId,
   }: UpdateBusinessAddressDto & UserIdParams): Promise<ApiResponse> {
-    const { businessId } = await this.verifyBusinessAddressId({
-      id: addressId,
-    })
-    await this.checkOwner({
-      userId,
-      businessId,
-    })
-
+    const { businessId } =
+      await this.accessControlService.verifyBussinessOwnerShip({
+        id: addressId,
+        model: 'BUSINESS_ADDRESS',
+        userId,
+      })
     const updatedBuinessAddress =
       await this.prismaService.businessAddress.update({
         where: { id: addressId, businessId },
@@ -560,10 +559,10 @@ export default class BusinessService {
     id,
     userId,
   }: DeleteBusinessAddressParams): Promise<BareApiResponse> {
-    const { businessId } = await this.verifyBusinessAddressId({ id })
-    await this.checkOwner({
+    await this.accessControlService.verifyBussinessOwnerShip({
+      id,
+      model: 'BUSINESS_ADDRESS',
       userId,
-      businessId,
     })
     await this.prismaService.businessAddress.delete({
       where: { id },
@@ -582,9 +581,10 @@ export default class BusinessService {
     userId,
     ...updateBusinessContactDto
   }: UpdateBusinessContactDto & UserIdParams): Promise<ApiResponse> {
-    const b = await this.checkOwner({
+    const {} = await this.accessControlService.verifyBussinessOwnerShip({
+      id: businessId,
+      model: 'BUSINESS_CONTACT',
       userId,
-      businessId,
     })
     const updatedBuinessContact =
       await this.prismaService.businessContact.update({
@@ -745,7 +745,11 @@ export default class BusinessService {
     businessId,
     userId,
   }: BusinessIdParams & UserIdParams): Promise<ApiResponse> {
-    await this.checkOwner({ userId, businessId })
+    await this.accessControlService.verifyBussinessOwnerShip({
+      id: businessId,
+      model: 'BUSINESS',
+      userId,
+    })
     const businessDetail = await this.prismaService.business.findFirst({
       where: { id: businessId },
       select: {
@@ -944,9 +948,10 @@ export default class BusinessService {
     userId,
     ...createStoryDto
   }: CreateStoryDto & UserIdParams): Promise<ApiResponse> {
-    await this.checkOwner({
+    await this.accessControlService.verifyBussinessOwnerShip({
+      id: businessId,
+      model: 'BUSINESS',
       userId,
-      businessId,
     })
     validateStory({ ...createStoryDto })
     const story = await this.prismaService.story.create({
@@ -969,26 +974,26 @@ export default class BusinessService {
     ...updateStoryDto
   }: UpdateStoryDto & UserIdParams): Promise<ApiResponse> {
     let oldImageUrl
-    let story = await this.verifyBusinessStoryId({
-      id,
-    })
-
-    await this.checkOwner({ businessId: story.businessId, userId })
-    if (updateStoryDto.image) oldImageUrl = story.image
+    const { entity: story } =
+      await this.accessControlService.verifyBussinessOwnerShip({
+        id,
+        model: 'STORY',
+        userId,
+      })
+    if (updateStoryDto.image) oldImageUrl = (story as Story).image
     validateStory({ ...updateStoryDto })
-    story = await this.prismaService.story.update({
+    const updateStory = await this.prismaService.story.update({
       where: { id },
       data: {
         ...updateStoryDto,
       },
     })
-
     if (oldImageUrl) deleteFileAsync({ filePath: oldImageUrl })
 
     return {
       status: 'success',
       message: 'story updated  successfully',
-      data: story,
+      data: updateStory,
     }
   }
 
@@ -996,15 +1001,17 @@ export default class BusinessService {
     userId,
     id,
   }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
-    let story = await this.verifyBusinessStoryId({
-      id,
-    })
-    await this.checkOwner({ businessId: story.businessId, userId })
+    const { entity: story } =
+      await this.accessControlService.verifyBussinessOwnerShip({
+        id,
+        model: 'STORY',
+        userId,
+      })
 
-    story = await this.prismaService.story.delete({
+    await this.prismaService.story.delete({
       where: { id },
     })
-    deleteFileAsync({ filePath: story?.image || '' })
+    deleteFileAsync({ filePath: (story as Story)?.image || '' })
     return {
       status: 'success',
       message: 'story deleted  successfully',

@@ -174,7 +174,12 @@ export default class AccessControlService {
 
     if (bussiness.ownerId !== user.id)
       throw new ForbiddenException('Bussiness deos not belong to you')
-    return { entity, isBussiness, user }
+    return {
+      entity,
+      isBussiness,
+      user,
+      businessId: isBussiness ? entity.id : (entity as any).businessId,
+    }
   }
 
   async verifyPermissionsId({ ids }: BaseIdListParams): Promise<Permission[]> {

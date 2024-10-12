@@ -44,4 +44,5 @@ export type VerifyOwnershipResponse = {
   entity: BusinessSubEntity
   isBussiness: boolean // is the entity business it self
   user: User
+  businessId: string
 }
