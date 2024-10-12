@@ -7,7 +7,13 @@ import {
   StoryContentType,
   User,
 } from '@prisma/client'
-import { ChapaCustomerInfo, LogType, Selector, TimeUnit } from './base.type'
+import {
+  BusinessSubModel,
+  ChapaCustomerInfo,
+  LogType,
+  Selector,
+  TimeUnit,
+} from './base.type'
 
 export type SendSMSParams = {
   smsAddress: string
@@ -302,3 +308,8 @@ export type CheckRoleNameParams = BaseNameParams & {
     roleId: string
   }
 }
+
+export type VerifyOwnershipParams = {
+  model: BusinessSubModel
+} & BaseUserIdParams &
+  BaseIdParams

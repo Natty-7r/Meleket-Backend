@@ -1,12 +1,17 @@
 import {
+  BadGatewayException,
   BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { Admin, Permission, Role, User } from '@prisma/client'
-import { BaseIdParams, BaseNameParams } from 'src/common/types/params.type'
+import { Admin, Business, Permission, Role, User } from '@prisma/client'
+import {
+  BaseIdParams,
+  BaseNameParams,
+  VerifyOwnershipParams,
+} from 'src/common/types/params.type'
 import PrismaService from 'src/prisma/prisma.service'
 import {
   USER_PERMISSION_SELECTOR,
@@ -15,7 +20,11 @@ import {
   CLIENT_ROLE_NAME,
   CLIENT_PERMISSION_SELECTOR,
 } from 'src/common/constants/access-control.contants'
-import { RoleWithCountInfo } from 'src/common/types/base.type'
+import {
+  BusinessSubEntity,
+  RoleWithCountInfo,
+} from 'src/common/types/base.type'
+import { VerifyOwnershipResponse } from 'src/common/types/responses.type'
 import {
   BaseAdminIdParams,
   BaseIdListParams,
@@ -45,6 +54,13 @@ export default class AccessControlService {
     const admin = await this.prismaService.admin.findFirst({ where: { id } })
     if (!admin) throw new NotFoundException('Admin not found')
     return admin
+  }
+  private async verifyBussinessId({ id }: BaseIdParams): Promise<Business> {
+    const business = await this.prismaService.business.findFirst({
+      where: { id },
+    })
+    if (!business) throw new NotFoundException('Bussiness not found')
+    return business
   }
 
   private async checkroleName({
@@ -89,58 +105,77 @@ export default class AccessControlService {
     })
   }
 
-  // async verifyAdminCompanyOwnerShip({
-  //   id,
-  //   adminId,
-  //   moduleName,
-  // }: VerifyCompanyOwnershipParams) {
-  //   const admin = await this.verifyAdmin({ id: adminId })
-  //   let companyId: string = ''
-  //   let entity: Enitity
-  //   switch (moduleName) {
-  //     case 'ADMIN': {
-  //       const assingeeAadmin = await this.verifyAdminId({ id })
-  //       companyId = assingeeAadmin.Company?.id
-  //       entity = assingeeAadmin
-  //       break
-  //     }
-  //     case 'JOB': {
-  //       const job = await this.accessControlRepository.findJobById({ id })
-  //       if (!job)
-  //         throw new CustomErrorException('Job not found', HttpStatus.NOT_FOUND)
-  //       companyId = job.Company?.id
-  //       entity = job
-  //       break
-  //     }
-  //     case 'COMPANY': {
-  //       const company = await this.accessControlRepository.findCompanyById({
-  //         id,
-  //       })
-  //       if (!company)
-  //         throw new CustomErrorException(
-  //           'Company not found',
-  //           HttpStatus.NOT_FOUND,
-  //         )
-  //       companyId = company?.id
-  //       entity = company
-  //       break
-  //     }
-  //     case 'ROLE': {
-  //       const role = await this.verifyRoleId({ id })
-  //       companyId = role?.Company?.id
-  //       entity = role
-  //       break
-  //     }
-  //     default:
-  //       throw new CustomErrorException('Unknown entity', HttpStatus.BAD_REQUEST)
-  //   }
-  //   if (admin.Company.id !== companyId)
-  //     throw new CustomErrorException(
-  //       `${moduleName.toString()} Deos not belong to your compnay`,
-  //
-  //     )
-  //   return { id, adminId, entity }
-  // }
+  async verifyBussinessOwnerShip({
+    id,
+    model,
+    userId,
+  }: VerifyOwnershipParams): Promise<VerifyOwnershipResponse> {
+    let entity: BusinessSubEntity = null
+    let isBussiness: boolean = false
+    let entityName: string = ''
+    const user = (await this.verifyUserId({ id: userId })) as User
+    switch (model) {
+      case 'BUSINESS':
+        entity = await this.prismaService.business.findFirst({ where: { id } })
+        isBussiness = true
+        entityName = 'Bussiness'
+        break
+
+      case 'BUSINESS_SERVICE':
+        entity = await this.prismaService.bussinessService.findFirst({
+          where: { id },
+        })
+        entityName = 'Bussiness service'
+        break
+
+      case 'BUSINESS_ADDRESS':
+        entity = await this.prismaService.businessAddress.findFirst({
+          where: { id },
+        })
+        entityName = 'Bussiness address'
+        break
+
+      case 'BUSINESS_CONTACT':
+        entity = await this.prismaService.businessContact.findFirst({
+          where: { id },
+        })
+        entityName = 'Bussiness contact'
+        break
+
+      case 'BUSINESS_PACKAGE':
+        entity = await this.prismaService.businessPackage.findFirst({
+          where: { id },
+        })
+        entityName = 'Bussiness package'
+        break
+
+      case 'STORY':
+        entity = await this.prismaService.story.findFirst({
+          where: { id },
+        })
+        entityName = 'Story'
+        break
+
+      case 'BILL':
+        entity = await this.prismaService.bill.findFirst({
+          where: { id },
+        })
+        entityName = 'Bill'
+        break
+
+      default:
+        throw new BadGatewayException('Invalid bussiness sub type')
+    }
+    if (!entity) throw new NotFoundException(`${entityName} not found`)
+
+    const bussiness = await this.verifyBussinessId({
+      id: isBussiness ? entity.id : (entity as any)?.businessId,
+    })
+
+    if (bussiness.ownerId !== user.id)
+      throw new ForbiddenException('Bussiness deos not belong to you')
+    return { entity, isBussiness, user }
+  }
 
   async verifyPermissionsId({ ids }: BaseIdListParams): Promise<Permission[]> {
     const filteredIds = [...new Set(ids)]

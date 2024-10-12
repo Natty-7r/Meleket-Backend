@@ -1,5 +1,18 @@
 import { Request } from 'express'
-import { Admin, ModuleName, PermissionType, Role, User } from '@prisma/client'
+import {
+  Admin,
+  ModuleName,
+  PermissionType,
+  Role,
+  User,
+  Business,
+  BusinessAddress,
+  BusinessContact,
+  BusinessPackage,
+  BussinessService,
+  Story,
+  Bill,
+} from '@prisma/client'
 import {
   ADMIN_PERMISSION_SELECTOR,
   USER_PERMISSION_SELECTOR,
@@ -211,3 +224,21 @@ export type PermisionSet = {
   model: ModuleName
   action: PermissionType
 }
+
+export type BusinessSubModel =
+  | 'BUSINESS'
+  | 'BUSINESS_SERVICE'
+  | 'BUSINESS_ADDRESS'
+  | 'BUSINESS_CONTACT'
+  | 'BUSINESS_PACKAGE'
+  | 'STORY'
+  | 'BILL'
+
+export type BusinessSubEntity =
+  | Business
+  | BussinessService
+  | BusinessAddress
+  | BusinessContact
+  | BusinessPackage
+  | Story
+  | Bill
