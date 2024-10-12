@@ -1,6 +1,4 @@
-import { applyDecorators, UseInterceptors } from '@nestjs/common'
-import { ApiForbiddenResponse } from '@nestjs/swagger'
-import Public from 'src/common/decorators/public.decorator'
+import { applyDecorators } from '@nestjs/common'
 import {
   BillPackageSwaggerDefinition,
   CreatePackageSwaggerDefinition,
@@ -10,28 +8,32 @@ import {
 } from './payment-swagger.decorator'
 import Permissions from 'src/common/decorators/permission.decorator'
 
-const ClientRole = () =>
-  applyDecorators(
-    Permissions(),
-    ApiForbiddenResponse({ description: 'Only owner can manupulate' }),
-  )
-const AdminRole = () =>
-  applyDecorators(
-    Permissions(),
-    ApiForbiddenResponse({ description: 'Only Admin have access ' }),
-  )
-
 export const PurchasePackage = () =>
-  applyDecorators(ClientRole(), PurchasePackageSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS_PACKAGE', action: 'CREATE' }),
+    PurchasePackageSwaggerDefinition(),
+  )
 
 export const BillPackage = () =>
-  applyDecorators(ClientRole(), BillPackageSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS_PACKAGE', action: 'UPDATE' }),
+    BillPackageSwaggerDefinition(),
+  )
 
 export const CreatePackage = () =>
-  applyDecorators(AdminRole(), CreatePackageSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'PACKAGE', action: 'CREATE' }),
+    CreatePackageSwaggerDefinition(),
+  )
 
 export const UpdatePackage = () =>
-  applyDecorators(AdminRole(), UpdatePackageSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'PACKAGE', action: 'UPDATE' }),
+    UpdatePackageSwaggerDefinition(),
+  )
 
 export const GetPackages = () =>
-  applyDecorators(Public(), GetPackagesSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'PACKAGE', action: 'DELETE' }),
+    GetPackagesSwaggerDefinition(),
+  )
