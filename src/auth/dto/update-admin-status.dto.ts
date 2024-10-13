@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { AdminStatus } from '@prisma/client'
+import { Status } from '@prisma/client'
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export default class UpdateAdminStatusDto {
@@ -19,7 +19,7 @@ export default class UpdateAdminStatusDto {
   })
   @IsString()
   @IsNotEmpty()
-  status: AdminStatus
+  status: Status
 
   @ApiPropertyOptional({
     type: String,

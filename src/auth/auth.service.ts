@@ -135,7 +135,7 @@ export default class AuthService {
         password: hashedPassword,
         roleId: role,
         status: 'CREATED',
-        inactiveReason: 'new account',
+        inActiveReason: 'new account',
       },
     })
 
@@ -424,10 +424,10 @@ export default class AuthService {
             (user as Admin).status === 'CREATED'
               ? 'ACTIVE'
               : (user as Admin).status,
-          inactiveReason:
+          inActiveReason:
             (user as Admin).status === 'CREATED'
               ? ''
-              : (user as Admin).inactiveReason,
+              : (user as Admin).inActiveReason,
         },
       })
     }
@@ -461,7 +461,7 @@ export default class AuthService {
 
     await this.prismaService.admin.update({
       where: { id },
-      data: { status, inactiveReason: reason || '' },
+      data: { status, inActiveReason: reason || '' },
     })
     return {
       status: 'success',
