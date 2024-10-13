@@ -81,7 +81,7 @@ export default class BusinessController {
     })
   }
 
-  @Get('all')
+  @Get()
   @GetBusinesses()
   getAllBusiness() {
     return this.businessService.getAllBusinesses()

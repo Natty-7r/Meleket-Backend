@@ -5,15 +5,6 @@ import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
 export default class UpdateAdminStatusDto {
   @ApiProperty({
     type: String,
-    example: 'aasadf4jaasdfasdfjasdf',
-    description: 'admin id',
-  })
-  @IsString()
-  @IsNotEmpty()
-  id: string
-
-  @ApiProperty({
-    type: String,
     example: 'INACTIVE',
     description: 'status',
   })

@@ -96,9 +96,7 @@ export type OptionalBaseIdParams = { adminId?: string }
 
 export type BaseRoleIdParams = { roleId: string }
 
-export type BaseCompanyIdParams = { companyId: string }
-
-export type BaseOptionalCompanyIdParams = { companyId?: string }
+export type BaseOptionalRoleIdParams = { roleId?: string }
 
 export type StoryIdParams = {
   storyId: string

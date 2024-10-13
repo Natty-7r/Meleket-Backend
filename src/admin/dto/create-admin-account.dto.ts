@@ -30,7 +30,7 @@ export default class CreateAdminDto {
   @IsNotEmpty()
   email: string
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: String,
     example: '12345',
     description: 'User password',
@@ -41,10 +41,10 @@ export default class CreateAdminDto {
 
   @ApiPropertyOptional({
     type: String,
-    example: 'SUPER_ADMIN',
-    description: 'admin role',
+    example: 'aasadf4jaasdfasdfjasdf',
+    description: 'role id',
   })
   @IsString()
   @IsNotEmpty()
-  role: string
+  roleId?: string
 }

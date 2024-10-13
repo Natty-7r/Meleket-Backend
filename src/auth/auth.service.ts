@@ -15,15 +15,14 @@ import { generateOTP } from 'src/common/helpers/numbers.helper'
 import MessageService from 'src/message/message.service'
 import { ConfigService } from '@nestjs/config'
 import EmailStrategy from 'src/message/strategies/email.strategy'
-import { BaseIdParams } from 'src/common/types/params.type'
+import { BaseAdminIdParams } from 'src/common/types/params.type'
 import LoggerService from 'src/logger/logger.service'
 import AccessControlService from 'src/access-control/access-control.service'
-import {
-  CreateAccountDto,
-  CreateAdminDto,
-  SignInDto,
-  UpdateAdminStatusDto,
-} from './dto'
+import AdminService from 'src/admin/admin.service'
+import CreateAdminDto from 'src/admin/dto/create-admin-account.dto'
+import UserService from 'src/user/user.service'
+import { removePassword } from 'src/common/helpers/parser.helper'
+import { CreateAccountDto, SignInDto } from './dto'
 import VerifyOTPDto from './dto/verify-otp.dto'
 import CreateOTPDto from './dto/create-otp.dto'
 import VerifyUserDto from './dto/verify-user.dto'
@@ -42,48 +41,28 @@ export default class AuthService {
     private readonly configService: ConfigService,
     private readonly loggerSerive: LoggerService,
     private readonly accessContolService: AccessControlService,
-  ) {
-    // this.createSuperAdminAccount()
-  }
-
-  async createSuperAdminAccount() {
-    const admins = await this.prismaService.admin.findMany({})
-    if (admins.length === 0)
-      this.createAdminAccount({
-        firstName: this.configService
-          .get<string>('superAdmin.firstName')
-          .trim(),
-        lastName: this.configService.get<string>('superAdmin.lastName').trim(),
-        email: this.configService.get<string>('superAdmin.email').trim(),
-        password: this.configService.get<string>('superAdmin.password').trim(),
-        role: 'SUPER_ADMIN',
-      })
-  }
+    private readonly adminService: AdminService,
+    private readonly userService: UserService,
+  ) {}
 
   async createUserAccount(
     { firstName, lastName, email, password }: CreateAccountDto,
     signUpType: SignUpType,
   ) {
-    const user = await this.prismaService.user.findFirst({ where: { email } })
-    if (user) throw new ConflictException('Email is already in use!')
     const hashedPassword = await bcrypt.hash(password, 12)
 
     const userRole = await this.accessContolService.getUserRole()
 
-    const userCreated = await this.prismaService.user.create({
-      data: {
+    const userCreated = await this.userService.createUserAccount(
+      {
         firstName,
         lastName,
         email,
         password: hashedPassword,
-        profileLevel:
-          signUpType === SignUpType.BY_EMAIL ? 'CREATED' : 'VERIFIED',
         roleId: userRole.id,
       },
-    })
-    /* eslint-disable */
-    const { password: _, ...rest } = userCreated
-    /* eslint-disable */
+      signUpType,
+    )
     if (signUpType === SignUpType.BY_EMAIL) {
       const { otpCode } = await this.createOTP({
         channelType: 'EMAIL',
@@ -103,40 +82,36 @@ export default class AuthService {
     }
     this.loggerSerive.createLog({
       logType: 'USER_ACTIVITY',
-      message: `user account created for ${email}, ${firstName}, ${lastName} with ID${rest.id}`,
+      message: `user account created for ${email}, ${firstName}, ${lastName} with ID${userCreated.id}`,
       context: 'user account creation',
-      userId: rest.id,
+      userId: userCreated.id,
     })
     return {
       status: 'success',
       message: 'Account created successfully',
-      data: {
-        ...rest,
-      },
+      data: removePassword(userCreated),
     }
   }
 
   async createAdminAccount({
+    roleId,
+    password,
+    email,
     firstName,
     lastName,
-    email,
-    password,
-    role,
-  }: CreateAdminDto) {
-    const admin = await this.prismaService.admin.findFirst({ where: { email } })
-    if (admin) throw new ConflictException('Email is already in use!')
+  }: CreateAdminDto & BaseAdminIdParams) {
+    const adminRole = await this.accessContolService.getAdminRole({
+      roleId,
+    })
+
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    const adminCreated = await this.prismaService.admin.create({
-      data: {
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        roleId: role,
-        status: 'CREATED',
-        inActiveReason: 'new account',
-      },
+    const adminAccount = await this.adminService.createAdminAccount({
+      firstName,
+      lastName,
+      email,
+      roleId: adminRole.id,
+      password: hashedPassword,
     })
 
     this.messageService.setStrategy(this.emailStrategy)
@@ -146,22 +121,16 @@ export default class AuthService {
       address: email,
     })
 
-    /* eslint-disable */
-    const { password: _, ...rest } = adminCreated
-    /* eslint-disable */
-
     this.loggerSerive.createLog({
       logType: 'ADMIN_ACTIVITY',
-      message: `${role == 'SUPER_ADMIN' && 'Super'} admin account created for email:${email}, name: ${firstName}, ${lastName} with ID ${rest.id}`,
+      message: ` admin account created for email:${email}, name: ${firstName}, ${lastName} with ID ${adminAccount.id}`,
       context: 'admin account creation',
-      adminId: rest.id,
+      adminId: adminAccount.id,
     })
     return {
       status: 'success',
       message: 'Admin created successfully',
-      data: {
-        ...rest,
-      },
+      data: removePassword(adminAccount),
     }
   }
 
@@ -441,46 +410,6 @@ export default class AuthService {
     return {
       status: 'success',
       message: 'Password updated successfully',
-    }
-  }
-
-  async getAdmins() {
-    const admins = await this.prismaService.admin.findMany({})
-    return {
-      status: 'success',
-      message: 'Admin fetched   successfully',
-      data: admins,
-    }
-  }
-
-  async updateAdminStatus({ id, status, reason }: UpdateAdminStatusDto) {
-    const admin = await this.prismaService.admin.findUnique({
-      where: { id },
-    })
-    if (!admin) throw new BadRequestException('Invalid admin id ')
-
-    await this.prismaService.admin.update({
-      where: { id },
-      data: { status, inActiveReason: reason || '' },
-    })
-    return {
-      status: 'success',
-      message: 'Admin status updated  successfully',
-    }
-  }
-
-  async deleteAdminAccount({ id }: BaseIdParams) {
-    const admin = await this.prismaService.admin.findUnique({
-      where: { id },
-    })
-    if (!admin) throw new BadRequestException('Invalid admin id ')
-
-    await this.prismaService.admin.delete({
-      where: { id },
-    })
-    return {
-      status: 'success',
-      message: 'Admin account deleted  successfully',
     }
   }
 }

@@ -11,7 +11,6 @@ import {
 } from '@nestjs/swagger'
 import SignInResponse from 'src/auth/responses/sign-in.response'
 import CreateAccountResponse from '../responses/create-account.response'
-import CreateAdminAccountResponse from '../responses/create-admin.response '
 
 export const SignInSwaggerDefinition = () => {
   return applyDecorators(
@@ -34,17 +33,6 @@ export const CreateUserAccountSwaggerDefinition = () => {
     ApiCreatedResponse({
       type: CreateAccountResponse,
       description: 'user account created successfully',
-    }),
-    ApiConflictResponse({ description: 'Email is already in use!' }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-  )
-}
-export const CreateAdminSwaggerDefinition = () => {
-  return applyDecorators(
-    ApiOperation({ summary: 'Create admin account' }),
-    ApiCreatedResponse({
-      type: CreateAdminAccountResponse,
-      description: 'admin account created successfully',
     }),
     ApiConflictResponse({ description: 'Email is already in use!' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
@@ -101,34 +89,5 @@ export const UpdatePasswordSwaggerDefinition = () => {
     ApiNotFoundResponse({ description: 'OTP not found' }),
     ApiBadRequestResponse({ description: 'Invalid OTP' }),
     ApiGoneResponse({ description: 'OTP expired' }),
-  )
-}
-export const UpdateAdminStatusSwaggerDefinition = () => {
-  return applyDecorators(
-    ApiOperation({ summary: 'update admin status ' }),
-    ApiResponse({
-      type: String,
-      description: 'Admin status updated successfully',
-    }),
-    ApiBadRequestResponse({ description: 'Invalid admin id ' }),
-  )
-}
-export const GetAdminsSwaggerDefinition = () => {
-  return applyDecorators(
-    ApiOperation({ summary: 'get all  admins ' }),
-    ApiResponse({
-      type: Array<CreateAdminAccountResponse>,
-      description: 'Admins fetched  successfully',
-    }),
-  )
-}
-export const DeleteAdminAccountSwaggerDefinition = () => {
-  return applyDecorators(
-    ApiOperation({ summary: 'update admin status ' }),
-    ApiResponse({
-      type: String,
-      description: 'Admin status updated successfully',
-    }),
-    ApiBadRequestResponse({ description: 'Invalid admin id ' }),
   )
 }
