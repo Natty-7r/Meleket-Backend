@@ -218,7 +218,9 @@ export default class AccessControlService {
   }
 
   async getRoles(): Promise<Role[]> {
-    return this.prismaService.role.findMany()
+    return this.prismaService.role.findMany({
+      where: { name: { not: NULL_ROLE_NAME } },
+    })
   }
 
   async getRoleByName({ name }: BaseNameParams): Promise<Role> {

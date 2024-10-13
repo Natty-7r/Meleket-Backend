@@ -16,6 +16,7 @@ import AssignRoleDto from './dto/assign-role.dto'
 import {
   AssignAdminRole,
   CreateRole,
+  DeleteRole,
   GetPermissions,
   GetRoleDetail,
   GetRolePermissions,
@@ -106,6 +107,13 @@ export default class AccessControlController {
     return this.accessControlService.revokeAdminRole({
       id,
       adminId: user?.id,
+    })
+  }
+  @DeleteRole()
+  @Delete('/:id/role')
+  async deleteRoleRole(@Param('id', ParseUUIDPipe) id: string) {
+    return this.accessControlService.deleteRole({
+      id,
     })
   }
 }

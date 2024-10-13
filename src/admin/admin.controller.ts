@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Put } from '@nestjs/common'
 import User from 'src/common/decorators/user.decorator'
 import { RequestUser } from 'src/common/types/base.type'
+import { ApiTags } from '@nestjs/swagger'
 import AdminService from './admin.service'
 import {
   DeleteAdmin,
@@ -11,7 +12,7 @@ import {
 } from './decorators/admin-api.decorator'
 import UpdateAdminStatusDto from './dto/update-admin-status.dto'
 import UpdateAdminDto from './dto/update-admin-account.dto'
-import { ApiTags } from '@nestjs/swagger'
+
 @ApiTags('Admin')
 @Controller('admins')
 export default class AdminController {
