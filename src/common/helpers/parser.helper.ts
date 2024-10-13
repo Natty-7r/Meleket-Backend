@@ -80,3 +80,7 @@ export const removePassword = (user: User | Admin) => {
   const { password, ...userWithoutPassword } = user
   return userWithoutPassword
 }
+
+export const removePasswords = (users: User[] | Admin[]) => {
+  return users.map((user) => removePassword(user))
+}

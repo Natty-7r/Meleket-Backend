@@ -109,6 +109,7 @@ export default class AccessControlController {
       adminId: user?.id,
     })
   }
+
   @DeleteRole()
   @Delete('/:id/role')
   async deleteRoleRole(@Param('id', ParseUUIDPipe) id: string) {

@@ -8,7 +8,10 @@ import PrismaService from 'src/prisma/prisma.service'
 import LoggerService from 'src/logger/logger.service'
 import { Admin } from '@prisma/client'
 import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
-import { removePassword } from 'src/common/helpers/parser.helper'
+import {
+  removePassword,
+  removePasswords,
+} from 'src/common/helpers/parser.helper'
 import UpdateAdminStatusDto from './dto/update-admin-status.dto'
 import CreateAdminDto from './dto/create-admin-account.dto'
 import UpdateAdminDto from './dto/update-admin-account.dto'
@@ -126,7 +129,7 @@ export default class AdminService {
   async getAdmins(): Promise<ApiResponse> {
     const admins = await this.prismaService.admin.findMany()
     return {
-      data: admins,
+      data: removePasswords(admins),
       status: 'success',
       message: 'Admins fetched  successfully',
     }
