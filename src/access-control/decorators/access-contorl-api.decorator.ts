@@ -26,7 +26,7 @@ export const GetRolePermissions = () =>
   )
 export const GetRoles = () =>
   applyDecorators(
-    Permissions({ action: 'READ', model: 'PERMISSION' }),
+    Permissions({ action: 'READ', model: 'ROLE' }),
     GetRolesSwaggerDefinition(),
   )
 export const GetRoleDetail = () =>
