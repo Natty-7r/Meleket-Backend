@@ -12,49 +12,64 @@ import {
   UpdateReviewSwaggerDefinition,
   ViewStorySwaggerDefinition,
 } from './user-swagger.decorator'
-import { ApiForbiddenResponse } from '@nestjs/swagger'
-import Public from 'src/common/decorators/public.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import Permissions from 'src/common/decorators/permission.decorator'
 
-const ClientRole = () =>
-  applyDecorators(
-    Permissions(),
-    ApiForbiddenResponse({
-      description: 'Only client can user has privilage ',
-    }),
-  )
 export const AddReveiw = () =>
-  applyDecorators(ClientRole(), AddReviewSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'REVIEW', action: 'CREATE' }),
+    AddReviewSwaggerDefinition(),
+  )
 
 export const UpdateReview = () =>
-  applyDecorators(ClientRole(), UpdateReviewSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'REVIEW', action: 'UPDATE' }),
+    UpdateReviewSwaggerDefinition(),
+  )
 
 export const DeleteReview = () =>
-  applyDecorators(ClientRole(), DeleteReviewSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'REVIEW', action: 'DELETE' }),
+    DeleteReviewSwaggerDefinition(),
+  )
 
 export const AddRating = () =>
-  applyDecorators(ClientRole(), AddRatingSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'RATING', action: 'CREATE' }),
+    AddRatingSwaggerDefinition(),
+  )
 
 // follow related
 
 export const FollowBusiness = () =>
-  applyDecorators(ClientRole(), FollowBusinessSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'REVIEW', action: 'CREATE' }),
+    FollowBusinessSwaggerDefinition(),
+  )
 
 export const UnFollowBusiness = () =>
-  applyDecorators(ClientRole(), UnFollowBusinessSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'REVIEW', action: 'DELETE' }),
+    UnFollowBusinessSwaggerDefinition(),
+  )
 
 export const GetFollowedBusiness = () =>
-  applyDecorators(ClientRole(), GetFollowedBusinessSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS', action: 'READ' }),
+    GetFollowedBusinessSwaggerDefinition(),
+  )
 
 export const FollowedBusinesses = () =>
-  applyDecorators(ClientRole(), FollowedBusinessSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'BUSINESS', action: 'READ' }),
+    FollowedBusinessSwaggerDefinition(),
+  )
 
 // profile
 export const AddProfile = () =>
   applyDecorators(
-    ClientRole(),
+    Permissions({ model: 'PROFILE', action: 'CREATE' }),
     UseInterceptors(
       FileInterceptor('profilePicture', {
         storage: muluterStorage({ folder: 'profile', filePrefix: 'p' }),
@@ -70,7 +85,7 @@ export const AddProfile = () =>
 
 export const UpdateProfile = () =>
   applyDecorators(
-    ClientRole(),
+    Permissions({ model: 'PROFILE', action: 'UPDATE' }),
     UseInterceptors(
       FileInterceptor('profilePicture', {
         storage: muluterStorage({ folder: 'profile', filePrefix: 'p' }),
@@ -86,4 +101,7 @@ export const UpdateProfile = () =>
 
 // story related
 export const ViewStory = () =>
-  applyDecorators(ClientRole(), ViewStorySwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'STORY', action: 'READ' }),
+    ViewStorySwaggerDefinition(),
+  )

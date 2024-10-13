@@ -8,6 +8,7 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import {
   BaseIdParams,
+  BaseRoleIdParams,
   BusinessIdParams,
   StoryIdParams,
   UserIdParams,
@@ -16,6 +17,9 @@ import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import { validateAge } from 'src/common/helpers/validator.helper'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import BusinessService from 'src/business-module/business/business.service'
+import { SignUpType } from 'src/common/types/base.type'
+import { CreateAccountDto } from 'src/auth/dto'
+import { removePassword } from 'src/common/helpers/parser.helper'
 import AddReviewDto from './dto/add-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
 import EditReviewDto from './dto/edit-review.dto'
@@ -50,6 +54,32 @@ export default class UserService {
     return true
   }
 
+  async createUserAccount(
+    {
+      firstName,
+      lastName,
+      email,
+      password,
+      roleId,
+    }: CreateAccountDto & BaseRoleIdParams,
+    signUpType: SignUpType,
+  ) {
+    const user = await this.prismaService.user.findFirst({ where: { email } })
+    if (user) throw new ConflictException('Email is already in use!')
+
+    return this.prismaService.user.create({
+      data: {
+        firstName,
+        lastName,
+        email,
+        password,
+        profileLevel:
+          signUpType === SignUpType.BY_EMAIL ? 'CREATED' : 'VERIFIED',
+        roleId,
+      },
+    })
+  }
+
   // profile related
 
   async getUserDetail({ id }: BaseIdParams) {
@@ -59,7 +89,7 @@ export default class UserService {
     return {
       status: 'success',
       message: `user detail fetced  successfully`,
-      data: userDetail,
+      data: removePassword(userDetail),
     }
   }
 

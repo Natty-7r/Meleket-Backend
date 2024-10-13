@@ -3,6 +3,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import { ConfigModule } from '@nestjs/config'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
+import AdminModule from './admin/admin.module'
 import PaymentModule from './payment/payment.module'
 import AppController from './app.controller'
 import AppService from './app.service'
@@ -34,13 +35,14 @@ import BusinessBaseModule from './business-module/base-business.module'
       },
     }),
     LoggerModule,
-    CategoryModule,
+    AccessControlModule,
     AuthModule,
+    CategoryModule,
+    UserModule,
+    AdminModule,
     MessageModule,
     BusinessBaseModule,
-    UserModule,
     PaymentModule,
-    AccessControlModule,
   ],
 
   providers: [

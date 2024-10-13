@@ -1,6 +1,6 @@
 import { ModuleName, PermissionType } from '@prisma/client'
 
-export const NULL_ROLE_NAME: string = 'NULL_ROLE_NAME' // when admin is revoked
+export const NULL_ROLE_NAME: string = 'NULL_ROLE' // when admin is revoked
 
 export const USER_ROLE_NAME = 'USER_ROLE'
 

@@ -10,6 +10,7 @@ import { Admin, Business, Permission, Role, User } from '@prisma/client'
 import {
   BaseIdParams,
   BaseNameParams,
+  OptionalBaseIdParams,
   VerifyOwnershipParams,
 } from 'src/common/types/params.type'
 import PrismaService from 'src/prisma/prisma.service'
@@ -30,6 +31,7 @@ import {
   BaseIdListParams,
   BaseSelectorParams,
   CheckRoleNameParams,
+  BaseOptionalRoleIdParams,
 } from '../common/types/params.type'
 import CreateRoleDto from './dto/create-role.dto'
 import UpdateRoleDto from './dto/update-role.dto'
@@ -216,7 +218,9 @@ export default class AccessControlService {
   }
 
   async getRoles(): Promise<Role[]> {
-    return this.prismaService.role.findMany()
+    return this.prismaService.role.findMany({
+      where: { name: { not: NULL_ROLE_NAME } },
+    })
   }
 
   async getRoleByName({ name }: BaseNameParams): Promise<Role> {
@@ -237,7 +241,7 @@ export default class AccessControlService {
   }
 
   async createRole(
-    createRoleDto: CreateRoleDto & BaseAdminIdParams,
+    createRoleDto: CreateRoleDto & OptionalBaseIdParams,
   ): Promise<Role> {
     const { adminId, name, permissions: permissionIds } = createRoleDto
     await this.checkroleName({ name })
@@ -255,7 +259,6 @@ export default class AccessControlService {
       },
     })
   }
-
   async updateRole({
     id,
     adminId,
@@ -277,7 +280,6 @@ export default class AccessControlService {
       },
     })
   }
-
   async deleteRole({ id }: BaseIdParams): Promise<void> {
     const role = await this.verifyRoleId({ id })
 
@@ -373,5 +375,20 @@ export default class AccessControlService {
       where: { id },
       data: { roleId: clientRole.id },
     })
+  }
+  async getNullRole() {
+    const role = await this.getRoleByName({ name: NULL_ROLE_NAME })
+    if (!role)
+      return await this.createRole({
+        name: NULL_ROLE_NAME,
+        permissions: [],
+        roleType: 'ADMIN',
+      })
+    return role
+  }
+
+  async getAdminRole({ roleId }: BaseOptionalRoleIdParams) {
+    if (roleId) return this.verifyRoleId({ id: roleId })
+    return this.getNullRole()
   }
 }

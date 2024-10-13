@@ -63,11 +63,14 @@ export const VerifyCategory = () =>
   )
 
 export const GetCategories = () =>
-  applyDecorators(Public(), GetCategoriesSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'READ' }),
+    GetCategoriesSwaggerDefinition(),
+  )
 
 export const DeleteCategory = () =>
   applyDecorators(
-    Permissions({ model: 'CATEGORY', action: 'CREATE' }),
+    Permissions({ model: 'CATEGORY', action: 'DELETE' }),
     DeleteCategorySwaggerDefinition(),
   )
 

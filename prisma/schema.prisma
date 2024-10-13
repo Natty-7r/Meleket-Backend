@@ -16,9 +16,10 @@ enum PaymentMethod {
   CHAPA
 }
 
-enum BusinessVisiblityStatus {
+enum BusinessStatus {
   CREATED // no buyed package
   ACTIVE
+  INACTIVE
   HIDDEN // when package is done
 }
 
@@ -33,7 +34,7 @@ enum OTPType {
   RESET
 }
 
-enum AdminStatus {
+enum Status {
   ACTIVE
   INACTIVE
   CREATED // in active b/c just created need to reset password
@@ -63,8 +64,6 @@ enum LogType {
   SYSTEM_ACTIVITY
 }
 
-
-
 model User {
   id                 String           @id @default(uuid())
   firstName          String
@@ -81,8 +80,10 @@ model User {
   followedBusinesses Business[]       @relation("UserFollowsBusiness")
   createdAt          DateTime         @default(now())
   passwordUpdatedAt  DateTime         @updatedAt
+  status             Status           @default(CREATED)
+  inActiveReason     String           @default("new account")
   roleId             String
-  role               Role             @relation(name: "UserRoles",fields: [roleId], references: [id])
+  role               Role             @relation(name: "UserRoles", fields: [roleId], references: [id])
 
   // New relation to UserStoryView
   storyViews UserStoryView[]
@@ -101,16 +102,16 @@ model OTP {
 }
 
 model Admin {
-  id             String      @id @default(cuid())
+  id             String  @id @default(cuid())
   firstName      String
   lastName       String
-  email          String      @unique
+  email          String  @unique
   password       String
-  status         AdminStatus @default(CREATED)
-  inactiveReason String?     @default("new account")
-  roleId          String?
-  createRoles     Role[]   @relation(name: "CreatedBy")
-  role            Role?            @relation(name: "AdminRoles",fields: [roleId], references: [id])
+  status         Status  @default(CREATED)
+  inActiveReason String? @default("new account")
+  roleId         String?
+  createRoles    Role[]  @relation(name: "CreatedBy")
+  role           Role?   @relation(name: "AdminRoles", fields: [roleId], references: [id])
 
   createdAat DateTime @default(now()) @map("created_at")
   updatedAat DateTime @updatedAt @map("updated_at")
@@ -152,15 +153,16 @@ model Category {
 }
 
 model Business {
-  id           String                  @id @default(uuid())
-  ownerId      String
-  categoryId   String
-  name         String
-  description  String
-  templateId   String
-  mainImageUrl String
-  owner        User                    @relation("UserOwnsBusiness", fields: [ownerId], references: [id]) // New relation
-  visibility   BusinessVisiblityStatus @default(CREATED)
+  id             String         @id @default(uuid())
+  ownerId        String
+  categoryId     String
+  name           String
+  description    String
+  templateId     String
+  mainImageUrl   String
+  owner          User           @relation("UserOwnsBusiness", fields: [ownerId], references: [id]) // New relation
+  visibility     BusinessStatus @default(CREATED)
+  inActiveReason String?        @default("new account")
 
   services BussinessService[]
   address  BusinessAddress[]
@@ -346,12 +348,12 @@ model Log {
   adminId    String?
 }
 
-
 // Role-Based Access Control (RBAC) Schema
 enum RoleType {
   CLIENT
   ADMIN
 }
+
 // Enum to define possible actions for permissions
 enum PermissionType {
   READ
@@ -359,6 +361,7 @@ enum PermissionType {
   UPDATE
   CREATE
 }
+
 enum ModuleName {
   ROLE
   PERMISSION
@@ -382,21 +385,21 @@ enum ModuleName {
   LOG
 }
 
-
 model Role {
-  id        String @id @default(uuid())
-  name  String @unique
-  roleType  RoleType 
-  creatorId  String? 
+  id        String   @id @default(uuid())
+  name      String   @unique
+  roleType  RoleType
+  creatorId String?
 
   permissions Permission[]
-  admins      Admin[]    @relation(name: "AdminRoles")
-  users       User[]      @relation(name: "UserRoles")
+  admins      Admin[]      @relation(name: "AdminRoles")
+  users       User[]       @relation(name: "UserRoles")
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now())
   deletedAt   DateTime?
 
-  createdBy    Admin? @relation(name: "CreatedBy", fields: [creatorId], references: [id])
+  createdBy Admin? @relation(name: "CreatedBy", fields: [creatorId], references: [id])
+
   @@map("roles")
 }
 
