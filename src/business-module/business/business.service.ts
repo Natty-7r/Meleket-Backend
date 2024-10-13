@@ -687,4 +687,6 @@ export default class BusinessService {
       data: businesses,
     }
   }
+
+  //
 }
