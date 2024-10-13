@@ -46,6 +46,9 @@ export const USER_PERMISSION_SELECTOR: any = {
       AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'READ' }],
     },
     {
+      AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'CREATE' }],
+    },
+    {
       AND: [{ moduleName: 'BUSINESS_SERVICE' }, { permissionName: 'READ' }],
     },
     {

@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
+  ApiBody,
   ApiConflictResponse,
   ApiConsumes,
   ApiCreatedResponse,
@@ -14,18 +15,23 @@ import {
 import BusinessResponse from '../responses/business.response'
 import BusinessDetailResponse from '../responses/business-detail.response'
 import BusinessContactResponse from '../responses/business-contact.response'
+import CreateBusinessDto from '../dto/create-business.dto'
 
 export const CreateBusinessSwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ summary: 'Create business ' }),
+    ApiOperation({ summary: 'Create business' }),
     ApiCreatedResponse({
-      description: 'Create Business successfully',
-      type: BusinessResponse,
+      description: 'Business created successfully',
     }),
-    ApiConflictResponse({ description: 'Business name already taken' }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
+    ApiBadRequestResponse({ description: 'Invalid parent id' }),
+    ApiConflictResponse({ description: 'Category with the same name exists' }),
+    ApiConsumes('multipart/form-data'),
+    ApiBody({
+      type: CreateBusinessDto,
+      description: 'business creation data',
+    }),
   )
+
 export const UpdateBusinessImageSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ summary: 'Update buiness image' }),
