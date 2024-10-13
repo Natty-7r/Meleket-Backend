@@ -199,10 +199,7 @@ export type SearchBusinessByAddressParams = {
  * Category related params
  */
 
-export type CreateCategoryParams = OptionalImageUrlParams &
-  UserIdParams & {
-    verified: boolean
-  }
+export type BaseImageParams = { image: string }
 export type GenerateCategoryTreeParams = {
   categories: Category[]
 }

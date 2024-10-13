@@ -24,6 +24,7 @@ import {
 import {
   BusinessSubEntity,
   RoleWithCountInfo,
+  UserType,
 } from 'src/common/types/base.type'
 import { VerifyOwnershipResponse } from 'src/common/types/responses.type'
 import {
@@ -84,19 +85,33 @@ export default class AccessControlService {
     return true
   }
 
-  async verifyUserId({ id }: BaseIdParams): Promise<Admin | User> {
-    const user =
-      (await this.prismaService.user.findFirst({ where: { id } })) ||
-      (await this.prismaService.admin.findFirst({ where: { id } }))
+  async verifyUserId({
+    id,
+  }: BaseIdParams): Promise<{ user: Admin | User; userType: UserType }> {
+    let userType: UserType = 'USER'
+    let user: Admin | User = await this.prismaService.user.findFirst({
+      where: { id },
+    })
+    if (!user) {
+      user = await this.prismaService.admin.findFirst({ where: { id } })
+      userType = 'ADMIN'
+    }
     if (!user) throw new NotFoundException(' User Not found')
-
-    // if (( typeof user) === Admin &&  user === 'INACTIVE')
-    //   throw new CustomErrorException('Inactive user ', HttpStatus.UNAUTHORIZED)
-    return user
+    return { user, userType }
+  }
+  async verifyUserStatus({
+    id,
+  }: BaseIdParams): Promise<{ user: Admin | User; userType: UserType }> {
+    const { user, userType } = await this.verifyUserId({ id })
+    if (user.status !== 'ACTIVE')
+      throw new ForbiddenException(
+        `Inactive ${userType.toLowerCase()} account  `,
+      )
+    return { user, userType }
   }
 
   async getUserPermissions({ id }): Promise<Permission[]> {
-    const user = await this.verifyUserId({ id })
+    const { user } = await this.verifyUserId({ id })
     const role = await this.verifyRoleId({ id: user?.roleId })
     return this.prismaService.permission.findMany({
       where: {
@@ -115,7 +130,7 @@ export default class AccessControlService {
     let entity: BusinessSubEntity = null
     let isBussiness: boolean = false
     let entityName: string = ''
-    const user = (await this.verifyUserId({ id: userId })) as User
+    const { user } = await this.verifyUserId({ id: userId })
     switch (model) {
       case 'BUSINESS':
         entity = await this.prismaService.business.findFirst({ where: { id } })
@@ -179,7 +194,7 @@ export default class AccessControlService {
     return {
       entity,
       isBussiness,
-      user,
+      user: user as User,
       businessId: isBussiness ? entity.id : (entity as any).businessId,
     }
   }
