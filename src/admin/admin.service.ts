@@ -131,4 +131,20 @@ export default class AdminService {
       message: 'Admins fetched  successfully',
     }
   }
+  async getAdminDetail({ id }: BaseIdParams): Promise<ApiResponse> {
+    const admin = await this.prismaService.admin.findMany({
+      where: { id },
+      include: {
+        role: true,
+      },
+    })
+    const logs = await this.prismaService.log.findMany({
+      where: { adminId: id },
+    })
+    return {
+      data: { ...admin, logs },
+      status: 'success',
+      message: 'Admins detail  successfully',
+    }
+  }
 }

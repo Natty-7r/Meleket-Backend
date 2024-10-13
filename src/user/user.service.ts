@@ -19,12 +19,12 @@ import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import BusinessService from 'src/business-module/business/business.service'
 import { SignUpType } from 'src/common/types/base.type'
 import { CreateAccountDto } from 'src/auth/dto'
+import { removePassword } from 'src/common/helpers/parser.helper'
 import AddReviewDto from './dto/add-review.dto'
 import AddRatingDto from './dto/add-rating.dto'
 import EditReviewDto from './dto/edit-review.dto'
 import AddProfileDto from './dto/add-profile.dto'
 import UpdateProfileDto from './dto/update-profile.dto'
-import { removePassword } from 'src/common/helpers/parser.helper'
 
 @Injectable()
 export default class UserService {

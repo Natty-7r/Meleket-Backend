@@ -35,14 +35,14 @@ import BusinessBaseModule from './business-module/base-business.module'
       },
     }),
     LoggerModule,
-    CategoryModule,
+    AccessControlModule,
     AuthModule,
+    CategoryModule,
+    UserModule,
+    AdminModule,
     MessageModule,
     BusinessBaseModule,
-    UserModule,
     PaymentModule,
-    AccessControlModule,
-    AdminModule,
   ],
 
   providers: [

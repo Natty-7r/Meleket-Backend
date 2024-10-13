@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import {} from '@prisma/client'
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator'
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export default class CreateAdminDto {
   @ApiProperty({
@@ -45,6 +45,6 @@ export default class CreateAdminDto {
     description: 'role id',
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   roleId?: string
 }

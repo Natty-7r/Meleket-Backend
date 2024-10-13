@@ -212,7 +212,7 @@ export default class PaymentService {
     const { data: user } = await this.userService.getUserDetail({ id: userId })
     const paymentInitParams: PaymentInitParams = this.generateParmentInitOption(
       {
-        user,
+        user: user as any,
         amount: packageAmount,
         paymentMethod,
         callbackUrl,

@@ -96,34 +96,16 @@ async function seedAdmin() {
   const ADMIN_PERMISSION_SELECTOR: any = {
     OR: [
       {
-        AND: [{ moduleName: 'PERMISSION' }, { permissionName: 'CREATE' }],
-      },
-      {
-        AND: [{ moduleName: 'PERMISSION' }, { permissionName: 'UPDATE' }],
-      },
-      {
-        AND: [{ moduleName: 'PERMISSION' }, { permissionName: 'DELETE' }],
-      },
-      {
-        AND: [{ moduleName: 'ROLE' }, { permissionName: 'CREATE' }],
-      },
-      {
-        AND: [{ moduleName: 'ROLE' }, { permissionName: 'UPDATE' }],
-      },
-      {
-        AND: [{ moduleName: 'ROLE' }, { permissionName: 'DELETE' }],
+        AND: [{ moduleName: 'ROLE' }],
       },
       {
         AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'UPDATE' }], // Only update business status
       },
       {
-        AND: [{ moduleName: 'CATEGORY' }, { permissionName: 'CREATE' }],
+        AND: [{ moduleName: 'USER' }, { permissionName: 'UPDATE' }], // Only update business status
       },
       {
-        AND: [{ moduleName: 'CATEGORY' }, { permissionName: 'UPDATE' }],
-      },
-      {
-        AND: [{ moduleName: 'CATEGORY' }, { permissionName: 'DELETE' }],
+        AND: [{ moduleName: 'CATEGORY' }],
       },
     ],
   }

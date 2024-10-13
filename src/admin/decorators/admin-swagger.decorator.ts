@@ -45,10 +45,21 @@ export const UpdateAdminStatusSwaggerDefinition = () => {
 }
 export const DeleteAdminSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ summary: 'Delte admin  ' }),
+    ApiOperation({ summary: 'Delete admin  ' }),
     ApiResponse({
       type: String,
-      description: 'Admin  delelted successfully',
+      description: 'Admin  deleted successfully',
+    }),
+    ApiBadRequestResponse({ description: 'Invalid admin id ' }),
+    ApiParam({ description: ' admin id ', name: 'id' }),
+  )
+}
+export const GetadminDetailSwaggerDefinition = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get admin detail ' }),
+    ApiResponse({
+      type: String,
+      description: 'Admin  detail fetched successfully',
     }),
     ApiBadRequestResponse({ description: 'Invalid admin id ' }),
     ApiParam({ description: ' admin id ', name: 'id' }),

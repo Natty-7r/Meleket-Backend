@@ -3,6 +3,7 @@ import { applyDecorators } from '@nestjs/common'
 import {
   CreateAdminSwaggerDefinition,
   DeleteAdminSwaggerDefinition,
+  GetadminDetailSwaggerDefinition,
   GetAdminsSwaggerDefinition,
   UpdateAdminStatusSwaggerDefinition,
   UpdateAdminSwaggerDefinition,
@@ -27,6 +28,11 @@ export const DeleteAdmin = () =>
   applyDecorators(
     Permissions({ model: 'ADMIN', action: 'DELETE' }),
     DeleteAdminSwaggerDefinition(),
+  )
+export const GetAdminDetail = () =>
+  applyDecorators(
+    Permissions({ model: 'ADMIN', action: 'READ' }),
+    GetadminDetailSwaggerDefinition(),
   )
 
 export const GetAdmins = () =>

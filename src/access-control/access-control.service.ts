@@ -376,12 +376,13 @@ export default class AccessControlService {
   }
   async getNullRole() {
     const role = await this.getRoleByName({ name: NULL_ROLE_NAME })
-    if (role)
+    if (!role)
       return await this.createRole({
         name: NULL_ROLE_NAME,
         permissions: [],
         roleType: 'ADMIN',
       })
+    return role
   }
 
   async getAdminRole({ roleId }: BaseOptionalRoleIdParams) {
