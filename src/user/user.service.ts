@@ -24,6 +24,7 @@ import AddRatingDto from './dto/add-rating.dto'
 import EditReviewDto from './dto/edit-review.dto'
 import AddProfileDto from './dto/add-profile.dto'
 import UpdateProfileDto from './dto/update-profile.dto'
+import { removePassword } from 'src/common/helpers/parser.helper'
 
 @Injectable()
 export default class UserService {
@@ -88,7 +89,7 @@ export default class UserService {
     return {
       status: 'success',
       message: `user detail fetced  successfully`,
-      data: userDetail,
+      data: removePassword(userDetail),
     }
   }
 
