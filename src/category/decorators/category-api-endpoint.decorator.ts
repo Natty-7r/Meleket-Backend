@@ -11,16 +11,11 @@ import {
   VerifyCategorySwaggerDefinition,
   GetCategoriesSwaggerDefinition,
 } from './category-swagger.decorator'
-import { ApiUnauthorizedResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
 import Permissions from 'src/common/decorators/permission.decorator'
 import { GetCategoryBusinessSwaggerDefinition } from 'src/business-module/business/decorators/business-swagger.decorator'
 
-const AdminRole = () =>
-  applyDecorators(
-    Permissions(),
-    ApiUnauthorizedResponse({ description: 'Insucffincent permission' }),
-  )
+
 
 export const CreateCategory = () =>
   applyDecorators(
