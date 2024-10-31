@@ -23,6 +23,8 @@ export type Module = {
   name: string
 }
 
+export type UserType = 'USER' | 'ADMIN'
+
 export enum LoggerType {
   ACTIVITY = 'ACTIVITY',
   ERROR = 'ERROR',

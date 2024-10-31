@@ -96,7 +96,7 @@ export default class BusinessService {
     })
 
     if (!user) throw new UnauthorizedException('User not found ')
-    if (user?.profileLevel !== 'VERIFIED')
+    if (user?.status !== 'CREATED')
       throw new ForbiddenException('Unverfied user cannot create business ')
     return true
   }
@@ -687,4 +687,6 @@ export default class BusinessService {
       data: businesses,
     }
   }
+
+  //
 }

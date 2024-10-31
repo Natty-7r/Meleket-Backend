@@ -7,10 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserProfileLevel {
-  CREATED //  just opened , cannot add business 
-  VERIFIED // by email 
-}
+
 
 enum PaymentMethod {
   CHAPA
@@ -39,6 +36,7 @@ enum Status {
   INACTIVE
   CREATED // in active b/c just created need to reset password
 }
+
 
 enum ChannelType {
   EMAIL
@@ -70,7 +68,6 @@ model User {
   lastName           String
   email              String           @unique
   phoneNumber        String?
-  profileLevel       UserProfileLevel @default(CREATED)
   password           String
   profile            Profile?
   reviews            Review[]

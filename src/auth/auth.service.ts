@@ -53,16 +53,13 @@ export default class AuthService {
 
     const userRole = await this.accessContolService.getUserRole()
 
-    const userCreated = await this.userService.createUserAccount(
-      {
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        roleId: userRole.id,
-      },
-      signUpType,
-    )
+    const userCreated = await this.userService.createUserAccount({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      roleId: userRole.id,
+    })
     if (signUpType === SignUpType.BY_EMAIL) {
       const { otpCode } = await this.createOTP({
         channelType: 'EMAIL',
@@ -327,7 +324,7 @@ export default class AuthService {
 
     await this.prismaService.user.update({
       where: { id: user.id },
-      data: { profileLevel: 'VERIFIED' },
+      data: { status: 'ACTIVE' },
     })
     await this.prismaService.oTP.deleteMany({
       where: { channelValue: email, type: 'VERIFICATION' },

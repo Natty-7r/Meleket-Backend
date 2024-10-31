@@ -8,8 +8,10 @@ import {
   ApiConsumes,
   ApiCreatedResponse,
   ApiParam,
+  ApiBody,
 } from '@nestjs/swagger'
 import CategoryTreeResponse from '../responses/category-tree.response'
+import CreateCategoryDto from '../dto/create-category.dto'
 
 const categoryTreeExample = {
   id: 'c55931c4-5c45-4e81-95d6-6fd2c98d4611',
@@ -33,13 +35,17 @@ const categoryTreeExample = {
 
 export const CreateCategorySwaggerDefinition = () =>
   applyDecorators(
-    ApiOperation({ summary: 'Create Category ' }),
+    ApiOperation({ summary: 'Create Category' }),
     ApiCreatedResponse({
-      description: 'Category  created succefully',
+      description: 'Category created successfully',
     }),
     ApiBadRequestResponse({ description: 'Invalid parent id' }),
     ApiConflictResponse({ description: 'Category with the same name exists' }),
-    ApiConsumes('image'),
+    ApiConsumes('multipart/form-data'),
+    ApiBody({
+      type: CreateCategoryDto,
+      description: 'Category creation data',
+    }),
   )
 
 export const DeleteCategorySwaggerDefinition = () =>

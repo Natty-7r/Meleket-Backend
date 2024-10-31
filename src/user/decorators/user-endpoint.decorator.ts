@@ -2,37 +2,16 @@ import { applyDecorators, UseInterceptors } from '@nestjs/common'
 import {
   AddProfileSwaggerDefinition,
   AddRatingSwaggerDefinition,
-  AddReviewSwaggerDefinition,
-  DeleteReviewSwaggerDefinition,
   FollowBusinessSwaggerDefinition,
   FollowedBusinessSwaggerDefinition,
   UnFollowBusinessSwaggerDefinition,
   GetFollowedBusinessSwaggerDefinition,
   UpdateProfileSwaggerDefinition,
-  UpdateReviewSwaggerDefinition,
   ViewStorySwaggerDefinition,
 } from './user-swagger.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import Permissions from 'src/common/decorators/permission.decorator'
-
-export const AddReveiw = () =>
-  applyDecorators(
-    Permissions({ model: 'REVIEW', action: 'CREATE' }),
-    AddReviewSwaggerDefinition(),
-  )
-
-export const UpdateReview = () =>
-  applyDecorators(
-    Permissions({ model: 'REVIEW', action: 'UPDATE' }),
-    UpdateReviewSwaggerDefinition(),
-  )
-
-export const DeleteReview = () =>
-  applyDecorators(
-    Permissions({ model: 'REVIEW', action: 'DELETE' }),
-    DeleteReviewSwaggerDefinition(),
-  )
 
 export const AddRating = () =>
   applyDecorators(
