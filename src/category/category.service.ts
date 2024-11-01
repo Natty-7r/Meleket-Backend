@@ -13,12 +13,8 @@ import {
   BaseImageParams,
   BaseUserIdParams,
 } from 'src/common/types/params.type'
-import {
-  ApiResponse,
-  ApiResponseWithPagination,
-} from 'src/common/types/responses.type'
+
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import { Business } from '@prisma/client'
 import BusinessService from 'src/business-module/business/business.service'
 import AccessControlService from 'src/access-control/access-control.service'
 import {
@@ -86,9 +82,7 @@ export default class CategoryService {
     userId,
     parentId,
     ...createCategoryDto
-  }: CreateCategoryDto &
-    BaseUserIdParams &
-    BaseImageParams): Promise<ApiResponse> {
+  }: CreateCategoryDto & BaseUserIdParams & BaseImageParams) {
     const { userType } = await this.accessControlService.verifyUserStatus({
       id: userId,
     })
@@ -116,7 +110,7 @@ export default class CategoryService {
     } else if (createCategoryDto.level !== 1)
       throw new BadRequestException('New category should have level of 1 ')
 
-    const category = await this.prismaService.category.create({
+    return this.prismaService.category.create({
       data: {
         name: createCategoryDto.name.toLocaleLowerCase().trim(), // changing name for search
         ...createCategoryDto,
@@ -124,14 +118,6 @@ export default class CategoryService {
         price: createCategoryDto.price || 50,
       },
     })
-
-    return {
-      status: 'success',
-      message: 'Account created successfully',
-      data: {
-        ...category,
-      },
-    }
   }
 
   async updateCategory({
@@ -141,7 +127,7 @@ export default class CategoryService {
     price,
     parentId,
     verified,
-  }: UpdateCategoryDto): Promise<ApiResponse> {
+  }: UpdateCategoryDto) {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
@@ -167,19 +153,13 @@ export default class CategoryService {
         verified: verified || category.verified,
       },
     })
-    return {
-      status: 'success',
-      message: 'Category updated  successfully',
-      data: {
-        ...updatedCategory,
-      },
-    }
+    return updatedCategory
   }
 
   async updateCategoryImage({
     id,
     imageUrl,
-  }: BaseIdParams & OptionalImageUrlParams): Promise<ApiResponse> {
+  }: BaseIdParams & OptionalImageUrlParams) {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
@@ -195,13 +175,7 @@ export default class CategoryService {
       },
     })
     deleteFileAsync({ filePath: category.image })
-    return {
-      status: 'success',
-      message: 'Category updated  successfully',
-      data: {
-        ...updatedCategory,
-      },
-    }
+    return updatedCategory
   }
 
   async verifyCategory({ id }: BaseIdParams) {
@@ -211,7 +185,7 @@ export default class CategoryService {
 
     if (!category) throw new NotFoundException('Invalid category id')
 
-    const updatedCategory = await this.prismaService.category.update({
+    return this.prismaService.category.update({
       where: {
         id,
       },
@@ -219,30 +193,17 @@ export default class CategoryService {
         verified: true,
       },
     })
-    return {
-      status: 'success',
-      message: 'Category verified  successfully',
-      data: {
-        ...updatedCategory,
-      },
-    }
   }
 
-  async getCategories(): Promise<ApiResponse> {
+  async getCategories() {
     const allCategories = await this.prismaService.category.findMany({})
-    return {
-      status: 'success',
-      message: 'categories fetched',
-      data: this.generateCategoryTree({ categories: allCategories }),
-    }
+    return this.generateCategoryTree({ categories: allCategories })
   }
 
   async getCategoryBusiness({
     id,
     ...paginationParams
-  }: BaseIdParams & PaginationParams): Promise<
-    ApiResponseWithPagination<Business[]>
-  > {
+  }: BaseIdParams & PaginationParams) {
     const category = await this.verifyCategoryId({ id })
     return this.businessService.getCategoryBusinesses({
       ...paginationParams,
@@ -251,7 +212,7 @@ export default class CategoryService {
     })
   }
 
-  async deleteCategory({ id }: BaseIdParams): Promise<ApiResponse> {
+  async deleteCategory({ id }: BaseIdParams) {
     const category = await this.prismaService.category.findFirst({
       where: { id },
       /*eslint-disable*/
@@ -278,17 +239,13 @@ export default class CategoryService {
     })
 
     const updatedCategories = await this.prismaService.category.findMany()
-    return {
-      status: 'success',
-      message: 'Category verified  successfully',
-      data: this.generateCategoryTree({ categories: updatedCategories }),
-    }
+    return this.generateCategoryTree({ categories: updatedCategories })
   }
 
   async updateParentCategory({
     parentId,
     childrenId,
-  }: UpdateParentCategoryDto): Promise<ApiResponse> {
+  }: UpdateParentCategoryDto) {
     const parentCategory = await this.prismaService.category.findFirst({
       where: { id: parentId },
     })
@@ -306,10 +263,6 @@ export default class CategoryService {
       },
     })
     const updatedCategories = await this.prismaService.category.findMany()
-    return {
-      status: 'success',
-      message: 'Category updated  successfully',
-      data: this.generateCategoryTree({ categories: updatedCategories }),
-    }
+    return this.generateCategoryTree({ categories: updatedCategories })
   }
 }

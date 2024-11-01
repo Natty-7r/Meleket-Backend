@@ -244,3 +244,6 @@ export type BusinessSubEntity =
   | BusinessPackage
   | Story
   | Bill
+
+export type AdminWithoutPassword = Omit<Admin, 'password'>
+export type UserWithoutPassword = Omit<User, 'password'>

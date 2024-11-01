@@ -83,11 +83,8 @@ export default class AuthService {
       context: 'user account creation',
       userId: userCreated.id,
     })
-    return {
-      status: 'success',
-      message: 'Account created successfully',
-      data: removePassword(userCreated),
-    }
+
+    return removePassword(userCreated)
   }
 
   async createAdminAccount({
@@ -124,11 +121,8 @@ export default class AuthService {
       context: 'admin account creation',
       adminId: adminAccount.id,
     })
-    return {
-      status: 'success',
-      message: 'Admin created successfully',
-      data: removePassword(adminAccount),
-    }
+
+    return removePassword(adminAccount)
   }
 
   async validateUser({ email, password }: SignInDto): Promise<any> {
@@ -177,8 +171,7 @@ export default class AuthService {
     if (payload?.status === 'CREATED' || payload?.status === 'INACTIVE')
       throw new ForbiddenException('User not active')
     return {
-      status: 'success',
-      message: 'User Logged in successfully',
+      user: removePassword(user),
       access_token: this.jwtService.sign(payload),
     }
   }
@@ -254,7 +247,6 @@ export default class AuthService {
     })
 
     return {
-      status: 'success',
       message: `${type} OTP sent is to ${channelValue}  successfully  `,
       data: {
         otpCode,
@@ -270,7 +262,7 @@ export default class AuthService {
     phone,
     otp: otpCode,
     channelType,
-  }: VerifyOTPDto) {
+  }: VerifyOTPDto): Promise<string> {
     const channelValue = channelType === 'EMAIL' ? email : phone
     const otpRecord = await this.prismaService.oTP.findFirst({
       where: { type, channelValue },
@@ -298,19 +290,16 @@ export default class AuthService {
       data: { isVerified: true },
     })
 
-    return {
-      status: 'success',
-      message: 'OTP Verified',
-    }
+    return 'OTP Verified'
   }
 
-  async verifyAccount({ email, otp: otpCode }: VerifyUserDto) {
+  async verifyAccount({ email, otp: otpCode }: VerifyUserDto): Promise<string> {
     const user = await this.prismaService.user.findFirst({
       where: { email },
     })
 
     if (!user) throw new BadRequestException('Invalid Email')
-    const { status } = await this.verifyOTP({
+    const message = await this.verifyOTP({
       type: 'VERIFICATION',
       email,
       phone: '',
@@ -319,7 +308,7 @@ export default class AuthService {
       userType: 'CLIENT_USER',
     })
 
-    if (status != 'success')
+    if (message !== 'OTP Verified')
       throw new BadRequestException('Unable to verify user ')
 
     await this.prismaService.user.update({
@@ -329,10 +318,7 @@ export default class AuthService {
     await this.prismaService.oTP.deleteMany({
       where: { channelValue: email, type: 'VERIFICATION' },
     })
-    return {
-      status: 'success',
-      message: 'User Verified successfully',
-    }
+    return 'User Verified successfully'
   }
 
   async checkOTPVerification({
@@ -360,7 +346,11 @@ export default class AuthService {
     if (!otpRecord.isVerified) throw new BadGatewayException('OTP not verified')
   }
 
-  async updatePassword({ password, userId, userType }: UpdatePasswordDto) {
+  async updatePassword({
+    password,
+    userId,
+    userType,
+  }: UpdatePasswordDto): Promise<string> {
     const user =
       userType === 'CLIENT_USER'
         ? await this.prismaService.user.findUnique({
@@ -404,9 +394,7 @@ export default class AuthService {
       userId: userType === 'CLIENT_USER' && user.id,
       adminId: userType !== 'CLIENT_USER' && user.id,
     })
-    return {
-      status: 'success',
-      message: 'Password updated successfully',
-    }
+
+    return 'Password updated successfully'
   }
 }

@@ -10,7 +10,6 @@ import {
   BaseIdParams,
   UserIdParams,
 } from 'src/common/types/params.type'
-import { ApiResponse } from 'src/common/types/responses.type'
 import UserService from 'src/user/user.service'
 import AddReviewDto from './dto/add-review.dto'
 import BusinessService from '../business/business.service'
@@ -28,14 +27,14 @@ export default class BusinessReviewService {
     userId,
     businessId,
     review: reviewText,
-  }: AddReviewDto & UserIdParams & BaseBusinessIdParams): Promise<ApiResponse> {
+  }: AddReviewDto & UserIdParams & BaseBusinessIdParams) {
     await this.userService.checkProfileLevel({ id: userId })
     const business = await this.businessService.verifiyBusinessId({
       id: businessId,
     })
     if (business.ownerId === userId)
       throw new ForbiddenException('Owner cannot add review ')
-    let review = await this.prismaService.review.findFirst({
+    const review = await this.prismaService.review.findFirst({
       where: {
         businessId,
         userId,
@@ -44,23 +43,18 @@ export default class BusinessReviewService {
 
     if (review)
       throw new ConflictException('User can only add one review for a business')
-    review = await this.prismaService.review.create({
+    return this.prismaService.review.create({
       data: { userId, businessId, review: reviewText },
     })
-    return {
-      status: 'success',
-      message: `review added  successfully`,
-      data: review,
-    }
   }
 
   async updateReview({
     userId,
     id,
     review: reviewText,
-  }: EditReviewDto & UserIdParams & BaseIdParams): Promise<ApiResponse> {
+  }: EditReviewDto & UserIdParams & BaseIdParams) {
     await this.userService.checkProfileLevel({ id: userId })
-    let review = await this.prismaService.review.findFirst({
+    const review = await this.prismaService.review.findFirst({
       where: {
         id,
         userId,
@@ -68,25 +62,17 @@ export default class BusinessReviewService {
     })
 
     if (!review) throw new NotFoundException('Required review not found ')
-    review = await this.prismaService.review.update({
+    return this.prismaService.review.update({
       where: {
         id: review.id,
       },
       data: { review: reviewText },
     })
-    return {
-      status: 'success',
-      message: `review updated   successfully`,
-      data: review,
-    }
   }
 
-  async deleteReview({
-    userId,
-    id,
-  }: BaseIdParams & UserIdParams): Promise<ApiResponse> {
+  async deleteReview({ userId, id }: BaseIdParams & UserIdParams) {
     await this.userService.checkProfileLevel({ id: userId })
-    let review = await this.prismaService.review.findFirst({
+    const review = await this.prismaService.review.findFirst({
       where: {
         id,
         userId,
@@ -94,32 +80,22 @@ export default class BusinessReviewService {
     })
 
     if (!review) throw new NotFoundException('Required review not found ')
-    review = await this.prismaService.review.delete({
+    return this.prismaService.review.delete({
       where: { userId, id },
     })
-    return {
-      status: 'success',
-      message: `review deleted    successfully`,
-      data: review,
-    }
   }
 
   async getReviews({ businessId }: BaseBusinessIdParams) {
-    const reviews = await this.prismaService.review.findMany({
+    return this.prismaService.review.findMany({
       where: { businessId },
       orderBy: {
         createdAt: 'desc',
       },
     })
-    return {
-      status: 'success',
-      message: `reviews fetched  successfully`,
-      data: reviews,
-    }
   }
 
   async getReviewDetail({ id }: BaseIdParams) {
-    const reviewDetail = await this.prismaService.review.findMany({
+    return this.prismaService.review.findMany({
       where: { id },
       include: {
         user: {
@@ -130,10 +106,5 @@ export default class BusinessReviewService {
         },
       },
     })
-    return {
-      status: 'success',
-      message: `review detail fetched  successfully`,
-      data: reviewDetail,
-    }
   }
 }

@@ -145,11 +145,7 @@ export default class PaymentService {
       context: `name: ${name} ID: ${packageCreated.id} `,
       adminId,
     })
-    return {
-      status: 'success',
-      message: 'packages fetched successfully',
-      data: packageCreated,
-    }
+    return packageCreated
   }
 
   async updatePackage({
@@ -171,20 +167,11 @@ export default class PaymentService {
       context: `name: ${updatePackgeDto.name} ID: ${updatedPackage.id} `,
       adminId,
     })
-    return {
-      status: 'success',
-      message: 'packages updated successfully',
-      data: updatedPackage,
-    }
+    return updatedPackage
   }
 
   async getPackages() {
-    const packages = await this.prismaService.package.findMany()
-    return {
-      status: 'success',
-      message: 'packages fetched successfully',
-      data: packages,
-    }
+    return this.prismaService.package.findMany()
   }
 
   async puchasePackage({
@@ -234,12 +221,8 @@ export default class PaymentService {
       },
     })
     return {
-      status: 'success',
-      message: 'packages fetched successfully',
-      data: {
-        package: businessPackage,
-        payment: data,
-      },
+      package: businessPackage,
+      payment: data,
     }
   }
 
@@ -291,11 +274,7 @@ export default class PaymentService {
       message: 'Package billed',
       context: `bussinesPackageId: ${boughtPackage.id} businessId: ${boughtPackage.businessId} amount: ${packageBill.amount} billId: ${packageBill.id} userId: ${userId}`,
     })
-    return {
-      status: 'success',
-      message: 'package billed successfully',
-      data: billedPackage,
-    }
+    return billedPackage
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)

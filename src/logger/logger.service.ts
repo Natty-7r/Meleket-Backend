@@ -35,10 +35,7 @@ export default class LoggerService {
       },
     })
 
-    return {
-      status: 'success',
-      message: 'Logs archived successfully',
-    }
+    return 'Logs archived successfully'
   }
 
   @Cron('* * 0 * * *')
@@ -96,11 +93,7 @@ export default class LoggerService {
       },
     })
 
-    return {
-      status: 'success',
-      message: 'Logs fetched successfully',
-      data: logs,
-    }
+    return logs
   }
 
   async log(message: string, metadata?: Record<string, unknown>) {

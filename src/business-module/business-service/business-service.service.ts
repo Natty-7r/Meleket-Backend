@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import { BussinessService as BussinesServiceModelType } from '@prisma/client'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import AccessControlService from 'src/access-control/access-control.service'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
@@ -107,9 +106,7 @@ export default class BusinessServiceService {
     specifications,
     userId,
     imageUrl,
-  }: CreateBusinessServiceDto &
-    UserIdParams &
-    ImageUrlParams): Promise<ApiResponse> {
+  }: CreateBusinessServiceDto & UserIdParams & ImageUrlParams) {
     await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS',
@@ -130,20 +127,14 @@ export default class BusinessServiceService {
         image: imageUrl,
       },
     })
-    return {
-      status: 'success',
-      message: 'Buisness Service added successfully',
-      data: {
-        ...buinessService,
-      },
-    }
+    return buinessService
   }
 
   async updateBusinessServiceImage({
     id,
     imageUrl,
     userId,
-  }: UpdateBusinessImageParams): Promise<ApiResponse> {
+  }: UpdateBusinessImageParams) {
     const { entity: service } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
@@ -157,20 +148,14 @@ export default class BusinessServiceService {
       data: { image: imageUrl },
     })
     deleteFileAsync({ filePath: (service as BussinesServiceModelType).image })
-    return {
-      status: 'success',
-      message: 'Buisness image updated successfully',
-      data: {
-        ...updatedBusiness,
-      },
-    }
+    return updatedBusiness
   }
 
   async updateBusinessServices({
     services,
     businessId,
     userId,
-  }: UpdateBusinessServicesDto & UserIdParams): Promise<ApiResponse> {
+  }: UpdateBusinessServicesDto & UserIdParams) {
     /* eslint-disable */
     for (const { id } of services) await this.verifyBusinessServiceId({ id })
 
@@ -196,21 +181,12 @@ export default class BusinessServiceService {
       })
     }
 
-    const business = await this.prismaService.business.findFirst({
+    return await this.prismaService.business.findFirst({
       where: { id: businessId },
     })
-
-    return {
-      status: 'success',
-      message: 'Buisness services updated successfully',
-      data: { ...business },
-    }
   }
 
-  async deleteBusinessServices({
-    id,
-    userId,
-  }: DeleteBusinessServicesParams): Promise<BareApiResponse> {
+  async deleteBusinessServices({ id, userId }: DeleteBusinessServicesParams) {
     const { businessId } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
@@ -224,24 +200,14 @@ export default class BusinessServiceService {
         id,
       },
     })
-    return {
-      status: 'success',
-      message: 'Buisness services deleted successfully',
-    }
+    return 'Buisness services deleted successfully'
   }
 
-  async getBusinessServices({
-    businessId,
-  }: BaseBusinessIdParams): Promise<ApiResponse> {
-    const services = await this.prismaService.bussinessService.findMany({
+  async getBusinessServices({ businessId }: BaseBusinessIdParams) {
+    return await this.prismaService.bussinessService.findMany({
       where: {
         businessId,
       },
     })
-    return {
-      data: services,
-      status: 'success',
-      message: 'Buisness services fetched successfully',
-    }
   }
 }

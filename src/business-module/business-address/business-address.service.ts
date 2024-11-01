@@ -1,7 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import AccessControlService from 'src/access-control/access-control.service'
 
 import CreateBusinessAddressDto from './dto/create-business-address.dto'
@@ -65,7 +64,7 @@ export default class BusinessAddressService {
     specificLocation,
     streetAddress,
     userId,
-  }: CreateBusinessAddressDto & UserIdParams): Promise<ApiResponse> {
+  }: CreateBusinessAddressDto & UserIdParams) {
     await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS',
@@ -80,7 +79,7 @@ export default class BusinessAddressService {
       businessId,
     })
 
-    const buinessAddress = await this.prismaService.businessAddress.create({
+    return this.prismaService.businessAddress.create({
       data: {
         businessId,
         country,
@@ -90,13 +89,6 @@ export default class BusinessAddressService {
         specificLocation: specificLocation || undefined,
       },
     })
-    return {
-      status: 'success',
-      message: 'Buisness address added successfully',
-      data: {
-        ...buinessAddress,
-      },
-    }
   }
 
   async updateBusinessAddress({
@@ -107,37 +99,29 @@ export default class BusinessAddressService {
     specificLocation,
     streetAddress,
     userId,
-  }: UpdateBusinessAddressDto & UserIdParams): Promise<ApiResponse> {
+  }: UpdateBusinessAddressDto & UserIdParams) {
     const { businessId } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id: addressId,
         model: 'BUSINESS_ADDRESS',
         userId,
       })
-    const updatedBuinessAddress =
-      await this.prismaService.businessAddress.update({
-        where: { id: addressId, businessId },
-        data: {
-          country: country && country,
-          state: state && state,
-          city: city && city,
-          streetAddress: streetAddress && streetAddress,
-          specificLocation: specificLocation && specificLocation,
-        },
-      })
-    return {
-      status: 'success',
-      message: 'Buisness address updated successfully',
+    return this.prismaService.businessAddress.update({
+      where: { id: addressId, businessId },
       data: {
-        ...updatedBuinessAddress,
+        country: country && country,
+        state: state && state,
+        city: city && city,
+        streetAddress: streetAddress && streetAddress,
+        specificLocation: specificLocation && specificLocation,
       },
-    }
+    })
   }
 
   async deleteBusinessAddress({
     id,
     userId,
-  }: DeleteBusinessAddressParams): Promise<BareApiResponse> {
+  }: DeleteBusinessAddressParams): Promise<string> {
     await this.accessControlService.verifyBussinessOwnerShip({
       id,
       model: 'BUSINESS_ADDRESS',
@@ -147,23 +131,12 @@ export default class BusinessAddressService {
       where: { id },
     })
 
-    return {
-      status: 'success',
-      message: 'Buisness address deleted successfully',
-    }
+    return 'Buisness address deleted successfully'
   }
 
-  async getBusinessAddresses({
-    businessId,
-  }: BaseBusinessIdParams): Promise<ApiResponse> {
-    const addresses = await this.prismaService.businessAddress.findMany({
+  async getBusinessAddresses({ businessId }: BaseBusinessIdParams) {
+    return this.prismaService.businessAddress.findMany({
       where: { businessId },
     })
-
-    return {
-      data: addresses,
-      status: 'success',
-      message: 'Buisness address fetched successfully',
-    }
   }
 }

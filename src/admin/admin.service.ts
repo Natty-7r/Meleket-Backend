@@ -7,11 +7,8 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import LoggerService from 'src/logger/logger.service'
 import { Admin } from '@prisma/client'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
-import {
-  removePassword,
-  removePasswords,
-} from 'src/common/helpers/parser.helper'
+import { removePassword } from 'src/common/helpers/parser.helper'
+import { AdminWithoutPassword } from 'src/common/types/base.type'
 import UpdateAdminStatusDto from './dto/update-admin-status.dto'
 import CreateAdminDto from './dto/create-admin-account.dto'
 import UpdateAdminDto from './dto/update-admin-account.dto'
@@ -62,7 +59,7 @@ export default class AdminService {
     id,
     firstName,
     lastName,
-  }: UpdateAdminDto & BaseIdParams): Promise<ApiResponse> {
+  }: UpdateAdminDto & BaseIdParams): Promise<AdminWithoutPassword> {
     let admin = await this.verfiyAdminId({ id })
 
     admin = await this.prismaService.admin.update({
@@ -72,11 +69,8 @@ export default class AdminService {
         lastName: lastName || admin.lastName,
       },
     })
-    return {
-      data: removePassword(admin),
-      status: 'success',
-      message: 'Admin  updated  successfully',
-    }
+
+    return removePassword(admin) as AdminWithoutPassword
   }
 
   async updateAdminStatus({
@@ -84,7 +78,9 @@ export default class AdminService {
     status,
     reason,
     adminId,
-  }: UpdateAdminStatusDto & BaseAdminIdParams & BaseIdParams) {
+  }: UpdateAdminStatusDto &
+    BaseAdminIdParams &
+    BaseIdParams): Promise<AdminWithoutPassword> {
     let admin = await this.verfiyAdminId({ id })
     admin = await this.prismaService.admin.update({
       where: { id },
@@ -96,17 +92,13 @@ export default class AdminService {
       context: 'admin deleted',
     })
 
-    return {
-      data: removePassword(admin),
-      status: 'success',
-      message: 'Admin status updated  successfully',
-    }
+    return removePassword(admin) as AdminWithoutPassword
   }
 
   async deleteAdmin({
     id,
     adminId,
-  }: BaseIdParams & BaseAdminIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & BaseAdminIdParams): Promise<string> {
     let admin = await this.verfiyAdminId({ id })
 
     if (id === adminId)
@@ -120,22 +112,14 @@ export default class AdminService {
       message: `admin account with ID:${admin.id} deleted by admin with ID ${adminId}`,
       context: 'admin deleted',
     })
-    return {
-      status: 'success',
-      message: 'Admin  deleted  successfully',
-    }
+    return `Admin  with ID${id} deleted  successfully`
   }
 
-  async getAdmins(): Promise<ApiResponse> {
-    const admins = await this.prismaService.admin.findMany()
-    return {
-      data: removePasswords(admins),
-      status: 'success',
-      message: 'Admins fetched  successfully',
-    }
+  async getAdmins(): Promise<Admin[]> {
+    return this.prismaService.admin.findMany()
   }
 
-  async getAdminDetail({ id }: BaseIdParams): Promise<ApiResponse> {
+  async getAdminDetail({ id }: BaseIdParams) {
     const admin = await this.prismaService.admin.findMany({
       where: { id },
       include: {
@@ -145,10 +129,6 @@ export default class AdminService {
     const logs = await this.prismaService.log.findMany({
       where: { adminId: id },
     })
-    return {
-      data: { ...admin, logs },
-      status: 'success',
-      message: 'Admins detail  successfully',
-    }
+    return { admin, logs }
   }
 }

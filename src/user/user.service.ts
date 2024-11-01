@@ -12,7 +12,6 @@ import {
   StoryIdParams,
   UserIdParams,
 } from 'src/common/types/params.type'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import { validateAge } from 'src/common/helpers/validator.helper'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import BusinessService from 'src/business-module/business/business.service'
@@ -89,7 +88,7 @@ export default class UserService {
     userId,
     birthDate,
     ...addProfileDto
-  }: AddProfileDto & UserIdParams): Promise<ApiResponse> {
+  }: AddProfileDto & UserIdParams) {
     await this.checkUserId({ id: userId })
     let profile = await this.prismaService.profile.findFirst({
       where: { userId },
@@ -116,7 +115,7 @@ export default class UserService {
     userId,
     birthDate,
     ...updateProfileDto
-  }: UpdateProfileDto & UserIdParams): Promise<ApiResponse> {
+  }: UpdateProfileDto & UserIdParams) {
     let oldProfilePicturePath
     await this.checkUserId({ id: userId })
 
@@ -149,7 +148,7 @@ export default class UserService {
     userId,
     businessId,
     rateValue,
-  }: AddRatingDto & UserIdParams): Promise<ApiResponse> {
+  }: AddRatingDto & UserIdParams) {
     await this.checkProfileLevel({ id: userId })
     const business = await this.businessSevice.verifiyBusinessId({
       id: businessId,
@@ -180,28 +179,19 @@ export default class UserService {
   }
 
   // following
-  async followBussiness({
-    id,
-    businessId,
-  }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
+  async followBussiness({ id, businessId }: BaseIdParams & BusinessIdParams) {
     return this.businessSevice.addFollower({ id: businessId, userId: id })
   }
 
-  async unFollowBussiness({
-    id,
-    businessId,
-  }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
+  async unFollowBussiness({ id, businessId }: BaseIdParams & BusinessIdParams) {
     return this.businessSevice.removeFollower({ id: businessId, userId: id })
   }
 
-  async getFollowedBussiness({ id }: BaseIdParams): Promise<ApiResponse> {
+  async getFollowedBussiness({ id }: BaseIdParams) {
     return this.businessSevice.getFollowerBusiness({ userId: id })
   }
 
-  async viewStory({
-    storyId,
-    userId,
-  }: StoryIdParams & UserIdParams): Promise<BareApiResponse> {
+  async viewStory({ storyId, userId }: StoryIdParams & UserIdParams) {
     let userStoryView = await this.prismaService.userStoryView.findUnique({
       where: {
         /* eslint-disable */
@@ -223,9 +213,6 @@ export default class UserService {
       await this.businessSevice.updateStoryViewCount({ storyId })
     }
 
-    return {
-      status: 'success',
-      message: `User added as veiw for story successfully`,
-    }
+    return `User added as veiw for story successfully`
   }
 }

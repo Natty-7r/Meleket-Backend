@@ -12,14 +12,12 @@ import {
   BussinessService as BussinesServiceModelType,
   Story,
 } from '@prisma/client'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import { generateBusinessSorting } from 'src/common/helpers/sorting.helper'
 import LoggerService from 'src/logger/logger.service'
 import AccessControlService from 'src/access-control/access-control.service'
 import { createPagination } from '../../common/helpers/pagination.helper'
 
-import { ApiResponseWithPagination } from '../../common/types/responses.type'
 import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
 import {
@@ -206,7 +204,7 @@ export default class BusinessService {
   async createBusiness({
     userId,
     ...createBusinessDto
-  }: CreateBusinessDto & CreateBusinessParams): Promise<ApiResponse> {
+  }: CreateBusinessDto & CreateBusinessParams) {
     await this.checkUserProfileLevel({ userId })
     await this.checkBusinessName({ name: createBusinessDto.name })
 
@@ -255,20 +253,14 @@ export default class BusinessService {
       context: 'new bussines',
       userId,
     })
-    return {
-      status: 'success',
-      message: 'Account created successfully',
-      data: {
-        ...business,
-      },
-    }
+    return business
   }
 
   async updateBusinessImage({
     id,
     imageUrl,
     userId,
-  }: UpdateBusinessImageParams): Promise<ApiResponse> {
+  }: UpdateBusinessImageParams) {
     const { entity: bussiness } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
@@ -278,18 +270,11 @@ export default class BusinessService {
 
     if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
 
-    const updatedBusiness = await this.prismaService.business.update({
+    return await this.prismaService.business.update({
       where: { id },
       data: { mainImageUrl: imageUrl },
     })
     deleteFileAsync({ filePath: (bussiness as Business).mainImageUrl })
-    return {
-      status: 'success',
-      message: 'Buisness image updated successfully',
-      data: {
-        ...updatedBusiness,
-      },
-    }
   }
 
   async updateBusiness({
@@ -297,7 +282,7 @@ export default class BusinessService {
     name,
     description,
     userId,
-  }: UpdateBusinessDto & UserIdParams): Promise<ApiResponse> {
+  }: UpdateBusinessDto & UserIdParams) {
     const { entity: bussiness } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
@@ -305,47 +290,31 @@ export default class BusinessService {
         userId,
       })
 
-    const updatedBusiness = await this.prismaService.business.update({
+    return await this.prismaService.business.update({
       where: { id },
       data: {
         name: name || (bussiness as Business).name,
         description: description || (bussiness as Business).description,
       },
     })
-
-    return {
-      status: 'success',
-      message: 'Buisness updated successfully',
-      data: {
-        ...updatedBusiness,
-      },
-    }
   }
 
   async updateBusinessContact({
     businessId,
     userId,
     ...updateBusinessContactDto
-  }: UpdateBusinessContactDto & UserIdParams): Promise<ApiResponse> {
-    const {} = await this.accessControlService.verifyBussinessOwnerShip({
+  }: UpdateBusinessContactDto & UserIdParams) {
+    await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS_CONTACT',
       userId,
     })
-    const updatedBuinessContact =
-      await this.prismaService.businessContact.update({
-        where: { businessId },
-        data: {
-          ...updateBusinessContactDto,
-        },
-      })
-    return {
-      status: 'success',
-      message: 'Buisness contact updated successfully',
+    return await this.prismaService.businessContact.update({
+      where: { businessId },
       data: {
-        ...updatedBuinessContact,
+        ...updateBusinessContactDto,
       },
-    }
+    })
   }
   // fetch related
 
@@ -356,9 +325,7 @@ export default class BusinessService {
     sort = ['rating'],
     sortType = 'desc',
     name: categoryName,
-  }: CategoryIdParams & PaginationParams & BaseNameParams): Promise<
-    ApiResponseWithPagination<Business[]>
-  > {
+  }: CategoryIdParams & PaginationParams & BaseNameParams) {
     const businesses = await this.prismaService.business.findMany({
       where: { categoryId },
       take: items,
@@ -368,23 +335,18 @@ export default class BusinessService {
     const totalBusinesses = await this.prismaService.business.count({
       where: { categoryId },
     })
-
     return {
-      status: 'success',
-      message: `${categoryName}  buisness fetched successfully`,
-      data: {
-        pagination: createPagination({
-          totalCount: totalBusinesses,
-          page,
-          items,
-        }),
-        payload: businesses,
-      },
+      pagination: createPagination({
+        totalCount: totalBusinesses,
+        page,
+        items,
+      }),
+      payload: businesses,
     }
   }
 
-  async getAllBusinesses(): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany({
+  async getAllBusinesses() {
+    return await this.prismaService.business.findMany({
       select: {
         id: true,
         name: true,
@@ -404,15 +366,10 @@ export default class BusinessService {
         },
       },
     })
-    return {
-      status: 'success',
-      message: 'All buisness fetched successfully',
-      data: business,
-    }
   }
 
-  async getUserBusinesses({ userId }: UserIdParams): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany({
+  async getUserBusinesses({ userId }: UserIdParams) {
+    return await this.prismaService.business.findMany({
       where: { ownerId: userId },
       select: {
         id: true,
@@ -433,45 +390,8 @@ export default class BusinessService {
         },
       },
     })
-    return {
-      status: 'success',
-      message: 'User buisness fetched successfully',
-      data: business,
-    }
   }
 
-  async getBusinessDetail({ id }: BaseIdParams): Promise<ApiResponse> {
-    const businessDetail = await this.prismaService.business.findFirst({
-      where: { id },
-      select: {
-        category: {
-          select: {
-            name: true,
-            price: true,
-          },
-        },
-        id: true,
-        ratings: true,
-        reviews: {
-          take: 10,
-          orderBy: [{ createdAt: 'desc' }],
-        },
-        followers: {
-          take: 10,
-          orderBy: [{ createdAt: 'desc' }],
-        },
-        address: true,
-        contact: true,
-        services: true,
-      },
-    })
-
-    return {
-      status: 'success',
-      message: 'All buisness fetched successfully',
-      data: businessDetail,
-    }
-  }
   async getBusinessPackageDetail({ businessId }: BusinessIdParams) {
     return this.prismaService.business.findFirst({
       where: { id: businessId },
@@ -487,51 +407,43 @@ export default class BusinessService {
     })
   }
 
-  async getUserBusinessDetail({
+  async getBusinessDetail({
     businessId,
     userId,
-  }: BusinessIdParams & UserIdParams): Promise<ApiResponse> {
-    await this.accessControlService.verifyBussinessOwnerShip({
-      id: businessId,
-      model: 'BUSINESS',
-      userId,
-    })
-    const businessDetail = await this.prismaService.business.findFirst({
-      where: { id: businessId },
-      select: {
-        id: true,
-        name: true,
-        followers: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
+  }: BusinessIdParams & UserIdParams): Promise<any> {
+    const bussiness = await this.verifiyBusinessId({ id: businessId })
+    const select: any = {
+      id: true,
+      name: true,
+      followers: {
+        select: {
+          firstName: true,
+          lastName: true,
         },
-        category: {
-          select: {
-            name: true,
-          },
-        },
-        ratings: true,
-        reviews: true,
-        address: true,
-        contact: true,
-        services: true,
-        bills: true,
-        packages: true,
       },
-    })
-    return {
-      status: 'success',
-      message: 'All buisness fetched successfully',
-      data: businessDetail,
+      category: {
+        select: {
+          name: true,
+        },
+      },
+      ratings: true,
+      reviews: true,
+      address: true,
+      contact: true,
+      services: true,
     }
+    if (bussiness.ownerId === userId) {
+      select.bills = true
+      select.packages = true
+    }
+    return await this.prismaService.business.findFirst({
+      where: { id: businessId },
+      select,
+    })
   }
 
-  async searchBusinesses({
-    searchKey,
-  }: SearchBusinessParams): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany({
+  async searchBusinesses({ searchKey }: SearchBusinessParams) {
+    return await this.prismaService.business.findMany({
       where: {
         OR: [
           {
@@ -597,20 +509,13 @@ export default class BusinessService {
         },
       },
     })
-    if (!business || business.length == 0)
-      throw new NotFoundException(`no buisness for  ${searchKey} key `)
-    return {
-      status: 'success',
-      message: `buisness for ${searchKey} key fetched successfully`,
-      data: business,
-    }
   }
 
   // follow related
   async addFollower({
     id,
     userId,
-  }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & UserIdParams): Promise<string> {
     await this.verifiyBusinessId({ id })
 
     await this.prismaService.business.update({
@@ -624,16 +529,13 @@ export default class BusinessService {
       },
     })
 
-    return {
-      status: 'success',
-      message: 'User followed buisness  successfully',
-    }
+    return 'User followed buisness  successfully'
   }
 
   async removeFollower({
     id,
     userId,
-  }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & UserIdParams): Promise<string> {
     await this.verifiyBusinessId({ id })
 
     await this.prismaService.business.update({
@@ -647,14 +549,11 @@ export default class BusinessService {
       },
     })
 
-    return {
-      status: 'success',
-      message: 'User unfollowed buisness successfully',
-    }
+    return 'User unfollowed buisness successfully'
   }
 
-  async getFollowerBusiness({ userId }: UserIdParams): Promise<ApiResponse> {
-    const businesses = await this.prismaService.business.findMany({
+  async getFollowerBusiness({ userId }: UserIdParams) {
+    return await this.prismaService.business.findMany({
       where: {
         followers: {
           some: {
@@ -681,11 +580,6 @@ export default class BusinessService {
         },
       },
     })
-    return {
-      status: 'success',
-      message: 'followed  buisness feteched successfully',
-      data: businesses,
-    }
   }
 
   //
