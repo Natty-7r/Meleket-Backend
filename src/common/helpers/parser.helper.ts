@@ -1,4 +1,5 @@
 import { basename } from 'path'
+import { Admin, User } from '@prisma/client'
 import {
   ActivityLogData,
   ErrorLogData,
@@ -73,4 +74,13 @@ export const parseErrorFileLog = (logCotent: string): ErrorLogData[] => {
 export const parseLogFile = ({ content, logType }: LogFile) => {
   if (logType === LogType.ACTIVITY) return parseActivityFileLog(content)
   return parseErrorFileLog(content)
+}
+
+export const removePassword = (user: User | Admin) => {
+  const { password, ...userWithoutPassword } = user
+  return userWithoutPassword
+}
+
+export const removePasswords = (users: User[] | Admin[]) => {
+  return users.map((user) => removePassword(user))
 }

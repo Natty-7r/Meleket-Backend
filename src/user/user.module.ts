@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import BusinessModule from 'src/business/business.module'
+import BusinessModule from 'src/business-module/business/business.module'
 import UserService from './user.service'
 import UserController from './user.controller'
 

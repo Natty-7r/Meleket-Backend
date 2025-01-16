@@ -6,13 +6,17 @@ import {
   Request,
   UseGuards,
   Put,
-  Param,
-  Delete,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { RequestWithUser, SignUpType } from 'src/common/types/base.type'
-import { User } from '@prisma/client'
+import {
+  RequestUser,
+  RequestWithUser,
+  SignUpType,
+} from 'src/common/types/base.type'
 import { AuthGuard } from '@nestjs/passport'
+import { CreateAdminAccount } from 'src/admin/decorators/admin-api.decorator'
+import CreateAdminDto from 'src/admin/dto/create-admin-account.dto'
+import User from 'src/common/decorators/user.decorator'
 import AuthService from './auth.service'
 import LocalAuthGuard from './guards/local-auth.guard'
 import GoogleOAuthGuard from './guards/google-auth.guard'
@@ -21,19 +25,13 @@ import {
   CreateOTPDto,
   CreateAccountDto,
   UpdatePasswordDto,
-  CreateAdminDto,
-  UpdateAdminStatusDto,
   SignInDto,
 } from './dto'
 
 import {
-  CreateAdminAccount,
   CreateUserAccount,
-  DeleteAdminAccount,
-  GetAdmins,
   RequestOTP,
   SignIn,
-  UpdateAdminStatus,
   UpdatePassword,
   VerifyOTP,
   VerifyUser,
@@ -56,15 +54,21 @@ export default class AuthController {
 
   @CreateAdminAccount()
   @Post('/admin-accounts')
-  createAdminAccount(@Body() createAdminDto: CreateAdminDto) {
-    return this.authService.createAdminAccount(createAdminDto)
+  createAdminAccount(
+    @Body() createAdminDto: CreateAdminDto,
+    @User() admin: RequestUser,
+  ) {
+    return this.authService.createAdminAccount({
+      ...createAdminDto,
+      adminId: admin.id,
+    })
   }
 
   @SignIn()
   @UseGuards(LocalAuthGuard)
   @Post('/sign-in')
   async login(@Body() signInDto: SignInDto, @Request() req: RequestWithUser) {
-    return this.authService.login(req.user as User)
+    return this.authService.login(req.user)
   }
 
   @Get('google')
@@ -101,23 +105,5 @@ export default class AuthController {
   @Put('/password')
   updatePassword(@Body() updatePasswordDto: UpdatePasswordDto) {
     return this.authService.updatePassword(updatePasswordDto)
-  }
-
-  @GetAdmins()
-  @Get('/admins')
-  getAdmins() {
-    return this.authService.getAdmins()
-  }
-
-  @UpdateAdminStatus()
-  @Put('/admins/status')
-  updateAdminStatus(@Body() updateAdminStatusDto: UpdateAdminStatusDto) {
-    return this.authService.updateAdminStatus(updateAdminStatusDto)
-  }
-
-  @DeleteAdminAccount()
-  @Delete('/admins/:id')
-  deleteAdminAccount(@Param('id') id: string) {
-    return this.authService.deleteAdminAccount({ id })
   }
 }

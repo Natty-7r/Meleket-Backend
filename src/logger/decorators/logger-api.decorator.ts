@@ -1,20 +1,17 @@
 import { applyDecorators } from '@nestjs/common'
 
-import Roles from 'src/common/decorators/roles.decorator'
 import {
   ArchiveLogsSwaggerDefinition,
   ViewFileLogsSwaggerDefinition,
   ViewLogsSwaggerDefinition,
 } from './logger-swagger.decorator'
+import Permissions from 'src/common/decorators/permission.decorator'
 
 export const ViewLogs = () =>
-  applyDecorators(Roles('ADMIN', 'SUPER_ADMIN'), ViewLogsSwaggerDefinition())
+  applyDecorators(Permissions(), ViewLogsSwaggerDefinition())
 
 export const ViewFileLogs = () =>
-  applyDecorators(
-    Roles('ADMIN', 'SUPER_ADMIN'),
-    ViewFileLogsSwaggerDefinition(),
-  )
+  applyDecorators(Permissions(), ViewFileLogsSwaggerDefinition())
 
 export const ArchiveLogs = () =>
-  applyDecorators(Roles('SUPER_ADMIN'), ArchiveLogsSwaggerDefinition())
+  applyDecorators(Permissions(), ArchiveLogsSwaggerDefinition())

@@ -8,18 +8,21 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import { CategoryTreeNode } from 'src/common/types/base.type'
-import BusinessService from 'src/business/business.service'
-import { BaseIdParams } from 'src/common/types/params.type'
+import {
+  BaseIdParams,
+  BaseImageParams,
+  BaseUserIdParams,
+} from 'src/common/types/params.type'
 import {
   ApiResponse,
   ApiResponseWithPagination,
 } from 'src/common/types/responses.type'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import { Business } from '@prisma/client'
-import UserService from 'src/user/user.service'
+import BusinessService from 'src/business-module/business/business.service'
+import AccessControlService from 'src/access-control/access-control.service'
 import {
   PaginationParams,
-  CreateCategoryParams,
   GenerateCategoryTreeParams,
   OptionalImageUrlParams,
 } from '../common/types/params.type'
@@ -35,7 +38,7 @@ export default class CategoryService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly businessService: BusinessService,
-    private readonly userService: UserService,
+    private readonly accessControlService: AccessControlService,
   ) {}
 
   // helper function
@@ -80,12 +83,15 @@ export default class CategoryService {
   }
 
   async createCategory({
-    imageUrl,
-    verified,
     userId,
+    parentId,
     ...createCategoryDto
-  }: CreateCategoryDto & CreateCategoryParams): Promise<ApiResponse> {
-    if (!verified) await this.userService.checkProfileLevel({ id: userId })
+  }: CreateCategoryDto &
+    BaseUserIdParams &
+    BaseImageParams): Promise<ApiResponse> {
+    const { userType } = await this.accessControlService.verifyUserStatus({
+      id: userId,
+    })
 
     const previesCategory = await this.prismaService.category.findFirst({
       where: { name: createCategoryDto.name.toLocaleLowerCase().trim() },
@@ -93,14 +99,14 @@ export default class CategoryService {
     if (previesCategory)
       throw new ConflictException('Category with same name exits!')
 
-    if (createCategoryDto.parentId) {
+    if (parentId) {
       if (createCategoryDto.level === 1)
         throw new ConflictException(
           'first level category can not have Parent id ',
         )
 
       const parentCategory = await this.prismaService.category.findFirst({
-        where: { parentId: createCategoryDto.parentId },
+        where: { parentId },
       })
       if (!parentCategory)
         throw new BadRequestException('Invalid parent category id ')
@@ -114,8 +120,8 @@ export default class CategoryService {
       data: {
         name: createCategoryDto.name.toLocaleLowerCase().trim(), // changing name for search
         ...createCategoryDto,
-        image: imageUrl,
-        verified,
+        verified: userType === 'ADMIN',
+        price: createCategoryDto.price || 50,
       },
     })
 
@@ -248,27 +254,23 @@ export default class CategoryService {
   async deleteCategory({ id }: BaseIdParams): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
+      /*eslint-disable*/
+      include: { _count: { select: { business: true, children: true } } },
+      /*eslint-disable*/
     })
 
     if (!category) throw new NotFoundException('Invalid category id')
 
-    const childrenCategory = await this.prismaService.category.findMany({
-      where: {
-        AND: [
-          {
-            parentId: { not: null },
-          },
-          {
-            parentId: id,
-          },
-        ],
-      },
-    })
-
-    if (childrenCategory && childrenCategory.length > 0)
+    /*eslint-disable*/
+    if (category._count.children)
       throw new BadRequestException(
-        `Category has ${childrenCategory.length} children first move childrens to other parent`,
+        `Category has ${category._count.children} children first move childrens to other parent`,
       )
+    if (category._count.business > 0)
+      throw new BadRequestException(
+        `Category has ${category._count.business} business atached to it`,
+      )
+    /*eslint-disable*/
     await this.prismaService.category.delete({
       where: {
         id,

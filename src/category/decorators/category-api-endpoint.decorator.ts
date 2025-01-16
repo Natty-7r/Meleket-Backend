@@ -2,7 +2,6 @@ import { applyDecorators, UseInterceptors } from '@nestjs/common'
 
 import { FileInterceptor } from '@nestjs/platform-express'
 import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
-import Roles from 'src/common/decorators/roles.decorator'
 import {
   CreateCategorySwaggerDefinition,
   DeleteCategorySwaggerDefinition,
@@ -12,18 +11,15 @@ import {
   VerifyCategorySwaggerDefinition,
   GetCategoriesSwaggerDefinition,
 } from './category-swagger.decorator'
-import { GetCategoryBusinessSwaggerDefinition } from 'src/business/decorators/business-swagger.decorator'
-import { ApiUnauthorizedResponse } from '@nestjs/swagger'
 import Public from 'src/common/decorators/public.decorator'
+import Permissions from 'src/common/decorators/permission.decorator'
+import { GetCategoryBusinessSwaggerDefinition } from 'src/business-module/business/decorators/business-swagger.decorator'
 
-const AdminRole = () =>
-  applyDecorators(
-    Roles('ADMIN', 'SUPER_ADMIN'),
-    ApiUnauthorizedResponse({ description: 'Insucffincent permission' }),
-  )
+
 
 export const CreateCategory = () =>
   applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'CREATE' }),
     CreateCategorySwaggerDefinition(),
     UseInterceptors(
       FileInterceptor('image', {
@@ -35,7 +31,7 @@ export const CreateCategory = () =>
 
 export const UpdateCategory = () =>
   applyDecorators(
-    AdminRole(),
+    Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
     UpdateCategorySwaggerDefinition(),
     UseInterceptors(
       FileInterceptor('image', {
@@ -45,7 +41,7 @@ export const UpdateCategory = () =>
   )
 export const UpdateCategoryImage = () =>
   applyDecorators(
-    AdminRole(),
+    Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
     UpdateCategoryImageSwaggerDefinition(),
     UseInterceptors(
       FileInterceptor('image', {
@@ -56,16 +52,28 @@ export const UpdateCategoryImage = () =>
   )
 
 export const VerifyCategory = () =>
-  applyDecorators(AdminRole(), VerifyCategorySwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
+    VerifyCategorySwaggerDefinition(),
+  )
 
 export const GetCategories = () =>
-  applyDecorators(Public(), GetCategoriesSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'READ' }),
+    GetCategoriesSwaggerDefinition(),
+  )
 
 export const DeleteCategory = () =>
-  applyDecorators(AdminRole(), DeleteCategorySwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'DELETE' }),
+    DeleteCategorySwaggerDefinition(),
+  )
 
 export const UpdateCategoryParent = () =>
-  applyDecorators(AdminRole(), UpdateCategoryParentSwaggerDefinition())
+  applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
+    UpdateCategoryParentSwaggerDefinition(),
+  )
 
 export const GetCategoryBusinesses = () =>
   applyDecorators(Public(), GetCategoryBusinessSwaggerDefinition())

@@ -5,7 +5,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common'
-import BusinessService from 'src/business/business.service'
 import {
   AdminIdParams,
   BaseNameParams,
@@ -21,13 +20,14 @@ import {
   generateRandomString,
 } from 'src/common/helpers/string.helper'
 import UserService from 'src/user/user.service'
-import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/constants'
+import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/constants/base.constants'
 import {
   calculatePackageExpireDate,
   calculatePackageStartDate,
 } from 'src/common/helpers/date.helper'
 import LoggerService from 'src/logger/logger.service'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import BusinessService from 'src/business-module/business/business.service'
 import CreatePackageDto from './dto/create-package.dto'
 import PurchasePackageDto from './dto/purchase-package.dto'
 import Chapa from './payment-strategies/chapa.strategy'
@@ -212,7 +212,7 @@ export default class PaymentService {
     const { data: user } = await this.userService.getUserDetail({ id: userId })
     const paymentInitParams: PaymentInitParams = this.generateParmentInitOption(
       {
-        user,
+        user: user as any,
         amount: packageAmount,
         paymentMethod,
         callbackUrl,

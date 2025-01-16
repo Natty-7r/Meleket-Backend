@@ -12,14 +12,14 @@ export default class CreateCategoryDto {
   @IsNotEmpty()
   name: string
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: String,
     example: 'parent_id',
     description: 'Id of parent category',
   })
   @IsOptional()
   @IsString()
-  parentId: string
+  parentId?: string
 
   @ApiProperty({
     type: String,
@@ -39,14 +39,14 @@ export default class CreateCategoryDto {
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => Number(value))
-  price: number
+  price?: number
 
   @IsOptional()
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: String,
     example: 'url',
     description: 'image for the category',
   })
   @IsString()
-  image: string
+  image?: string
 }

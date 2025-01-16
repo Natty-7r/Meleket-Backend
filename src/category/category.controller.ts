@@ -14,7 +14,7 @@ import {
 import { ApiTags } from '@nestjs/swagger'
 
 import User from 'src/common/decorators/user.decorator'
-import { USER } from 'src/common/types/base.type'
+import { RequestUser } from 'src/common/types/base.type'
 import { SortType } from 'src/common/types/params.type'
 import CreateCategoryDto from './dto/create-category.dto'
 import CategoryService from './category.service'
@@ -41,13 +41,12 @@ export default class CategoryController {
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
     @UploadedFile() file: Express.Multer.File,
-    @User() user: USER,
+    @User() user: RequestUser,
   ) {
     return this.categoryService.createCategory({
       ...createCategoryDto,
-      imageUrl: file?.path || 'uploads/category/category.png',
+      image: file?.path || 'uploads/category/category.png',
       price: createCategoryDto?.price || 50,
-      verified: user.userType !== 'CLIENT_USER',
       userId: user.id,
     })
   }

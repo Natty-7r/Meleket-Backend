@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
 import { ConfigModule, ConfigService } from '@nestjs/config' // Import ConfigModule and ConfigService
 import MessageModule from 'src/message/message.module'
+import AdminModule from 'src/admin/admin.module'
+import UserModule from 'src/user/user.module'
 import AuthService from './auth.service'
 import AuthController from './auth.controller'
 import LocalStrategy from './strategies/local.strategy'
@@ -24,6 +26,8 @@ import JwtStrategy from './strategies/jwt.strategry'
       },
     }),
     MessageModule,
+    AdminModule,
+    UserModule,
   ],
   providers: [AuthService, LocalStrategy, GoogleStrategy, JwtStrategy],
   controllers: [AuthController],

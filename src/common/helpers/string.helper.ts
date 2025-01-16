@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { PACKAGE_CODE_PREFIX } from '../constants'
+import { PACKAGE_CODE_PREFIX } from '../constants/base.constants'
 import { generateEightDigitNumberString } from './numbers.helper'
 import { RandomStringOptions } from '../types/params.type'
 

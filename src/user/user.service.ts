@@ -3,24 +3,24 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import {
   BaseIdParams,
+  BaseRoleIdParams,
   BusinessIdParams,
   StoryIdParams,
   UserIdParams,
 } from 'src/common/types/params.type'
-import BusinessService from 'src/business/business.service'
 import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import { validateAge } from 'src/common/helpers/validator.helper'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import AddReviewDto from './dto/add-review.dto'
-import AddRatingDto from './dto/add-rating.dto'
-import EditReviewDto from './dto/edit-review.dto'
+import BusinessService from 'src/business-module/business/business.service'
+import { CreateAccountDto } from 'src/auth/dto'
+import { removePassword } from 'src/common/helpers/parser.helper'
 import AddProfileDto from './dto/add-profile.dto'
-import UpdateProfileDto from './dto/update-profile.dto'
+import UpdateProfileDto from './dto/edit-profile.dto'
+import AddRatingDto from './dto/add.rating.dto'
 
 @Injectable()
 export default class UserService {
@@ -45,9 +45,31 @@ export default class UserService {
       where: { id },
     })
 
-    if (user.profileLevel !== 'VERIFIED')
+    if (user.status !== 'CREATED')
       throw new ForbiddenException('Not allowed for unverfied user  ')
     return true
+  }
+
+  async createUserAccount({
+    firstName,
+    lastName,
+    email,
+    password,
+    roleId,
+  }: CreateAccountDto & BaseRoleIdParams) {
+    const user = await this.prismaService.user.findFirst({ where: { email } })
+    if (user) throw new ConflictException('Email is already in use!')
+
+    return this.prismaService.user.create({
+      data: {
+        firstName,
+        lastName,
+        email,
+        password,
+        status: 'CREATED',
+        roleId,
+      },
+    })
   }
 
   // profile related
@@ -59,7 +81,7 @@ export default class UserService {
     return {
       status: 'success',
       message: `user detail fetced  successfully`,
-      data: userDetail,
+      data: removePassword(userDetail),
     }
   }
 
@@ -119,88 +141,6 @@ export default class UserService {
       status: 'success',
       message: `profile updated  successfully`,
       data: profile,
-    }
-  }
-
-  // Review related
-
-  async addReview({
-    userId,
-    businessId,
-    review: reviewText,
-  }: AddReviewDto & UserIdParams): Promise<ApiResponse> {
-    await this.checkProfileLevel({ id: userId })
-    const business = await this.businessSevice.verifiyBusinessId({
-      id: businessId,
-    })
-    if (business.ownerId === userId)
-      throw new ForbiddenException('Owner cannot add review ')
-    let review = await this.prismaService.review.findFirst({
-      where: {
-        businessId,
-        userId,
-      },
-    })
-
-    if (review)
-      throw new ConflictException('User can only add one review for a business')
-    review = await this.prismaService.review.create({
-      data: { userId, businessId, review: reviewText },
-    })
-    return {
-      status: 'success',
-      message: `review added  successfully`,
-      data: review,
-    }
-  }
-
-  async updateReview({
-    userId,
-    id,
-    review: reviewText,
-  }: EditReviewDto & UserIdParams): Promise<ApiResponse> {
-    await this.checkProfileLevel({ id: userId })
-    let review = await this.prismaService.review.findFirst({
-      where: {
-        id,
-        userId,
-      },
-    })
-
-    if (!review) throw new NotFoundException('Required review not found ')
-    review = await this.prismaService.review.update({
-      where: {
-        id: review.id,
-      },
-      data: { review: reviewText },
-    })
-    return {
-      status: 'success',
-      message: `review updated   successfully`,
-      data: review,
-    }
-  }
-
-  async deleteReview({
-    userId,
-    id,
-  }: BaseIdParams & UserIdParams): Promise<ApiResponse> {
-    await this.checkProfileLevel({ id: userId })
-    let review = await this.prismaService.review.findFirst({
-      where: {
-        id,
-        userId,
-      },
-    })
-
-    if (!review) throw new NotFoundException('Required review not found ')
-    review = await this.prismaService.review.delete({
-      where: { userId, id },
-    })
-    return {
-      status: 'success',
-      message: `review deleted    successfully`,
-      data: review,
     }
   }
 

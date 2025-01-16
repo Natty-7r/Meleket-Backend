@@ -10,10 +10,11 @@ async function bootstrap() {
     .setTitle('Meleket Backend')
     .setDescription('API Docs for Meleket web application')
     .setVersion('1.0')
+    .addBearerAuth()
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('docs', app, document)
+  SwaggerModule.setup('api', app, document)
   const port = process.env.PORT || 3000
 
   app.enableCors()
