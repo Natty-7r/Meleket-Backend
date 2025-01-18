@@ -71,6 +71,7 @@ export default class AccessControlService {
     name,
   }: CheckRoleNameParams): Promise<boolean> {
     const role = await this.prismaService.role.findFirst({ where: { name } })
+    console.log(role, name)
     if (role) {
       if (!forUpdate) {
         // Case 1: Role exists and the role is not being updated
@@ -376,7 +377,7 @@ export default class AccessControlService {
 
     const permissionIds = permissions.map((permission) => permission.id)
     return this.createRole({
-      name: USER_ROLE_NAME,
+      name: CLIENT_ROLE_NAME,
       permissions: permissionIds,
       roleType: 'CLIENT',
       adminId: null,
@@ -386,6 +387,7 @@ export default class AccessControlService {
   async assignClientRole({ id }: BaseIdParams) {
     await this.verifyUserId({ id })
     const clientRole = await this.getClientRole()
+
     return this.prismaService.user.update({
       where: { id },
       data: { roleId: clientRole.id },

@@ -1,45 +1,43 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
 import {
   Business,
   BussinessService as BussinesServiceModelType,
   Story,
 } from '@prisma/client'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
+import AccessControlService from 'src/access-control/access-control.service'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import { generateBusinessSorting } from 'src/common/helpers/sorting.helper'
+import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import LoggerService from 'src/logger/logger.service'
-import AccessControlService from 'src/access-control/access-control.service'
+import PrismaService from 'src/prisma/prisma.service'
 import { createPagination } from '../../common/helpers/pagination.helper'
 
-import { ApiResponseWithPagination } from '../../common/types/responses.type'
-import CreateBusinessDto from './dto/create-business.dto'
-import UpdateBusinessDto from './dto/update-business.dto'
 import {
+  BaseIdParams,
+  BaseNameParams,
+  BusinessIdParams,
+  CategoryIdParams,
   CheckBusinessAddressParams,
   CheckBusinessNameParams,
   CheckBusinessServiceNameParams,
   CreateBusinessParams,
+  PaginationParams,
+  SearchBusinessParams,
+  StoryIdParams,
   UpdateBusinessImageParams,
+  UserIdParams,
   VerifyBusinessIdParams,
   VerifyBusinessServiceIdParams,
-  BusinessIdParams,
-  CategoryIdParams,
-  SearchBusinessParams,
-  UserIdParams,
-  BaseIdParams,
-  StoryIdParams,
-  PaginationParams,
-  BaseNameParams,
 } from '../../common/types/params.type'
+import { ApiResponseWithPagination } from '../../common/types/responses.type'
+import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
+import UpdateBusinessDto from './dto/update-business.dto'
 
 @Injectable()
 export default class BusinessService {
@@ -90,17 +88,23 @@ export default class BusinessService {
     })
   }
 
-  async checkUserProfileLevel({ userId }: UserIdParams): Promise<boolean> {
-    const user = await this.prismaService.user.findFirst({
-      where: { id: userId },
+  // async checkUserProfileLevel({ userId }: UserIdParams): Promise<boolean> {
+  //   const user = await this.prismaService.user.findFirst({
+  //     where: { id: userId },
+  //   })
+
+  //   if (!user) throw new UnauthorizedException('User not found ')
+  //   if (user?.status !== 'ACTIVE')
+  //     throw new ForbiddenException('Unverfied user cannot create business ')
+  //   return true
+  // }
+  async verifyCategoryId({ id }: BaseIdParams) {
+    const category = await this.prismaService.category.findFirst({
+      where: { id },
     })
-
-    if (!user) throw new UnauthorizedException('User not found ')
-    if (user?.status !== 'CREATED')
-      throw new ForbiddenException('Unverfied user cannot create business ')
-    return true
+    if (!category) throw new BadRequestException('Invalid category Id')
+    return category
   }
-
   async verifiyBusinessId({ id }: VerifyBusinessIdParams): Promise<Business> {
     const business = await this.prismaService.business.findFirst({
       where: { id },
@@ -207,7 +211,7 @@ export default class BusinessService {
     userId,
     ...createBusinessDto
   }: CreateBusinessDto & CreateBusinessParams): Promise<ApiResponse> {
-    await this.checkUserProfileLevel({ userId })
+    await this.verifyCategoryId({ id: createBusinessDto.categoryId })
     await this.checkBusinessName({ name: createBusinessDto.name })
 
     const businessMainImage = createBusinessDto.mainImage
@@ -220,6 +224,14 @@ export default class BusinessService {
             image: true,
           },
         })
+    const a = await this.prismaService.category.findFirst({
+      where: {
+        id: createBusinessDto.categoryId,
+      },
+      select: {
+        image: true,
+      },
+    })
 
     const business = await this.prismaService.business.create({
       data: {
@@ -257,7 +269,7 @@ export default class BusinessService {
     })
     return {
       status: 'success',
-      message: 'Account created successfully',
+      message: 'Business created successfully',
       data: {
         ...business,
       },

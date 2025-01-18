@@ -2,32 +2,32 @@ import {
   BadGatewayException,
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
-import * as bcrypt from 'bcrypt'
-import { JwtService } from '@nestjs/jwt'
-import { OTPType, Admin } from '@prisma/client'
-import { RequestUser, SignUpType } from 'src/common/types/base.type'
-import { generateOTP } from 'src/common/helpers/numbers.helper'
-import MessageService from 'src/message/message.service'
 import { ConfigService } from '@nestjs/config'
-import EmailStrategy from 'src/message/strategies/email.strategy'
-import { BaseAdminIdParams } from 'src/common/types/params.type'
-import LoggerService from 'src/logger/logger.service'
+import { JwtService } from '@nestjs/jwt'
+import { Admin, OTPType, User } from '@prisma/client'
+import * as bcrypt from 'bcrypt'
 import AccessControlService from 'src/access-control/access-control.service'
 import AdminService from 'src/admin/admin.service'
 import CreateAdminDto from 'src/admin/dto/create-admin-account.dto'
-import UserService from 'src/user/user.service'
+import { generateOTP } from 'src/common/helpers/numbers.helper'
 import { removePassword } from 'src/common/helpers/parser.helper'
-import { CreateAccountDto, SignInDto } from './dto'
-import VerifyOTPDto from './dto/verify-otp.dto'
-import CreateOTPDto from './dto/create-otp.dto'
-import VerifyUserDto from './dto/verify-user.dto'
+import { RequestUser, SignUpType, UserType } from 'src/common/types/base.type'
+import { BaseAdminIdParams } from 'src/common/types/params.type'
+import LoggerService from 'src/logger/logger.service'
+import MessageService from 'src/message/message.service'
+import EmailStrategy from 'src/message/strategies/email.strategy'
+import PrismaService from 'src/prisma/prisma.service'
+import UserService from 'src/user/user.service'
 import SmsStrategy from '../message/strategies/sms.strategy'
+import { CreateAccountDto, SignInDto } from './dto'
+import CreateOTPDto from './dto/create-otp.dto'
 import UpdatePasswordDto from './dto/update-passowrd.dto'
+import VerifyOTPDto from './dto/verify-otp.dto'
+import VerifyUserDto from './dto/verify-user.dto'
 
 @Injectable()
 export default class AuthService {
@@ -38,7 +38,6 @@ export default class AuthService {
     private readonly confgiService: ConfigService,
     private readonly smsStrategy: SmsStrategy,
     private readonly emailStrategy: EmailStrategy,
-    private readonly configService: ConfigService,
     private readonly loggerSerive: LoggerService,
     private readonly accessContolService: AccessControlService,
     private readonly adminService: AdminService,
@@ -132,24 +131,28 @@ export default class AuthService {
   }
 
   async validateUser({ email, password }: SignInDto): Promise<any> {
-    // let userType: UserType = 'CLIENT_USER'
-    let user: RequestUser = await this.prismaService.user.findFirst({
+    let userType: UserType = 'USER'
+    let user: User | Admin
+
+    user = await this.prismaService.user.findFirst({
       where: { email },
+      include: { role: { select: { id: true, name: true } } },
     })
     if (!user) {
-      // userType = 'ADMIN'
-      user = await this.prismaService.admin.findFirst({ where: { email } })
+      userType = 'ADMIN'
+      user = await this.prismaService.admin.findFirst({
+        where: { email },
+        include: { role: { select: { id: true, name: true } } },
+      })
     }
-
-    if (!user)
-      throw new NotFoundException(`No user is registered with ${email} email`)
+    if (!user) throw new NotFoundException(`Invalid Email or Password`)
 
     const doesPasswordMatch = await bcrypt.compare(password, user.password)
     if (!doesPasswordMatch)
       throw new BadRequestException('Invalid Email or Password')
 
-    // if (userType !== 'CLIENT_USER' && (user as any).status !== 'ACTIVE')
-    // throw new UnauthorizedException('Admin is Inactive currenlty ')
+    if (userType === 'ADMIN' && (user as Admin).status !== 'ACTIVE')
+      throw new UnauthorizedException('Admin is Inactive currenlty ')
     /* eslint-disable */
     const { password: _, ...result } = user
     /* eslint-disable */
@@ -161,25 +164,19 @@ export default class AuthService {
       ? {
           email: user.email,
           sub: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          // userType: user.userType,
         }
       : {
           email: user.email,
           sub: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          // userType: user.userType,
-          status: (user as Admin).status,
         }
 
-    if (payload?.status === 'CREATED' || payload?.status === 'INACTIVE')
-      throw new ForbiddenException('User not active')
+    if (user?.status === 'CREATED' || user?.status === 'INACTIVE')
+      throw new UnauthorizedException('User not active')
     return {
       status: 'success',
       message: 'User Logged in successfully',
       access_token: this.jwtService.sign(payload),
+      data: user,
     }
   }
 
@@ -257,7 +254,7 @@ export default class AuthService {
       status: 'success',
       message: `${type} OTP sent is to ${channelValue}  successfully  `,
       data: {
-        otpCode,
+        // otpCode,
         channelType,
         channelValue,
       },

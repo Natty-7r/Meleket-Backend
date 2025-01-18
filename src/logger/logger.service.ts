@@ -119,7 +119,7 @@ export default class LoggerService {
       message: message || (metadata?.message as string),
       context:
         context ||
-        `at filename: ${metadata?.fileName} from IP: ${metadata?.ip} saved with Id: ${metadata?.id}`,
+        `at filename: ${metadata?.fileName} from IP: ${metadata?.ip} saved with Id: ${metadata.id}`,
     })
     this.winstonLoggerService.error(message, metadata)
   }

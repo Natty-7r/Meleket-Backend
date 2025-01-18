@@ -35,7 +35,7 @@ export default class AccessControlController {
   @GetPermissions()
   @Get('permissions')
   async getPermissions(@User() user: RequestUser) {
-    return this.accessControlService.getPermissions({ adminId: user?.id })
+    return this.accessControlService.getPermissions({ adminId: user.id })
   }
 
   @GetRoles()
@@ -66,7 +66,7 @@ export default class AccessControlController {
   ) {
     return this.accessControlService.createRole({
       ...createRoleDto,
-      adminId: user?.id,
+      adminId: user.id,
     })
   }
 
@@ -80,7 +80,7 @@ export default class AccessControlController {
     return this.accessControlService.updateRole({
       ...updateRoleDto,
       id,
-      adminId: user?.id,
+      adminId: user.id,
     })
   }
 
@@ -94,7 +94,7 @@ export default class AccessControlController {
     return this.accessControlService.assigneAdminRole({
       ...assingRoleDto,
       id,
-      adminId: user?.id,
+      adminId: user.id,
     })
   }
 
@@ -106,7 +106,7 @@ export default class AccessControlController {
   ) {
     return this.accessControlService.revokeAdminRole({
       id,
-      adminId: user?.id,
+      adminId: user.id,
     })
   }
 

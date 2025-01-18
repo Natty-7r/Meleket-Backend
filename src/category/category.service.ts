@@ -127,7 +127,7 @@ export default class CategoryService {
 
     return {
       status: 'success',
-      message: 'Account created successfully',
+      message: 'Category created successfully',
       data: {
         ...category,
       },

@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common'
-import BusinessService from './business.service'
 import BusinessController from './business.controller'
+import BusinessService from './business.service'
 
 @Module({
-  imports: [],
   providers: [BusinessService],
   exports: [BusinessService],
   controllers: [BusinessController],

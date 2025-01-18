@@ -25,9 +25,8 @@ export default class PermissionGuard implements CanActivate {
     const { user } = request
     const allowedPermissions =
       await this.accessControlService.getUserPermissions({
-        id: user?.id,
+        id: user.id,
       })
-
     // Check if the user has all the required permissions
     const hasPermission = requiredPermissions.every((requiredPermission) =>
       allowedPermissions.some(
