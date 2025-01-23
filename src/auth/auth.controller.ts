@@ -67,7 +67,7 @@ export default class AuthController {
   @SignIn()
   @UseGuards(LocalAuthGuard)
   @Post('/sign-in')
-  async login(@Body() signInDto: SignInDto, @Request() req: RequestWithUser) {
+  async login(@Body() _: SignInDto, @Request() req: RequestWithUser) {
     return this.authService.login(req.user)
   }
 

@@ -59,7 +59,7 @@ export default class BusinessAddressController {
   ) {
     return this.businessAddressService.deleteBusinessAddress({
       id,
-      userId: user?.id,
+      userId: user.id,
     })
   }
 

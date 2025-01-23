@@ -66,19 +66,18 @@ async function seedPermissions() {
         default:
           permissionWeight = 1
       }
-      if (!(permissionType !== 'READ' && module == 'PERMISSION'))
-        permissions.push({
-          moduleName: module,
-          permissionName: permissionType,
-          permissionWeight,
-        })
+
+      permissions.push({
+        moduleName: module,
+        permissionName: permissionType,
+        permissionWeight,
+      })
     })
   })
   await prisma.permission.deleteMany({})
   await prisma.permission.createMany({
     data: permissions,
   })
-  console.log('Permissions seeded successfully')
 }
 
 async function seedAdmin() {
@@ -99,10 +98,13 @@ async function seedAdmin() {
         AND: [{ moduleName: 'ROLE' }],
       },
       {
-        AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'UPDATE' }], // Only update business status
+        AND: [{ moduleName: 'PERMISSION' }, { permissionName: 'READ' }],
       },
       {
-        AND: [{ moduleName: 'USER' }, { permissionName: 'UPDATE' }], // Only update business status
+        AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'UPDATE' }],
+      },
+      {
+        AND: [{ moduleName: 'USER' }, { permissionName: 'UPDATE' }],
       },
       {
         AND: [{ moduleName: 'CATEGORY' }],
@@ -127,9 +129,10 @@ async function seedAdmin() {
       ...superAdminData,
       roleId: role.id,
       password: hashedPassword,
+      inActiveReason: '',
+      status: 'ACTIVE',
     },
   })
-  console.log('Admins, and Roles seeded successfully')
 }
 
 async function seedPackages() {
@@ -156,8 +159,7 @@ async function seedPackages() {
 async function main() {
   await seedPermissions()
   await seedAdmin()
-  seedPackages()
-  console.log('Seeding completed successfully')
+  await seedPackages()
 }
 
 main()

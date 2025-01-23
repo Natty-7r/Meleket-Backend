@@ -67,7 +67,7 @@ export default class BusinessStoryController {
   @Get()
   @GetAllStories()
   async fetchAllStories(@User() user: RequestUser) {
-    return this.businessStoryService.getStories({ userId: user?.id })
+    return this.businessStoryService.getStories({ userId: user.id })
   }
 
   @Get(':businessId')
@@ -78,7 +78,7 @@ export default class BusinessStoryController {
   ) {
     return this.businessStoryService.getBusinessStories({
       businessId,
-      userId: user?.id,
+      userId: user.id,
     })
   }
 }
