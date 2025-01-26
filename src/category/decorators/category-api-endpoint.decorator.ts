@@ -6,7 +6,6 @@ import {
   CreateCategorySwaggerDefinition,
   DeleteCategorySwaggerDefinition,
   UpdateCategoryParentSwaggerDefinition,
-  UpdateCategoryImageSwaggerDefinition,
   UpdateCategorySwaggerDefinition,
   VerifyCategorySwaggerDefinition,
   GetCategoriesSwaggerDefinition,
@@ -14,8 +13,6 @@ import {
 import Public from 'src/common/decorators/public.decorator'
 import Permissions from 'src/common/decorators/permission.decorator'
 import { GetCategoryBusinessSwaggerDefinition } from 'src/business-module/business/decorators/business-swagger.decorator'
-
-
 
 export const CreateCategory = () =>
   applyDecorators(
@@ -36,17 +33,6 @@ export const UpdateCategory = () =>
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
-      }),
-    ),
-  )
-export const UpdateCategoryImage = () =>
-  applyDecorators(
-    Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
-    UpdateCategoryImageSwaggerDefinition(),
-    UseInterceptors(
-      FileInterceptor('image', {
-        storage: muluterStorage({ folder: 'category', filePrefix: 'cat' }),
-        fileFilter: multerFilter({ fileType: 'image', maxSize: 5 }),
       }),
     ),
   )

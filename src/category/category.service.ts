@@ -5,26 +5,20 @@ import {
   NotFoundException,
   UseGuards,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
+import { Business } from '@prisma/client'
+import AccessControlService from 'src/access-control/access-control.service'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
+import BusinessService from 'src/business-module/business/business.service'
 import { CategoryTreeNode } from 'src/common/types/base.type'
-import {
-  BaseIdParams,
-  BaseImageParams,
-  BaseUserIdParams,
-} from 'src/common/types/params.type'
+import { BaseIdParams, BaseUserIdParams } from 'src/common/types/params.type'
 import {
   ApiResponse,
   ApiResponseWithPagination,
 } from 'src/common/types/responses.type'
-import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import { Business } from '@prisma/client'
-import BusinessService from 'src/business-module/business/business.service'
-import AccessControlService from 'src/access-control/access-control.service'
+import PrismaService from 'src/prisma/prisma.service'
 import {
-  PaginationParams,
   GenerateCategoryTreeParams,
-  OptionalImageUrlParams,
+  PaginationParams,
 } from '../common/types/params.type'
 import CreateCategoryDto from './dto/create-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
@@ -165,34 +159,6 @@ export default class CategoryService {
         parentId: parentId || category.parentId,
       },
     })
-    return {
-      status: 'success',
-      message: 'Category updated  successfully',
-      data: {
-        ...updatedCategory,
-      },
-    }
-  }
-
-  async updateCategoryImage({
-    id,
-    imageUrl,
-  }: BaseIdParams & OptionalImageUrlParams): Promise<ApiResponse> {
-    const category = await this.prismaService.category.findFirst({
-      where: { id },
-    })
-
-    if (!category) throw new NotFoundException('Invalid category id')
-
-    const updatedCategory = await this.prismaService.category.update({
-      where: {
-        id,
-      },
-      data: {
-        image: imageUrl,
-      },
-    })
-    deleteFileAsync({ filePath: category.image })
     return {
       status: 'success',
       message: 'Category updated  successfully',

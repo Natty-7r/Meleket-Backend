@@ -25,7 +25,6 @@ import {
   GetCategories,
   GetCategoryBusinesses,
   UpdateCategory,
-  UpdateCategoryImage,
   UpdateCategoryParent,
   VerifyCategory,
 } from './decorators/category-api-endpoint.decorator'
@@ -57,18 +56,6 @@ export default class CategoryController {
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     return this.categoryService.updateCategory({ ...updateCategoryDto, id })
-  }
-
-  @UpdateCategoryImage()
-  @Put(':id/image')
-  updateCategoryImage(
-    @Param('id:') id: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.categoryService.updateCategoryImage({
-      id,
-      imageUrl: file.path,
-    })
   }
 
   @VerifyCategory()
