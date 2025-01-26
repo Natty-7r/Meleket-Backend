@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UseGuards,
 } from '@nestjs/common'
-import { Business } from '@prisma/client'
+import { Business, Category } from '@prisma/client'
 import AccessControlService from 'src/access-control/access-control.service'
 import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import BusinessService from 'src/business-module/business/business.service'
@@ -23,6 +23,7 @@ import {
 import CreateCategoryDto from './dto/create-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import UpdateCategoryDto from './dto/update-category.dto'
+import CategoryQueryDto from './dto/category-query.dto'
 
 @Injectable()
 @UseGuards(JwtAuthGuard)
@@ -192,13 +193,9 @@ export default class CategoryService {
     }
   }
 
-  async getCategories(): Promise<ApiResponse> {
+  async getCategories(query: CategoryQueryDto): Promise<CategoryTreeNode[]> {
     const allCategories = await this.prismaService.category.findMany({})
-    return {
-      status: 'success',
-      message: 'categories fetched',
-      data: this.generateCategoryTree({ categories: allCategories }),
-    }
+    return this.generateCategoryTree({ categories: allCategories })
   }
 
   async getCategoryBusiness({

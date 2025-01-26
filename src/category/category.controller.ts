@@ -29,6 +29,7 @@ import {
   VerifyCategory,
 } from './decorators/category-api-endpoint.decorator'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
+import CategoryQueryDto from './dto/category-query.dto'
 
 @ApiTags('Category')
 @Controller('category')
@@ -73,9 +74,9 @@ export default class CategoryController {
   }
 
   @GetCategories()
-  @Get('all')
-  getCategories() {
-    return this.categoryService.getCategories()
+  @Get('')
+  getCategories(@Query() query: CategoryQueryDto) {
+    return this.categoryService.getCategories(query)
   }
 
   @GetCategoryBusinesses()
@@ -87,6 +88,7 @@ export default class CategoryController {
     @Query('sort') sort: string[], // Sorting fields
     @Query('sortType', new DefaultValuePipe('desc')) sortType: SortType,
   ) {
+    console.log('aaaaaaaaaaaaaa')
     return this.categoryService.getCategoryBusiness({
       id,
       page,
