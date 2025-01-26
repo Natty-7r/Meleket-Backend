@@ -88,7 +88,6 @@ export default class CategoryController {
     @Query('sort') sort: string[], // Sorting fields
     @Query('sortType', new DefaultValuePipe('desc')) sortType: SortType,
   ) {
-    console.log('aaaaaaaaaaaaaa')
     return this.categoryService.getCategoryBusiness({
       id,
       page,

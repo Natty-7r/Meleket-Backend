@@ -5,9 +5,8 @@ import {
   NotFoundException,
   UseGuards,
 } from '@nestjs/common'
-import { Business, Category } from '@prisma/client'
+import { Business, Category, Prisma } from '@prisma/client'
 import AccessControlService from 'src/access-control/access-control.service'
-import JwtAuthGuard from 'src/auth/guards/jwt.guard'
 import BusinessService from 'src/business-module/business/business.service'
 import { CategoryTreeNode } from 'src/common/types/base.type'
 import { BaseIdParams, BaseUserIdParams } from 'src/common/types/params.type'
@@ -24,9 +23,9 @@ import CreateCategoryDto from './dto/create-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import UpdateCategoryDto from './dto/update-category.dto'
 import CategoryQueryDto from './dto/category-query.dto'
+import paginator from 'src/common/helpers/pagination.helper'
 
 @Injectable()
-@UseGuards(JwtAuthGuard)
 export default class CategoryService {
   categoryTree: CategoryTreeNode[]
 
@@ -83,6 +82,7 @@ export default class CategoryService {
     image,
     ...createCategoryDto
   }: CreateCategoryDto & BaseUserIdParams): Promise<ApiResponse> {
+    let level = 1
     const { userType } = await this.accessControlService.verifyUserStatus({
       id: userId,
     })
@@ -94,29 +94,23 @@ export default class CategoryService {
       throw new ConflictException('Category with same name exits!')
 
     if (parentId) {
-      if (createCategoryDto.level === 1)
-        throw new ConflictException(
-          'first level category can not have Parent id ',
-        )
-
       const parentCategory = await this.prismaService.category.findFirst({
-        where: { parentId },
+        where: { id: parentId },
       })
+
       if (!parentCategory)
         throw new BadRequestException('Invalid parent category id ')
-
-      if (createCategoryDto.level !== parentCategory.level - 1)
-        throw new ConflictException('Parent level should current level -1  ')
-    } else if (createCategoryDto.level !== 1)
-      throw new BadRequestException('New category should have level of 1 ')
+      level = parentCategory.level + 1
+    }
 
     const category = await this.prismaService.category.create({
       data: {
-        name: createCategoryDto.name.toLocaleLowerCase().trim(), // changing name for search
+        name: createCategoryDto.name.toLocaleLowerCase().trim(),
         ...createCategoryDto,
         verified: userType === 'ADMIN',
         price: createCategoryDto.price || 50,
         image: image.path || 'uploads/category/category.png',
+        level,
       },
     })
 
@@ -132,21 +126,22 @@ export default class CategoryService {
   async updateCategory({
     id,
     name,
-    level,
     price,
     parentId,
   }: UpdateCategoryDto & BaseIdParams): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
+    let level = category.level
     if (!category || !id) throw new NotFoundException('Invalid category id')
 
     if (parentId) {
       const parentCategory = await this.prismaService.category.findFirst({
-        where: { parentId },
+        where: { id: parentId },
       })
       if (!parentCategory)
         throw new BadRequestException('Invalid parent category id ')
+      level = parentCategory.level + 1
     }
 
     const updatedCategory = await this.prismaService.category.update({
@@ -154,7 +149,7 @@ export default class CategoryService {
         id,
       },
       data: {
-        level: level || category.level,
+        level: level,
         name: name || category.name,
         price: price || category.price,
         parentId: parentId || category.parentId,
@@ -193,7 +188,24 @@ export default class CategoryService {
     }
   }
 
-  async getCategories(query: CategoryQueryDto): Promise<CategoryTreeNode[]> {
+  async getCategories({
+    page,
+    itemsPerPage,
+    search,
+    parentId,
+  }: CategoryQueryDto): Promise<any> {
+    const condition: Prisma.CategoryWhereInput = { deletedAt: null }
+    const orderBy: Prisma.CategoryOrderByWithRelationInput = {
+      createdAt: 'desc',
+    }
+    if (search) condition.parentId = parentId
+    if (parentId) condition.name = { contains: search, mode: 'insensitive' }
+    const categories = await paginator({
+      model: this.prismaService.category,
+      pageOptions: { page, itemsPerPage },
+      selectionOption: { condition },
+    })
+    console.log(categories)
     const allCategories = await this.prismaService.category.findMany({})
     return this.generateCategoryTree({ categories: allCategories })
   }

@@ -11,7 +11,7 @@ import {
   GetCategoriesSwaggerDefinition,
 } from './category-swagger.decorator'
 import Public from 'src/common/decorators/public.decorator'
-import Permissions from 'src/common/decorators/permission.decorator'
+import Permissions from 'src/access-control/decorators/permission.decorator'
 import { GetCategoryBusinessSwaggerDefinition } from 'src/business-module/business/decorators/business-swagger.decorator'
 
 export const CreateCategory = () =>

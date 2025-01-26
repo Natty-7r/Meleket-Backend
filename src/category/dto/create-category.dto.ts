@@ -29,16 +29,6 @@ export default class CreateCategoryDto {
   @IsString()
   parentId?: string
 
-  @ApiProperty({
-    type: String,
-    example: '1',
-    description: 'category level 1 for top parent category',
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  @Transform(({ value }) => Number(value))
-  level: number
-
   @ApiPropertyOptional({
     type: String,
     example: '100',
