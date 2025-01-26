@@ -1,12 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { IsString, IsNotEmpty } from 'class-validator'
+import { PartialType } from '@nestjs/swagger'
+import AddReviewDto from './add-review.dto'
 
-export default class EditReviewDto {
-  @ApiProperty({
-    description: 'Review content',
-    example: 'Great service and friendly staff!',
-  })
-  @IsString()
-  @IsNotEmpty()
-  review: string
-}
+export default class EditReviewDto extends PartialType(AddReviewDto) {}

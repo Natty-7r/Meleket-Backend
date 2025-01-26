@@ -7,22 +7,7 @@ import {
   ApiOperation,
   ApiParam,
 } from '@nestjs/swagger'
-import RatingResponse from '../responses/rating.response'
 import ProfileResponse from '../responses/profile.response'
-
-// rating related
-
-export const AddRatingSwaggerDefinition = () =>
-  applyDecorators(
-    ApiOperation({ summary: 'Rate a bussines' }),
-    ApiCreatedResponse({
-      description: 'Rate added successfully',
-      type: RatingResponse,
-    }),
-    ApiBadRequestResponse({ description: 'Invalid business ID' }),
-    ApiForbiddenResponse({ description: 'Owner cannot rate own business  ' }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-  )
 
 // follow related
 export const FollowBusinessSwaggerDefinition = () =>

@@ -48,34 +48,6 @@ export default class BusinessService {
 
   // helper methods
 
-  async calculateRatingSummary({ id }: BaseIdParams) {
-    const ratings = await this.prismaService.rating.findMany({
-      where: {
-        businessId: id,
-      },
-    })
-
-    const averageRating =
-      ratings.reduce((sum, rating) => {
-        return sum + rating.rateValue
-      }, 0.0) / ratings.length
-    /* eslint-disable */
-    const ratingSummary = {
-      1: ratings.filter((rating) => rating.rateValue === 1).length,
-      2: ratings.filter((rating) => rating.rateValue === 2).length,
-      3: ratings.filter((rating) => rating.rateValue === 3).length,
-      4: ratings.filter((rating) => rating.rateValue === 4).length,
-      5: ratings.filter((rating) => rating.rateValue === 5).length,
-    }
-    /* eslint-disable */
-    return this.prismaService.business.update({
-      where: { id },
-      data: {
-        averageRating,
-        ratingSummary: JSON.stringify(ratingSummary),
-      },
-    })
-  }
   async updateStoryViewCount({ storyId }: StoryIdParams): Promise<Story> {
     const story = await this.verifyBusinessStoryId({ id: storyId })
 
@@ -250,6 +222,7 @@ export default class BusinessService {
         }),
       },
       select: {
+        id: true,
         owner: { select: { id: true, firstName: true, lastName: true } },
         name: true,
         description: true,
@@ -455,7 +428,6 @@ export default class BusinessService {
           },
         },
         id: true,
-        ratings: true,
         reviews: {
           take: 10,
           orderBy: [{ createdAt: 'desc' }],
@@ -516,7 +488,6 @@ export default class BusinessService {
             name: true,
           },
         },
-        ratings: true,
         reviews: true,
         address: true,
         contact: true,

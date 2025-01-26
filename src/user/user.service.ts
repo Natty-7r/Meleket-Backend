@@ -144,41 +144,6 @@ export default class UserService {
     }
   }
 
-  // Rating related
-  async addRating({
-    userId,
-    businessId,
-    rateValue,
-  }: AddRatingDto & UserIdParams): Promise<ApiResponse> {
-    await this.checkProfileLevel({ id: userId })
-    const business = await this.businessSevice.verifiyBusinessId({
-      id: businessId,
-    })
-    if (business.ownerId === userId)
-      throw new ForbiddenException('Owner cannot rate own business  ')
-    let rating = await this.prismaService.rating.findFirst({
-      where: {
-        businessId,
-        userId,
-      },
-    })
-
-    if (rating)
-      rating = await this.prismaService.rating.update({
-        where: { id: rating.id },
-        data: { rateValue },
-      })
-    rating = await this.prismaService.rating.create({
-      data: { userId, businessId, rateValue },
-    })
-    this.businessSevice.calculateRatingSummary({ id: businessId })
-    return {
-      status: 'success',
-      message: `Rating added successfully`,
-      data: rating,
-    }
-  }
-
   // following
   async followBussiness({
     id,

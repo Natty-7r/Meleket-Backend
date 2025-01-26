@@ -90,6 +90,7 @@ export default class CategoryService {
         throw new BadRequestException('Invalid parent category id ')
       level = parentCategory.level + 1
     }
+    console.log(parentId, 'ppp')
 
     const category = await this.prismaService.category.create({
       data: {
@@ -99,7 +100,7 @@ export default class CategoryService {
         price: createCategoryDto.price || 50,
         image: image.path || 'uploads/category/category.png',
         level,
-        parentId,
+        parentId: parentId || null,
       },
     })
 

@@ -68,7 +68,6 @@ model User {
   password           String
   profile            Profile?
   reviews            Review[]
-  ratings            Rating[]
   bills              Bill[]
   businesses         Business[] @relation("UserOwnsBusiness")
   followedBusinesses Business[] @relation("UserFollowsBusiness")
@@ -173,7 +172,6 @@ model Business {
   followers     User[]            @relation("UserFollowsBusiness")
   packages      BusinessPackage[]
   reviews       Review[]
-  ratings       Rating[]
   ratingSummary Json
   averageRating Float
   bills         Bill[]
@@ -243,7 +241,8 @@ model Review {
   id         String @id @default(uuid())
   userId     String
   businessId String
-  review     String
+  review     String?
+  rating     Int?
 
   user     User     @relation(fields: [userId], references: [id])
   business Business @relation(fields: [businessId], references: [id])
@@ -253,22 +252,6 @@ model Review {
   deletedAt DateTime?
 
   @@map("raview")
-}
-
-model Rating {
-  id         String @id @default(uuid())
-  userId     String
-  businessId String
-  rateValue  Int
-
-  user     User     @relation(fields: [userId], references: [id])
-  business Business @relation(fields: [businessId], references: [id])
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime?
-  deletedAt DateTime?
-
-  @@map("rating")
 }
 
 model Story {
