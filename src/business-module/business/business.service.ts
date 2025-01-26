@@ -15,7 +15,6 @@ import { generateBusinessSorting } from 'src/common/helpers/sorting.helper'
 import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import LoggerService from 'src/logger/logger.service'
 import PrismaService from 'src/prisma/prisma.service'
-import { createPagination } from '../../common/helpers/pagination.helper'
 
 import {
   BaseIdParams,
@@ -368,9 +367,9 @@ export default class BusinessService {
     sort = ['rating'],
     sortType = 'desc',
     name: categoryName,
-  }: CategoryIdParams & PaginationParams & BaseNameParams): Promise<
-    ApiResponseWithPagination<Business[]>
-  > {
+  }: CategoryIdParams &
+    PaginationParams &
+    BaseNameParams): Promise<ApiResponse> {
     const businesses = await this.prismaService.business.findMany({
       where: { categoryId },
       take: items,
@@ -384,14 +383,7 @@ export default class BusinessService {
     return {
       status: 'success',
       message: `${categoryName}  buisness fetched successfully`,
-      data: {
-        pagination: createPagination({
-          totalCount: totalBusinesses,
-          page,
-          items,
-        }),
-        payload: businesses,
-      },
+      data: businesses,
     }
   }
 

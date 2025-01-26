@@ -3,27 +3,16 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-  UseGuards,
 } from '@nestjs/common'
-import { Business, Category, Prisma } from '@prisma/client'
 import AccessControlService from 'src/access-control/access-control.service'
-import BusinessService from 'src/business-module/business/business.service'
 import { CategoryTreeNode } from 'src/common/types/base.type'
 import { BaseIdParams, BaseUserIdParams } from 'src/common/types/params.type'
-import {
-  ApiResponse,
-  ApiResponseWithPagination,
-} from 'src/common/types/responses.type'
+import { ApiResponse } from 'src/common/types/responses.type'
 import PrismaService from 'src/prisma/prisma.service'
-import {
-  GenerateCategoryTreeParams,
-  PaginationParams,
-} from '../common/types/params.type'
+import { GenerateCategoryTreeParams } from '../common/types/params.type'
 import CreateCategoryDto from './dto/create-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import UpdateCategoryDto from './dto/update-category.dto'
-import CategoryQueryDto from './dto/category-query.dto'
-import paginator from 'src/common/helpers/pagination.helper'
 
 @Injectable()
 export default class CategoryService {
@@ -31,7 +20,6 @@ export default class CategoryService {
 
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly businessService: BusinessService,
     private readonly accessControlService: AccessControlService,
   ) {}
 
@@ -111,6 +99,7 @@ export default class CategoryService {
         price: createCategoryDto.price || 50,
         image: image.path || 'uploads/category/category.png',
         level,
+        parentId,
       },
     })
 
@@ -188,40 +177,9 @@ export default class CategoryService {
     }
   }
 
-  async getCategories({
-    page,
-    itemsPerPage,
-    search,
-    parentId,
-  }: CategoryQueryDto): Promise<any> {
-    const condition: Prisma.CategoryWhereInput = { deletedAt: null }
-    const orderBy: Prisma.CategoryOrderByWithRelationInput = {
-      createdAt: 'desc',
-    }
-    if (search) condition.parentId = parentId
-    if (parentId) condition.name = { contains: search, mode: 'insensitive' }
-    const categories = await paginator({
-      model: this.prismaService.category,
-      pageOptions: { page, itemsPerPage },
-      selectionOption: { condition },
-    })
-    console.log(categories)
+  async getCategories(): Promise<CategoryTreeNode[]> {
     const allCategories = await this.prismaService.category.findMany({})
     return this.generateCategoryTree({ categories: allCategories })
-  }
-
-  async getCategoryBusiness({
-    id,
-    ...paginationParams
-  }: BaseIdParams & PaginationParams): Promise<
-    ApiResponseWithPagination<Business[]>
-  > {
-    const category = await this.verifyCategoryId({ id })
-    return this.businessService.getCategoryBusinesses({
-      ...paginationParams,
-      categoryId: id,
-      name: category.name,
-    })
   }
 
   async deleteCategory({ id }: BaseIdParams): Promise<ApiResponse> {
@@ -276,6 +234,7 @@ export default class CategoryService {
       },
       data: {
         parentId,
+        level: parentCategory.level + 1,
       },
     })
     const updatedCategories = await this.prismaService.category.findMany()

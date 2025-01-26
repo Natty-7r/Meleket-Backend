@@ -1,18 +1,16 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
 
 import { FileInterceptor } from '@nestjs/platform-express'
+import Permissions from 'src/common/decorators/permission.decorator'
 import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import {
   CreateCategorySwaggerDefinition,
   DeleteCategorySwaggerDefinition,
+  GetCategoriesSwaggerDefinition,
   UpdateCategoryParentSwaggerDefinition,
   UpdateCategorySwaggerDefinition,
   VerifyCategorySwaggerDefinition,
-  GetCategoriesSwaggerDefinition,
 } from './category-swagger.decorator'
-import Public from 'src/common/decorators/public.decorator'
-import Permissions from 'src/access-control/decorators/permission.decorator'
-import { GetCategoryBusinessSwaggerDefinition } from 'src/business-module/business/decorators/business-swagger.decorator'
 
 export const CreateCategory = () =>
   applyDecorators(
@@ -60,6 +58,3 @@ export const UpdateCategoryParent = () =>
     Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
     UpdateCategoryParentSwaggerDefinition(),
   )
-
-export const GetCategoryBusinesses = () =>
-  applyDecorators(Public(), GetCategoryBusinessSwaggerDefinition())

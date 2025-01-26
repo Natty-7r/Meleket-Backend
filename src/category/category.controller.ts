@@ -1,35 +1,29 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Put,
-  Query,
   UploadedFile,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
 import User from 'src/common/decorators/user.decorator'
 import { RequestUser } from 'src/common/types/base.type'
-import { SortType } from 'src/common/types/params.type'
-import CreateCategoryDto from './dto/create-category.dto'
 import CategoryService from './category.service'
-import UpdateCategoryDto from './dto/update-category.dto'
 import {
   CreateCategory,
   DeleteCategory,
   GetCategories,
-  GetCategoryBusinesses,
   UpdateCategory,
   UpdateCategoryParent,
   VerifyCategory,
 } from './decorators/category-api-endpoint.decorator'
+import CreateCategoryDto from './dto/create-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
-import CategoryQueryDto from './dto/category-query.dto'
+import UpdateCategoryDto from './dto/update-category.dto'
 
 @ApiTags('Category')
 @Controller('category')
@@ -75,26 +69,8 @@ export default class CategoryController {
 
   @GetCategories()
   @Get('')
-  getCategories(@Query() query: CategoryQueryDto) {
-    return this.categoryService.getCategories(query)
-  }
-
-  @GetCategoryBusinesses()
-  @Get('/business/:id')
-  getCategoryBusiness(
-    @Param('id') id: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number, // Default to page 1
-    @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number, // Default to 10 items per page
-    @Query('sort') sort: string[], // Sorting fields
-    @Query('sortType', new DefaultValuePipe('desc')) sortType: SortType,
-  ) {
-    return this.categoryService.getCategoryBusiness({
-      id,
-      page,
-      items,
-      sort,
-      sortType,
-    })
+  getCategories() {
+    return this.categoryService.getCategories()
   }
 
   @DeleteCategory()
