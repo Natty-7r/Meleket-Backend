@@ -4,6 +4,14 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
 
 export default class CreateCategoryDto {
   @ApiProperty({
+    description: 'image for the category',
+    type: 'string',
+    format: 'binary',
+  })
+  @IsOptional()
+  image?: Express.Multer.File
+
+  @ApiProperty({
     type: String,
     example: 'Barber',
     description: 'Business name',
@@ -40,13 +48,4 @@ export default class CreateCategoryDto {
   @IsNumber()
   @Transform(({ value }) => Number(value))
   price?: number
-
-  @IsOptional()
-  @ApiPropertyOptional({
-    type: String,
-    example: 'url',
-    description: 'image for the category',
-  })
-  @IsString()
-  image?: string
 }

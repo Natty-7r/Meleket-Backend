@@ -40,21 +40,23 @@ export default class CategoryController {
   @Post()
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() image: Express.Multer.File,
     @User() user: RequestUser,
   ) {
     return this.categoryService.createCategory({
       ...createCategoryDto,
-      image: file?.path || 'uploads/category/category.png',
-      price: createCategoryDto?.price || 50,
       userId: user.id,
+      image,
     })
   }
 
   @UpdateCategory()
-  @Put()
-  updateCategory(@Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryService.updateCategory(updateCategoryDto)
+  @Put('/:id')
+  updateCategory(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
+    return this.categoryService.updateCategory({ ...updateCategoryDto, id })
   }
 
   @UpdateCategoryImage()

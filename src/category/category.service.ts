@@ -85,10 +85,9 @@ export default class CategoryService {
   async createCategory({
     userId,
     parentId,
+    image,
     ...createCategoryDto
-  }: CreateCategoryDto &
-    BaseUserIdParams &
-    BaseImageParams): Promise<ApiResponse> {
+  }: CreateCategoryDto & BaseUserIdParams): Promise<ApiResponse> {
     const { userType } = await this.accessControlService.verifyUserStatus({
       id: userId,
     })
@@ -122,6 +121,7 @@ export default class CategoryService {
         ...createCategoryDto,
         verified: userType === 'ADMIN',
         price: createCategoryDto.price || 50,
+        image: image.path || 'uploads/category/category.png',
       },
     })
 
@@ -140,8 +140,7 @@ export default class CategoryService {
     level,
     price,
     parentId,
-    verified,
-  }: UpdateCategoryDto): Promise<ApiResponse> {
+  }: UpdateCategoryDto & BaseIdParams): Promise<ApiResponse> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
@@ -164,7 +163,6 @@ export default class CategoryService {
         name: name || category.name,
         price: price || category.price,
         parentId: parentId || category.parentId,
-        verified: verified || category.verified,
       },
     })
     return {
