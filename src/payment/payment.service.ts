@@ -5,6 +5,17 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common'
+import { Cron, CronExpression } from '@nestjs/schedule'
+import BusinessService from 'src/business-module/business/business.service'
+import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/constants/base.constants'
+import {
+  calculatePackageExpireDate,
+  calculatePackageStartDate,
+} from 'src/common/helpers/date.helper'
+import {
+  generatePackageCode,
+  generateRandomString,
+} from 'src/common/helpers/string.helper'
 import {
   AdminIdParams,
   BaseNameParams,
@@ -14,24 +25,13 @@ import {
   PaymentInitParams,
   UserIdParams,
 } from 'src/common/types/params.type'
-import PrismaService from 'src/prisma/prisma.service'
-import {
-  generatePackageCode,
-  generateRandomString,
-} from 'src/common/helpers/string.helper'
-import UserService from 'src/user/user.service'
-import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/constants/base.constants'
-import {
-  calculatePackageExpireDate,
-  calculatePackageStartDate,
-} from 'src/common/helpers/date.helper'
 import LoggerService from 'src/logger/logger.service'
-import { Cron, CronExpression } from '@nestjs/schedule'
-import BusinessService from 'src/business-module/business/business.service'
+import PrismaService from 'src/prisma/prisma.service'
+import UserService from 'src/user/user.service'
 import CreatePackageDto from './dto/create-package.dto'
 import PurchasePackageDto from './dto/purchase-package.dto'
-import Chapa from './payment-strategies/chapa.strategy'
 import UpdatePackageDto from './dto/update-package.dto'
+import Chapa from './payment-strategies/chapa.strategy'
 
 @Injectable()
 export default class PaymentService {
@@ -145,11 +145,7 @@ export default class PaymentService {
       context: `name: ${name} ID: ${packageCreated.id} `,
       adminId,
     })
-    return {
-      status: 'success',
-      message: 'packages fetched successfully',
-      data: packageCreated,
-    }
+    return packageCreated
   }
 
   async updatePackage({
@@ -171,20 +167,11 @@ export default class PaymentService {
       context: `name: ${updatePackgeDto.name} ID: ${updatedPackage.id} `,
       adminId,
     })
-    return {
-      status: 'success',
-      message: 'packages updated successfully',
-      data: updatedPackage,
-    }
+    return updatedPackage
   }
 
   async getPackages() {
-    const packages = await this.prismaService.package.findMany()
-    return {
-      status: 'success',
-      message: 'packages fetched successfully',
-      data: packages,
-    }
+    return this.prismaService.package.findMany()
   }
 
   async puchasePackage({
@@ -233,13 +220,10 @@ export default class PaymentService {
         packageId: packageDetail.id,
       },
     })
+
     return {
-      status: 'success',
-      message: 'packages fetched successfully',
-      data: {
-        package: businessPackage,
-        payment: data,
-      },
+      package: businessPackage,
+      payment: data,
     }
   }
 
@@ -291,11 +275,7 @@ export default class PaymentService {
       message: 'Package billed',
       context: `bussinesPackageId: ${boughtPackage.id} businessId: ${boughtPackage.businessId} amount: ${packageBill.amount} billId: ${packageBill.id} userId: ${userId}`,
     })
-    return {
-      status: 'success',
-      message: 'package billed successfully',
-      data: billedPackage,
-    }
+    return billedPackage
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
