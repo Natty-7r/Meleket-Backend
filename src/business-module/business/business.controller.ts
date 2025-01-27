@@ -34,12 +34,12 @@ export default class BusinessController {
   async createBusiness(
     @Body() createBusinessDto: CreateBusinessDto,
     @User() user: RequestUser,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() image?: Express.Multer.File,
   ) {
     return this.businessService.createBusiness({
       ...createBusinessDto,
       userId: user.id,
-      mainImage: file?.path || undefined,
+      mainImage: image?.path || undefined,
     })
   }
 

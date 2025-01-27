@@ -24,18 +24,6 @@ export const AddBusinessServiceSwaggerDefinition = () =>
     ApiConsumes('image'),
   )
 
-export const UpdateBusinessServiceImageSwaggerDefinition = () =>
-  applyDecorators(
-    ApiOperation({ summary: 'Update business service image' }),
-    ApiResponse({
-      description: 'Business  updated successfully',
-      type: BusinessServicerResponse,
-    }),
-    ApiBadRequestResponse({ description: 'Invalid business Id' }),
-    ApiConflictResponse({ description: 'Business name already taken' }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-  )
-
 export const UpdateBusinessServiceSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ summary: 'Update business service' }),

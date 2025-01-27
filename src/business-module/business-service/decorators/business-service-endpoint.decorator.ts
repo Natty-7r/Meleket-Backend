@@ -1,14 +1,13 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
+import Permissions from 'src/common/decorators/permission.decorator'
+import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import {
   AddBusinessServiceSwaggerDefinition,
-  UpdateBusinessServiceImageSwaggerDefinition,
-  UpdateBusinessServiceSwaggerDefinition,
-  GetBusinessServiceSwaggerDefinition,
   DeleteBusinessServiceSwaggerDefinition,
+  GetBusinessServiceSwaggerDefinition,
+  UpdateBusinessServiceSwaggerDefinition,
 } from './business-service-swagger.decorator'
-import { FileInterceptor } from '@nestjs/platform-express'
-import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
-import Permissions from 'src/common/decorators/permission.decorator'
 
 export const AddBusinessService = () =>
   applyDecorators(
@@ -44,22 +43,4 @@ export const GetBusinessService = () =>
   applyDecorators(
     Permissions({ model: 'BUSINESS_SERVICE', action: 'READ' }),
     GetBusinessServiceSwaggerDefinition(),
-  )
-
-export const UpdateBusinessServiceImage = () =>
-  applyDecorators(
-    Permissions({ model: 'BUSINESS_SERVICE', action: 'UPDATE' }),
-    UseInterceptors(
-      FileInterceptor('image', {
-        storage: muluterStorage({
-          folder: 'business/service',
-          filePrefix: 'b',
-        }),
-        fileFilter: multerFilter({
-          fileType: 'image',
-          maxSize: 5,
-        }),
-      }),
-    ),
-    UpdateBusinessServiceImageSwaggerDefinition(),
   )
