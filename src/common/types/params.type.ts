@@ -151,12 +151,6 @@ export type CreateBusinessParams = {
   mainImage?: string
 }
 
-export type UpdateBusinessImageParams = {
-  id: string
-  imageUrl: string
-  userId: string
-}
-
 export type UpdateBusinessServiceImageParams = {
   id: string
   imageUrl: string
@@ -186,10 +180,6 @@ export type GetUserBusinessDetailParams = {
 
 export type GetCategoryBusinessParams = {
   categoryId: string
-}
-
-export type SearchBusinessParams = {
-  searchKey: string
 }
 
 export type SearchBusinessByAddressParams = {
@@ -248,11 +238,6 @@ export type CreatePaginatioParams = {
 /**
  * Sort related
  */
-
-export type GenerateSortingParams = {
-  sortKeys: string[]
-  sortType: SortType
-}
 
 export type APIMethods = 'GET' | 'POST' | 'PUT' | 'DELETE'
 export interface ApiCallBody {

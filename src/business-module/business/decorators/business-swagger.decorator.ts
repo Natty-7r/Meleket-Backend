@@ -8,14 +8,13 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger'
-import BusinessResponse from '../responses/business.response'
-import BusinessDetailResponse from '../responses/business-detail.response'
-import BusinessContactResponse from '../responses/business-contact.response'
 import CreateBusinessDto from '../dto/create-business.dto'
+import BusinessContactResponse from '../responses/business-contact.response'
+import BusinessDetailResponse from '../responses/business-detail.response'
+import BusinessResponse from '../responses/business.response'
 
 export const CreateBusinessSwaggerDefinition = () =>
   applyDecorators(
@@ -32,19 +31,6 @@ export const CreateBusinessSwaggerDefinition = () =>
     }),
   )
 
-export const UpdateBusinessImageSwaggerDefinition = () =>
-  applyDecorators(
-    ApiOperation({ summary: 'Update buiness image' }),
-    ApiResponse({
-      description: 'Business image updated successfully',
-      type: BusinessResponse,
-    }),
-    ApiParam({ description: 'business Id', name: 'id' }),
-    ApiBadRequestResponse({ description: 'Invalid business Id' }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
-  )
-
 export const UpdateBusinessSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ summary: 'Update business' }),
@@ -52,6 +38,7 @@ export const UpdateBusinessSwaggerDefinition = () =>
       description: 'Business  updated successfully',
       type: BusinessResponse,
     }),
+    ApiConsumes('multipart/form-data'),
     ApiBadRequestResponse({ description: 'Invalid business Id' }),
     ApiConflictResponse({ description: 'Business name already taken' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),

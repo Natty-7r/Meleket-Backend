@@ -267,11 +267,18 @@ export type PaginationOptions = {
   itemsPerPage?: number | string
 }
 
+// export type SelectionOptions<T> = {
+//   select?: SelectOption<T>
+//   include?: IncludesOption<T>
+//   orderBy?: OrderByOption<T>[]
+//   condition?: Condition<T>
+// }
+
 export type SelectionOptions<T> = {
-  select?: SelectOption<T>
-  include?: IncludesOption<T>
-  orderBy?: OrderByOption<T>[]
-  condition?: Condition<T>
+  select?: any
+  include?: any
+  orderBy?: any
+  condition?: any
 }
 
 export interface PaginatedResult<T> {
@@ -285,4 +292,13 @@ export interface PaginatedResult<T> {
     prev: number | null
     next: number | null
   }
+}
+
+export enum BusinessSortableFields {
+  'rating' = 'rating',
+  'follower' = 'follower',
+  'service' = 'service',
+}
+export enum ReviewSortableFields {
+  'rating' = 'rating',
 }

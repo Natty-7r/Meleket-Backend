@@ -21,7 +21,7 @@ export const AddBusinessServiceSwaggerDefinition = () =>
     ApiBadRequestResponse({ description: 'Invalid business Id' }),
     ApiConflictResponse({ description: 'Service name exist in the business' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
+    ApiConsumes('multipart/form-data'),
   )
 
 export const UpdateBusinessServiceSwaggerDefinition = () =>
@@ -33,7 +33,7 @@ export const UpdateBusinessServiceSwaggerDefinition = () =>
     }),
     ApiBadRequestResponse({ description: 'Invalid business Id' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
+    ApiConsumes('multipart/form-data'),
   )
 export const DeleteBusinessServiceSwaggerDefinition = () =>
   applyDecorators(

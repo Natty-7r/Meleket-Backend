@@ -4,17 +4,20 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
+import { Prisma, Review } from '@prisma/client'
+import paginator from 'src/common/helpers/pagination.helper'
+import { PaginatedResult } from 'src/common/types/base.type'
 import {
   BaseBusinessIdParams,
   BaseIdParams,
   UserIdParams,
 } from 'src/common/types/params.type'
-import { ApiResponse } from 'src/common/types/responses.type'
+import PrismaService from 'src/prisma/prisma.service'
 import UserService from 'src/user/user.service'
-import AddReviewDto from './dto/add-review.dto'
 import BusinessService from '../business/business.service'
+import AddReviewDto from './dto/add-review.dto'
 import EditReviewDto from './dto/edit-review.dto'
+import ReviewQueryDto from './dto/review-query.dto'
 
 @Injectable()
 export default class BusinessReviewService {
@@ -60,7 +63,7 @@ export default class BusinessReviewService {
     businessId,
     review: reviewText,
     rating,
-  }: AddReviewDto & UserIdParams & BaseBusinessIdParams): Promise<ApiResponse> {
+  }: AddReviewDto & UserIdParams & BaseBusinessIdParams): Promise<Review> {
     await this.userService.checkProfileLevel({ id: userId })
     const business = await this.businessService.verifiyBusinessId({
       id: businessId,
@@ -80,18 +83,14 @@ export default class BusinessReviewService {
       data: { userId, businessId, review: reviewText, rating },
     })
     if (rating) this.calculateRatingSummary({ id: businessId })
-    return {
-      status: 'success',
-      message: `review added  successfully`,
-      data: review,
-    }
+    return review
   }
 
   async updateReview({
     userId,
     id,
     ...editReviewDto
-  }: EditReviewDto & UserIdParams & BaseIdParams): Promise<ApiResponse> {
+  }: EditReviewDto & UserIdParams & BaseIdParams): Promise<Review> {
     await this.userService.checkProfileLevel({ id: userId })
     let review = await this.prismaService.review.findFirst({
       where: {
@@ -109,17 +108,13 @@ export default class BusinessReviewService {
     })
     if (editReviewDto.rating)
       this.calculateRatingSummary({ id: review.businessId })
-    return {
-      status: 'success',
-      message: `review updated   successfully`,
-      data: review,
-    }
+    return review
   }
 
   async deleteReview({
     userId,
     id,
-  }: BaseIdParams & UserIdParams): Promise<ApiResponse> {
+  }: BaseIdParams & UserIdParams): Promise<string> {
     await this.userService.checkProfileLevel({ id: userId })
     const review = await this.prismaService.review.findFirst({
       where: {
@@ -133,29 +128,34 @@ export default class BusinessReviewService {
       where: { userId, id },
     })
     this.calculateRatingSummary({ id: review.businessId })
-    return {
-      status: 'success',
-      message: `review deleted    successfully`,
-      data: review,
-    }
+    return id
   }
 
-  async getReviews({ businessId }: BaseBusinessIdParams) {
-    const reviews = await this.prismaService.review.findMany({
-      where: { businessId },
-      orderBy: {
-        createdAt: 'desc',
+  async getReviews({
+    businessId,
+    page,
+    itemsPerPage,
+    orderOption,
+    orderType,
+  }: BaseBusinessIdParams & ReviewQueryDto): Promise<PaginatedResult<Review>> {
+    const where: Prisma.ReviewWhereInput = { deletedAt: null, businessId }
+    const orderBy: Prisma.ReviewOrderByWithRelationInput =
+      orderOption && orderType ? { rating: orderType } : { createdAt: 'desc' }
+
+    return paginator<Review, Review>({
+      model: this.prismaService.review,
+      pageOptions: { page, itemsPerPage },
+      selectionOption: {
+        condition: {
+          where,
+          orderBy,
+        },
       },
     })
-    return {
-      status: 'success',
-      message: `reviews fetched  successfully`,
-      data: reviews,
-    }
   }
 
   async getReviewDetail({ id }: BaseIdParams) {
-    const reviewDetail = await this.prismaService.review.findMany({
+    return await this.prismaService.review.findMany({
       where: { id },
       include: {
         user: {
@@ -166,10 +166,5 @@ export default class BusinessReviewService {
         },
       },
     })
-    return {
-      status: 'success',
-      message: `review detail fetched  successfully`,
-      data: reviewDetail,
-    }
   }
 }

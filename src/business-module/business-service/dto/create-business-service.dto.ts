@@ -11,14 +11,6 @@ export default class CreateBusinessServiceDto {
   image?: Express.Multer.File
 
   @ApiProperty({
-    description: 'Unique identifier for the business',
-    example: '550e8400-e29b-41d4-a716-446655440001',
-  })
-  @IsString()
-  @IsNotEmpty()
-  businessId: string
-
-  @ApiProperty({
     description: 'Name for the business service',
     example: 'house cleaning',
   })
