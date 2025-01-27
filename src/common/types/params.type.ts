@@ -11,6 +11,8 @@ import {
   BusinessSubModel,
   ChapaCustomerInfo,
   LogType,
+  PaginationOptions,
+  SelectionOptions,
   Selector,
   TimeUnit,
 } from './base.type'
@@ -311,3 +313,9 @@ export type VerifyOwnershipParams = {
   model: BusinessSubModel
 } & BaseUserIdParams &
   BaseIdParams
+
+export type PaginatorParams<T> = {
+  model: any
+  pageOptions: PaginationOptions
+  selectionOption?: SelectionOptions<T>
+}

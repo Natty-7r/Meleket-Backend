@@ -1,19 +1,18 @@
 import { applyDecorators } from '@nestjs/common'
 import {
-  ApiNotFoundResponse,
-  ApiOperation,
-  ApiResponse,
   ApiBadRequestResponse,
+  ApiBody,
   ApiConflictResponse,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
   ApiParam,
-  ApiBody,
+  ApiResponse,
 } from '@nestjs/swagger'
-import CategoryTreeResponse from '../responses/category-tree.response'
 import CreateCategoryDto from '../dto/create-category.dto'
 
-const categoryTreeExample = {
+const CategoryTreeExample = {
   id: 'c55931c4-5c45-4e81-95d6-6fd2c98d4611',
   name: 'Barber',
   parentId: null,
@@ -65,28 +64,6 @@ export const UpdateCategorySwaggerDefinition = () =>
     ApiParam({ description: 'Category ID', name: 'id' }),
   )
 
-export const UpdateCategoryImageSwaggerDefinition = (
-  ...optionalDecorators: Function[]
-) =>
-  applyDecorators(
-    ApiOperation({ summary: 'Update category image' }),
-    ApiCreatedResponse({
-      type: CategoryTreeResponse,
-      description: 'Category  image  updated succefully',
-      example: {
-        id: 'c55931c4-5c45-4e81-95d6-6fd2c98d4611',
-        name: 'Barber',
-        parentId: null,
-        image: 'uploads/category/category.png',
-        level: 1,
-        price: 100,
-        children: [],
-      },
-    }),
-    ApiNotFoundResponse({ description: 'Invalid category id  ' }),
-    ApiConsumes('multipart/form-data'),
-    ...(optionalDecorators as any),
-  )
 export const UpdateCategoryParentSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ summary: 'Update category parent' }),

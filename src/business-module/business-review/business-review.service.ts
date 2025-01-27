@@ -24,10 +24,42 @@ export default class BusinessReviewService {
     private readonly userService: UserService,
   ) {}
 
+  async calculateRatingSummary({ id }: BaseIdParams) {
+    const reviews = await this.prismaService.review.findMany({
+      where: {
+        businessId: id,
+        rating: { not: null },
+      },
+      select: { rating: true },
+    })
+
+    const averageRating =
+      reviews.reduce((sum, rating) => {
+        return sum + rating.rating
+      }, 0.0) / reviews.length
+    /* eslint-disable */
+    const ratingSummary = {
+      1: reviews.filter((rating) => rating.rating === 1).length,
+      2: reviews.filter((rating) => rating.rating === 2).length,
+      3: reviews.filter((rating) => rating.rating === 3).length,
+      4: reviews.filter((rating) => rating.rating === 4).length,
+      5: reviews.filter((rating) => rating.rating === 5).length,
+    }
+    /* eslint-disable */
+    return this.prismaService.business.update({
+      where: { id },
+      data: {
+        averageRating,
+        ratingSummary: JSON.stringify(ratingSummary),
+      },
+    })
+  }
+
   async addReview({
     userId,
     businessId,
     review: reviewText,
+    rating,
   }: AddReviewDto & UserIdParams & BaseBusinessIdParams): Promise<ApiResponse> {
     await this.userService.checkProfileLevel({ id: userId })
     const business = await this.businessService.verifiyBusinessId({
@@ -45,8 +77,9 @@ export default class BusinessReviewService {
     if (review)
       throw new ConflictException('User can only add one review for a business')
     review = await this.prismaService.review.create({
-      data: { userId, businessId, review: reviewText },
+      data: { userId, businessId, review: reviewText, rating },
     })
+    if (rating) this.calculateRatingSummary({ id: businessId })
     return {
       status: 'success',
       message: `review added  successfully`,
@@ -57,7 +90,7 @@ export default class BusinessReviewService {
   async updateReview({
     userId,
     id,
-    review: reviewText,
+    ...editReviewDto
   }: EditReviewDto & UserIdParams & BaseIdParams): Promise<ApiResponse> {
     await this.userService.checkProfileLevel({ id: userId })
     let review = await this.prismaService.review.findFirst({
@@ -72,8 +105,10 @@ export default class BusinessReviewService {
       where: {
         id: review.id,
       },
-      data: { review: reviewText },
+      data: { ...editReviewDto, updatedAt: new Date() },
     })
+    if (editReviewDto.rating)
+      this.calculateRatingSummary({ id: review.businessId })
     return {
       status: 'success',
       message: `review updated   successfully`,
@@ -86,7 +121,7 @@ export default class BusinessReviewService {
     id,
   }: BaseIdParams & UserIdParams): Promise<ApiResponse> {
     await this.userService.checkProfileLevel({ id: userId })
-    let review = await this.prismaService.review.findFirst({
+    const review = await this.prismaService.review.findFirst({
       where: {
         id,
         userId,
@@ -94,9 +129,10 @@ export default class BusinessReviewService {
     })
 
     if (!review) throw new NotFoundException('Required review not found ')
-    review = await this.prismaService.review.delete({
+    await this.prismaService.review.delete({
       where: { userId, id },
     })
+    this.calculateRatingSummary({ id: review.businessId })
     return {
       status: 'success',
       message: `review deleted    successfully`,

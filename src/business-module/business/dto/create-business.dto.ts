@@ -1,7 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsString } from 'class-validator'
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export default class CreateBusinessDto {
+  @ApiProperty({
+    description: 'image for the category',
+    type: 'string',
+    format: 'binary',
+  })
+  @IsOptional()
+  image?: Express.Multer.File
+
   @ApiProperty({
     type: String,
     example: "John's Barber Shop",
