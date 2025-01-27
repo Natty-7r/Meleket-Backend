@@ -148,14 +148,14 @@ export default class UserService {
   async followBussiness({
     id,
     businessId,
-  }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & BusinessIdParams): Promise<any> {
     return this.businessSevice.addFollower({ id: businessId, userId: id })
   }
 
   async unFollowBussiness({
     id,
     businessId,
-  }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & BusinessIdParams): Promise<any> {
     return this.businessSevice.removeFollower({ id: businessId, userId: id })
   }
 

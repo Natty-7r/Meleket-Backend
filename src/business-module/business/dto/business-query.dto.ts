@@ -1,9 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { IsOptional, IsString, IsUUID } from 'class-validator'
+import { ApiPropertyOptional } from '@nestjs/swagger'
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator'
 import QueryDto from 'src/common/dto/query.dto'
+import { BusinessSortableFields } from 'src/common/types/base.type'
 
 export default class BusinessQueryDto extends QueryDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: String,
     example: 'barber',
     description: 'search by name of category',
@@ -13,13 +14,41 @@ export default class BusinessQueryDto extends QueryDto {
   @IsOptional()
   search?: string
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: String,
-    example: 'parent-id-uuid',
-    description: 'The parent ID for hierarchical filtering',
+    example: 'uuid',
+    description: 'Category id',
     required: false,
   })
-  @IsUUID()
+  @IsString()
   @IsOptional()
-  parentId?: string
+  categoryId?: string
+
+  @ApiPropertyOptional({
+    type: String,
+    example: 'uuid',
+    description: 'User id ',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  userId?: string
+
+  @ApiPropertyOptional({
+    description: 'Field to order by from Business sortables fields',
+    example: 'rating',
+    enum: BusinessSortableFields,
+  })
+  @IsOptional()
+  @IsEnum(BusinessSortableFields)
+  orderOption?: BusinessSortableFields
+
+  @ApiPropertyOptional({
+    description: 'Order direction (ascending or descending)',
+    enum: ['asc', 'desc'],
+    example: 'asc',
+  })
+  @IsOptional()
+  @IsEnum(['asc', 'desc'])
+  orderType?: 'asc' | 'desc'
 }
