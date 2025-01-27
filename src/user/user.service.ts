@@ -4,7 +4,12 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
+import { Profile } from '@prisma/client'
+import { CreateAccountDto } from 'src/auth/dto'
+import BusinessService from 'src/business-module/business/business.service'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
+import { removePassword } from 'src/common/helpers/parser.helper'
+import { validateAge } from 'src/common/helpers/validator.helper'
 import {
   BaseIdParams,
   BaseRoleIdParams,
@@ -12,15 +17,10 @@ import {
   StoryIdParams,
   UserIdParams,
 } from 'src/common/types/params.type'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
-import { validateAge } from 'src/common/helpers/validator.helper'
-import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import BusinessService from 'src/business-module/business/business.service'
-import { CreateAccountDto } from 'src/auth/dto'
-import { removePassword } from 'src/common/helpers/parser.helper'
+import { ApiResponse } from 'src/common/types/responses.type'
+import PrismaService from 'src/prisma/prisma.service'
 import AddProfileDto from './dto/add-profile.dto'
 import UpdateProfileDto from './dto/edit-profile.dto'
-import AddRatingDto from './dto/add.rating.dto'
 
 @Injectable()
 export default class UserService {
@@ -89,7 +89,7 @@ export default class UserService {
     userId,
     birthDate,
     ...addProfileDto
-  }: AddProfileDto & UserIdParams): Promise<ApiResponse> {
+  }: AddProfileDto & UserIdParams): Promise<Profile> {
     await this.checkUserId({ id: userId })
     let profile = await this.prismaService.profile.findFirst({
       where: { userId },
@@ -97,7 +97,7 @@ export default class UserService {
     if (profile)
       return this.updateProfile({ userId, ...addProfileDto, birthDate })
     const age = validateAge(birthDate)
-    profile = await this.prismaService.profile.create({
+    return this.prismaService.profile.create({
       data: {
         userId,
         birthDate,
@@ -105,18 +105,13 @@ export default class UserService {
         ...addProfileDto,
       },
     })
-    return {
-      status: 'success',
-      message: `profile added  successfully`,
-      data: profile,
-    }
   }
 
   async updateProfile({
     userId,
     birthDate,
     ...updateProfileDto
-  }: UpdateProfileDto & UserIdParams): Promise<ApiResponse> {
+  }: UpdateProfileDto & UserIdParams): Promise<Profile> {
     let oldProfilePicturePath
     await this.checkUserId({ id: userId })
 
@@ -137,11 +132,7 @@ export default class UserService {
     })
     if (oldProfilePicturePath)
       deleteFileAsync({ filePath: oldProfilePicturePath })
-    return {
-      status: 'success',
-      message: `profile updated  successfully`,
-      data: profile,
-    }
+    return profile
   }
 
   // following
@@ -166,7 +157,7 @@ export default class UserService {
   async viewStory({
     storyId,
     userId,
-  }: StoryIdParams & UserIdParams): Promise<BareApiResponse> {
+  }: StoryIdParams & UserIdParams): Promise<string> {
     let userStoryView = await this.prismaService.userStoryView.findUnique({
       where: {
         /* eslint-disable */
@@ -188,9 +179,6 @@ export default class UserService {
       await this.businessSevice.updateStoryViewCount({ storyId })
     }
 
-    return {
-      status: 'success',
-      message: `User added as veiw for story successfully`,
-    }
+    return `User added as veiw for story successfully`
   }
 }
