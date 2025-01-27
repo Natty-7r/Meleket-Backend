@@ -35,10 +35,7 @@ export default class LoggerService {
       },
     })
 
-    return {
-      status: 'success',
-      message: 'Logs archived successfully',
-    }
+    return 'Logs archived successfully'
   }
 
   @Cron('* * 0 * * *')
@@ -89,18 +86,12 @@ export default class LoggerService {
 
     if (logType) queryConditions.logType = logType
 
-    const logs = await this.prismaService.log.findMany({
+    return this.prismaService.log.findMany({
       where: queryConditions,
       orderBy: {
         timestamp: 'desc',
       },
     })
-
-    return {
-      status: 'success',
-      message: 'Logs fetched successfully',
-      data: logs,
-    }
   }
 
   async log(message: string, metadata?: Record<string, unknown>) {
