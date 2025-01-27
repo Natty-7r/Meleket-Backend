@@ -23,15 +23,16 @@ import BusinessServiceService from './business-service.service'
 import CreateBusinessServiceDto from './dto/create-business-service.dto'
 
 @ApiTags('Business-service')
-@Controller('business/services')
+@Controller('businesses')
 export default class BusinessServiceController {
   constructor(
     private readonly businessServiceService: BusinessServiceService,
   ) {}
 
-  @Post()
+  @Post('/:id/services')
   @AddBusinessService()
   async addBusinessService(
+    @Param('id') businessId: string,
     @Body() createBusinessServiceDto: CreateBusinessServiceDto,
     @User() user: RequestUser,
     @UploadedFile() image?: Express.Multer.File,
@@ -40,10 +41,11 @@ export default class BusinessServiceController {
       ...createBusinessServiceDto,
       image,
       userId: user.id,
+      businessId,
     })
   }
 
-  @Put('/:id')
+  @Put('/services')
   @UpdateBusinessServices()
   async updateBusinessServices(
     @Param('id') id: string,
@@ -57,7 +59,7 @@ export default class BusinessServiceController {
     })
   }
 
-  @Delete('/:id')
+  @Delete('services/:id')
   @DeleteBusinessService()
   deleteService(@Param('id') id: string, @User() { id: userId }: RequestUser) {
     return this.businessServiceService.deleteBusinessServices({

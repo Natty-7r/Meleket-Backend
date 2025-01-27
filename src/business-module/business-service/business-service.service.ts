@@ -6,12 +6,12 @@ import {
 import { BussinessService as BussinesServiceModelType } from '@prisma/client'
 import AccessControlService from 'src/access-control/access-control.service'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
 import PrismaService from 'src/prisma/prisma.service'
 import {
   BaseBusinessIdParams,
   BaseIdParams,
   BaseUserIdParams,
+  BusinessIdParams,
   CheckBusinessServiceNameParams,
   DeleteBusinessServicesParams,
   UserIdParams,
@@ -68,7 +68,9 @@ export default class BusinessServiceService {
     specifications,
     userId,
     image,
-  }: CreateBusinessServiceDto & UserIdParams): Promise<ApiResponse> {
+  }: CreateBusinessServiceDto &
+    UserIdParams &
+    BusinessIdParams): Promise<BussinesServiceModelType> {
     await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS',
@@ -89,13 +91,8 @@ export default class BusinessServiceService {
         image: image?.path,
       },
     })
-    return {
-      status: 'success',
-      message: 'Buisness Service added successfully',
-      data: {
-        ...buinessService,
-      },
-    }
+
+    return buinessService
   }
 
   async updateBusinessService({
@@ -128,7 +125,7 @@ export default class BusinessServiceService {
   async deleteBusinessServices({
     id,
     userId,
-  }: DeleteBusinessServicesParams): Promise<BareApiResponse> {
+  }: DeleteBusinessServicesParams): Promise<string> {
     const { businessId } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
@@ -142,24 +139,17 @@ export default class BusinessServiceService {
         id,
       },
     })
-    return {
-      status: 'success',
-      message: 'Buisness services deleted successfully',
-    }
+
+    return id
   }
 
   async getBusinessServices({
     businessId,
-  }: BaseBusinessIdParams): Promise<ApiResponse> {
-    const services = await this.prismaService.bussinessService.findMany({
+  }: BaseBusinessIdParams): Promise<BussinesServiceModelType[]> {
+    return await this.prismaService.bussinessService.findMany({
       where: {
         businessId,
       },
     })
-    return {
-      data: services,
-      status: 'success',
-      message: 'Buisness services fetched successfully',
-    }
   }
 }
