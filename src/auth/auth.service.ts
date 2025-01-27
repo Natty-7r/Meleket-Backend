@@ -173,10 +173,8 @@ export default class AuthService {
     if (user?.status === 'CREATED' || user?.status === 'INACTIVE')
       throw new UnauthorizedException('User not active')
     return {
-      status: 'success',
-      message: 'User Logged in successfully',
       access_token: this.jwtService.sign(payload),
-      data: user,
+      ...user,
     }
   }
 
@@ -251,13 +249,8 @@ export default class AuthService {
     })
 
     return {
-      status: 'success',
-      message: `${type} OTP sent is to ${channelValue}  successfully  `,
-      data: {
-        // otpCode,
-        channelType,
-        channelValue,
-      },
+      channelType,
+      channelValue,
     }
   }
 
@@ -326,10 +319,7 @@ export default class AuthService {
     await this.prismaService.oTP.deleteMany({
       where: { channelValue: email, type: 'VERIFICATION' },
     })
-    return {
-      status: 'success',
-      message: 'User Verified successfully',
-    }
+    return 'User Verified successfully'
   }
 
   async checkOTPVerification({
@@ -401,9 +391,6 @@ export default class AuthService {
       userId: userType === 'CLIENT_USER' && user.id,
       adminId: userType !== 'CLIENT_USER' && user.id,
     })
-    return {
-      status: 'success',
-      message: 'Password updated successfully',
-    }
+    return 'Password updated successfully'
   }
 }
