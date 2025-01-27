@@ -4,22 +4,21 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
-import LoggerService from 'src/logger/logger.service'
-import { Admin } from '@prisma/client'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
+import { Admin, Log } from '@prisma/client'
 import {
   removePassword,
   removePasswords,
 } from 'src/common/helpers/parser.helper'
-import UpdateAdminStatusDto from './dto/update-admin-status.dto'
-import CreateAdminDto from './dto/create-admin-account.dto'
-import UpdateAdminDto from './dto/update-admin-account.dto'
+import LoggerService from 'src/logger/logger.service'
+import PrismaService from 'src/prisma/prisma.service'
 import {
   BaseAdminIdParams,
   BaseIdParams,
   BaseRoleIdParams,
 } from '../common/types/params.type'
+import CreateAdminDto from './dto/create-admin-account.dto'
+import UpdateAdminDto from './dto/update-admin-account.dto'
+import UpdateAdminStatusDto from './dto/update-admin-status.dto'
 
 @Injectable()
 export default class AdminService {
@@ -62,7 +61,7 @@ export default class AdminService {
     id,
     firstName,
     lastName,
-  }: UpdateAdminDto & BaseIdParams): Promise<ApiResponse> {
+  }: UpdateAdminDto & BaseIdParams): Promise<Admin> {
     let admin = await this.verfiyAdminId({ id })
 
     admin = await this.prismaService.admin.update({
@@ -72,11 +71,7 @@ export default class AdminService {
         lastName: lastName || admin.lastName,
       },
     })
-    return {
-      data: removePassword(admin),
-      status: 'success',
-      message: 'Admin  updated  successfully',
-    }
+    return removePassword(admin) as Admin
   }
 
   async updateAdminStatus({
@@ -96,17 +91,13 @@ export default class AdminService {
       context: 'admin deleted',
     })
 
-    return {
-      data: removePassword(admin),
-      status: 'success',
-      message: 'Admin status updated  successfully',
-    }
+    return removePassword(admin) as Admin
   }
 
   async deleteAdmin({
     id,
     adminId,
-  }: BaseIdParams & BaseAdminIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & BaseAdminIdParams): Promise<string> {
     let admin = await this.verfiyAdminId({ id })
 
     if (id === adminId)
@@ -120,23 +111,16 @@ export default class AdminService {
       message: `admin account with ID:${admin.id} deleted by admin with ID ${adminId}`,
       context: 'admin deleted',
     })
-    return {
-      status: 'success',
-      message: 'Admin  deleted  successfully',
-    }
+    return id
   }
 
-  async getAdmins(): Promise<ApiResponse> {
+  async getAdmins(): Promise<Admin[]> {
     const admins = await this.prismaService.admin.findMany()
-    return {
-      data: removePasswords(admins),
-      status: 'success',
-      message: 'Admins fetched  successfully',
-    }
+    return removePasswords(admins) as Admin[]
   }
 
-  async getAdminDetail({ id }: BaseIdParams): Promise<ApiResponse> {
-    const admin = await this.prismaService.admin.findMany({
+  async getAdminDetail({ id }: BaseIdParams): Promise<Admin & { logs: Log[] }> {
+    const admin = await this.prismaService.admin.findFirst({
       where: { id },
       include: {
         role: true,
@@ -145,10 +129,6 @@ export default class AdminService {
     const logs = await this.prismaService.log.findMany({
       where: { adminId: id },
     })
-    return {
-      data: { ...admin, logs },
-      status: 'success',
-      message: 'Admins detail  successfully',
-    }
+    return { ...(removePassword(admin) as Admin), logs }
   }
 }
