@@ -299,3 +299,6 @@ export enum BusinessSortableFields {
   'follower' = 'follower',
   'service' = 'service',
 }
+export enum ReviewSortableFields {
+  'rating' = 'rating',
+}
