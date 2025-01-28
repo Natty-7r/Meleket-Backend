@@ -74,11 +74,6 @@ export type CategoryTreeSwaggerConfig = {
   successMessage: string
 }
 
-export enum SignUpType {
-  BY_EMAIL = 'BY_EMAIL',
-  OAUTH = 'OAUTH',
-}
-
 export interface ChapaConfig {
   secretKey: string // Chapa secret key
   baseUrl: string // Base URL for Chapa API

@@ -2,41 +2,41 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
+  Put,
+  Req,
   Request,
   UseGuards,
-  Put,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import {
-  RequestUser,
-  RequestWithUser,
-  SignUpType,
-} from 'src/common/types/base.type'
-import { AuthGuard } from '@nestjs/passport'
 import { CreateAdminAccount } from 'src/admin/decorators/admin-api.decorator'
 import CreateAdminDto from 'src/admin/dto/create-admin-account.dto'
 import User from 'src/common/decorators/user.decorator'
+import { RequestUser, RequestWithUser } from 'src/common/types/base.type'
 import AuthService from './auth.service'
-import LocalAuthGuard from './guards/local-auth.guard'
-import GoogleOAuthGuard from './guards/google-auth.guard'
 import {
-  VerifyOTPDto,
-  CreateOTPDto,
   CreateAccountDto,
-  UpdatePasswordDto,
+  CreateOTPDto,
   SignInDto,
+  UpdatePasswordDto,
+  VerifyOTPDto,
 } from './dto'
+import GoogleOAuthGuard from './guards/google-auth.guard'
+import LocalAuthGuard from './guards/local-auth.guard'
 
+import { AuthProvider } from '@prisma/client'
 import {
   CreateUserAccount,
   RequestOTP,
   SignIn,
+  UpdateAuthProvider,
   UpdatePassword,
   VerifyOTP,
   VerifyUser,
 } from './decorators/auth-api-endpoint.decorator'
 import VerifyAccountDto from './dto/verify-user.dto'
+import UpdateAuthProviderDto from './dto/update-auth-provider.dto'
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -46,10 +46,10 @@ export default class AuthController {
   @CreateUserAccount()
   @Post('/user-accounts')
   createUserAccount(@Body() createAccountDto: CreateAccountDto) {
-    return this.authService.createUserAccount(
-      createAccountDto,
-      SignUpType.BY_EMAIL,
-    )
+    return this.authService.createUserAccount({
+      ...createAccountDto,
+      authProvider: AuthProvider.LOCAL,
+    })
   }
 
   @CreateAdminAccount()
@@ -72,15 +72,13 @@ export default class AuthController {
   }
 
   @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-    return 'google auth trying '
-  }
-
-  @Get('google-redirect')
   @UseGuards(GoogleOAuthGuard)
-  googleAuthRedirect() {
-    // return this.authService.googleLogin(req)
+  async googleAuth() {}
+
+  @Get('google/callback')
+  @UseGuards(GoogleOAuthGuard)
+  googleAuthRedirect(@Req() req: RequestWithUser) {
+    return this.authService.login(req.user)
   }
 
   @RequestOTP()
@@ -105,5 +103,17 @@ export default class AuthController {
   @Put('/password')
   updatePassword(@Body() updatePasswordDto: UpdatePasswordDto) {
     return this.authService.updatePassword(updatePasswordDto)
+  }
+  @UpdateAuthProvider()
+  @Patch('/provider')
+  updateAuthProvider(
+    @User() user: RequestUser,
+    @Body() updateAuthProviderDto: UpdateAuthProviderDto,
+  ) {
+    console.log(user)
+    return this.authService.updateAuthProvider({
+      userId: user.id,
+      ...updateAuthProviderDto,
+    })
   }
 }

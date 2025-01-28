@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common'
-import { Profile } from '@prisma/client'
+import { AuthProvider, Profile, Status } from '@prisma/client'
 import { CreateAccountDto } from 'src/auth/dto'
 import BusinessService from 'src/business-module/business/business.service'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
@@ -37,7 +37,7 @@ export default class UserService {
     })
 
     if (!user) throw new ForbiddenException('User not found')
-    return true
+    return user
   }
 
   async checkProfileLevel({ id }: BaseIdParams) {
@@ -50,24 +50,23 @@ export default class UserService {
     return true
   }
 
-  async createUserAccount({
-    firstName,
-    lastName,
-    email,
-    password,
-    roleId,
-  }: CreateAccountDto & BaseRoleIdParams) {
-    const user = await this.prismaService.user.findFirst({ where: { email } })
+  async createUserAccount(
+    createAccountDto: CreateAccountDto &
+      BaseRoleIdParams & { authProvider: AuthProvider },
+  ) {
+    const user = await this.prismaService.user.findFirst({
+      where: { email: createAccountDto.email },
+    })
     if (user) throw new ConflictException('Email is already in use!')
 
     return this.prismaService.user.create({
       data: {
-        firstName,
-        lastName,
-        email,
-        password,
-        status: 'CREATED',
-        roleId,
+        ...createAccountDto,
+        currentAuthMethod: createAccountDto.authProvider,
+        status:
+          createAccountDto.authProvider !== AuthProvider.LOCAL
+            ? 'ACTIVE'
+            : 'CREATED',
       },
     })
   }
@@ -78,11 +77,7 @@ export default class UserService {
     const userDetail = await this.prismaService.user.findFirst({
       where: { id },
     })
-    return {
-      status: 'success',
-      message: `user detail fetced  successfully`,
-      data: removePassword(userDetail),
-    }
+    return removePassword(userDetail)
   }
 
   async addProfile({

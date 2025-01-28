@@ -24,6 +24,14 @@ enum UserType {
   SUPER_ADMIN
 }
 
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+  LINKEDIN
+  TELEGRAM
+}
+
 enum OTPType {
   VERIFICATION
   RESET
@@ -60,22 +68,24 @@ enum LogType {
 }
 
 model User {
-  id                 String     @id @default(uuid())
+  id                 String       @id @default(uuid())
   firstName          String
   lastName           String
-  email              String     @unique
+  email              String       @unique
   phoneNumber        String?
   password           String
   profile            Profile?
   reviews            Review[]
   bills              Bill[]
-  businesses         Business[] @relation("UserOwnsBusiness")
-  followedBusinesses Business[] @relation("UserFollowsBusiness")
-  passwordUpdatedAt  DateTime   @updatedAt
-  status             Status     @default(CREATED)
-  inActiveReason     String     @default("new account")
+  businesses         Business[]   @relation("UserOwnsBusiness")
+  followedBusinesses Business[]   @relation("UserFollowsBusiness")
+  passwordUpdatedAt  DateTime     @updatedAt
+  status             Status       @default(CREATED)
+  inActiveReason     String       @default("new account")
   roleId             String
-  role               Role       @relation(name: "UserRoles", fields: [roleId], references: [id])
+  authProvider       AuthProvider @default(LOCAL)
+  currentAuthMethod  AuthProvider @default(LOCAL)
+  role               Role         @relation(name: "UserRoles", fields: [roleId], references: [id])
 
   // New relation to UserStoryView
   storyViews UserStoryView[]
@@ -238,7 +248,7 @@ model BusinessContact {
 }
 
 model Review {
-  id         String @id @default(uuid())
+  id         String  @id @default(uuid())
   userId     String
   businessId String
   review     String?
