@@ -37,6 +37,7 @@ export default class CategoryController {
     @UploadedFile() image: Express.Multer.File,
     @User() user: RequestUser,
   ) {
+    console.log(user, 'jjjjj')
     return this.categoryService.createCategory({
       ...createCategoryDto,
       userId: user.id,

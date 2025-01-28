@@ -8,14 +8,14 @@ import {
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import { Admin, OTPType, User } from '@prisma/client'
+import { Admin, AuthProvider, OTPType, User } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
 import AccessControlService from 'src/access-control/access-control.service'
 import AdminService from 'src/admin/admin.service'
 import CreateAdminDto from 'src/admin/dto/create-admin-account.dto'
 import { generateOTP } from 'src/common/helpers/numbers.helper'
 import { removePassword } from 'src/common/helpers/parser.helper'
-import { RequestUser, SignUpType, UserType } from 'src/common/types/base.type'
+import { RequestUser, UserType } from 'src/common/types/base.type'
 import { BaseAdminIdParams } from 'src/common/types/params.type'
 import LoggerService from 'src/logger/logger.service'
 import MessageService from 'src/message/message.service'
@@ -44,10 +44,13 @@ export default class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async createUserAccount(
-    { firstName, lastName, email, password }: CreateAccountDto,
-    signUpType: SignUpType,
-  ) {
+  async createUserAccount({
+    firstName,
+    lastName,
+    email,
+    password,
+    authProvider,
+  }: CreateAccountDto & { authProvider: AuthProvider }) {
     const hashedPassword = await bcrypt.hash(password, 12)
 
     const userRole = await this.accessContolService.getUserRole()
@@ -58,8 +61,9 @@ export default class AuthService {
       email,
       password: hashedPassword,
       roleId: userRole.id,
+      authProvider,
     })
-    if (signUpType === SignUpType.BY_EMAIL) {
+    if (authProvider === AuthProvider.LOCAL) {
       const { otpCode } = await this.createOTP({
         channelType: 'EMAIL',
         email,
@@ -82,11 +86,7 @@ export default class AuthService {
       context: 'user account creation',
       userId: userCreated.id,
     })
-    return {
-      status: 'success',
-      message: 'Account created successfully',
-      data: removePassword(userCreated),
-    }
+    return removePassword(userCreated)
   }
 
   async createAdminAccount({
@@ -99,9 +99,7 @@ export default class AuthService {
     const adminRole = await this.accessContolService.getAdminRole({
       roleId,
     })
-
     const hashedPassword = await bcrypt.hash(password, 12)
-
     const adminAccount = await this.adminService.createAdminAccount({
       firstName,
       lastName,
@@ -123,14 +121,14 @@ export default class AuthService {
       context: 'admin account creation',
       adminId: adminAccount.id,
     })
-    return {
-      status: 'success',
-      message: 'Admin created successfully',
-      data: removePassword(adminAccount),
-    }
+    return removePassword(adminAccount)
   }
 
-  async validateUser({ email, password }: SignInDto): Promise<any> {
+  async checkEmail({
+    email,
+  }: {
+    email: string
+  }): Promise<{ user: User | Admin; userType: UserType }> {
     let userType: UserType = 'USER'
     let user: User | Admin
 
@@ -145,7 +143,21 @@ export default class AuthService {
         include: { role: { select: { id: true, name: true } } },
       })
     }
+    if (!user) return { user: null, userType: 'USER' }
+    if (userType === 'ADMIN') return { user: user as Admin, userType }
+    return { user: user as User, userType }
+  }
+
+  async validateUser({ email, password }: SignInDto): Promise<any> {
+    const { user, userType } = await this.checkEmail({ email })
     if (!user) throw new NotFoundException(`Invalid Email or Password`)
+
+    if (userType === 'USER') {
+      if ((user as User).authProvider !== 'LOCAL')
+        throw new UnauthorizedException(
+          `User is uses ${(user as User).authProvider} auth provider`,
+        )
+    }
 
     const doesPasswordMatch = await bcrypt.compare(password, user.password)
     if (!doesPasswordMatch)
@@ -153,10 +165,7 @@ export default class AuthService {
 
     if (userType === 'ADMIN' && (user as Admin).status !== 'ACTIVE')
       throw new UnauthorizedException('Admin is Inactive currenlty ')
-    /* eslint-disable */
-    const { password: _, ...result } = user
-    /* eslint-disable */
-    return result
+    return removePassword(user)
   }
 
   async login(user: RequestUser) {

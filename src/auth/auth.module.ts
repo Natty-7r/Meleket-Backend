@@ -7,8 +7,8 @@ import UserModule from 'src/user/user.module'
 import AuthService from './auth.service'
 import AuthController from './auth.controller'
 import LocalStrategy from './strategies/local.strategy'
-import GoogleStrategy from './strategies/google.strategry'
 import JwtStrategy from './strategies/jwt.strategry'
+import { GoogleStrategy } from './strategies/google.strategry'
 
 @Module({
   imports: [

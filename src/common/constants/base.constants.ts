@@ -19,3 +19,5 @@ export const ARCHIVED_LOG_EXPIRATION_DATE: number = 20
 export const EMAIL_TEMPLATE_FOLDER_PATH: string = '/src/message/templates/mail/'
 
 export const SMS_TEMPLATE_FOLDER_PATH: string = '/src/message/templates/sms/'
+
+export const DEFAULE_O_AUTH_PASSWORD: string = '123456'

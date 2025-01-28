@@ -24,6 +24,14 @@ enum UserType {
   SUPER_ADMIN
 }
 
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+  LINKEDIN
+  TELEGRAM
+}
+
 enum OTPType {
   VERIFICATION
   RESET
@@ -75,6 +83,7 @@ model User {
   status             Status     @default(CREATED)
   inActiveReason     String     @default("new account")
   roleId             String
+  authProvider       AuthProvider  @default(LOCAL)
   role               Role       @relation(name: "UserRoles", fields: [roleId], references: [id])
 
   // New relation to UserStoryView
