@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Put,
   Req,
@@ -29,6 +30,7 @@ import {
   CreateUserAccount,
   RequestOTP,
   SignIn,
+  UpdateAuthProvider,
   UpdatePassword,
   VerifyOTP,
   VerifyUser,
@@ -99,6 +101,11 @@ export default class AuthController {
   @UpdatePassword()
   @Put('/password')
   updatePassword(@Body() updatePasswordDto: UpdatePasswordDto) {
+    return this.authService.updatePassword(updatePasswordDto)
+  }
+  @UpdateAuthProvider()
+  @Patch('/provider')
+  updateAuthProvider(@Body() updatePasswordDto: UpdatePasswordDto) {
     return this.authService.updatePassword(updatePasswordDto)
   }
 }
