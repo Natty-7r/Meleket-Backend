@@ -10,6 +10,7 @@ import {
 } from './auth-swagger-definition.decorator'
 import Public from 'src/common/decorators/public.decorator'
 import JwtAuthGuard from '../guards/jwt.guard'
+import { ApiBearerAuth, ApiUnauthorizedResponse } from '@nestjs/swagger'
 
 export const CreateUserAccount = () =>
   applyDecorators(Public(), CreateUserAccountSwaggerDefinition())
@@ -22,6 +23,8 @@ export const UpdatePassword = () =>
 export const UpdateAuthProvider = () =>
   applyDecorators(
     UseGuards(JwtAuthGuard),
+    ApiBearerAuth(),
+    ApiUnauthorizedResponse({ description: 'Unauthorized' }),
     UpdateAuthProviderSwaggerDefinition(),
   )
 

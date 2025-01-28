@@ -196,7 +196,7 @@ export default class PaymentService {
     })
     const packageAmount = businessDetail.category.price * packageDetail.price
 
-    const { data: user } = await this.userService.getUserDetail({ id: userId })
+    const user = await this.userService.checkUserId({ id: userId })
     const paymentInitParams: PaymentInitParams = this.generateParmentInitOption(
       {
         user: user as any,

@@ -36,6 +36,7 @@ import {
   VerifyUser,
 } from './decorators/auth-api-endpoint.decorator'
 import VerifyAccountDto from './dto/verify-user.dto'
+import UpdateAuthProviderDto from './dto/update-auth-provider.dto'
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -105,7 +106,14 @@ export default class AuthController {
   }
   @UpdateAuthProvider()
   @Patch('/provider')
-  updateAuthProvider(@Body() updatePasswordDto: UpdatePasswordDto) {
-    return this.authService.updatePassword(updatePasswordDto)
+  updateAuthProvider(
+    @User() user: RequestUser,
+    @Body() updateAuthProviderDto: UpdateAuthProviderDto,
+  ) {
+    console.log(user)
+    return this.authService.updateAuthProvider({
+      userId: user.id,
+      ...updateAuthProviderDto,
+    })
   }
 }

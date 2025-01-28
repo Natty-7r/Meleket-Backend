@@ -4,7 +4,7 @@ import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export default class UpdateAuthProviderDto {
   @ApiProperty({
-    type: AuthProvider,
+    enum: AuthProvider,
     example: AuthProvider.LOCAL,
     description: 'new auth method',
   })

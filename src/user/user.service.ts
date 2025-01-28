@@ -37,7 +37,7 @@ export default class UserService {
     })
 
     if (!user) throw new ForbiddenException('User not found')
-    return true
+    return user
   }
 
   async checkProfileLevel({ id }: BaseIdParams) {
@@ -62,6 +62,7 @@ export default class UserService {
     return this.prismaService.user.create({
       data: {
         ...createAccountDto,
+        currentAuthMethod: createAccountDto.authProvider,
         status:
           createAccountDto.authProvider !== AuthProvider.LOCAL
             ? 'ACTIVE'
@@ -76,11 +77,7 @@ export default class UserService {
     const userDetail = await this.prismaService.user.findFirst({
       where: { id },
     })
-    return {
-      status: 'success',
-      message: `user detail fetced  successfully`,
-      data: removePassword(userDetail),
-    }
+    return removePassword(userDetail)
   }
 
   async addProfile({

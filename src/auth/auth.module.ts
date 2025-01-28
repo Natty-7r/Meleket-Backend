@@ -13,17 +13,21 @@ import { GoogleStrategy } from './strategies/google.strategry'
 @Module({
   imports: [
     ConfigModule.forRoot(), // Ensure ConfigModule is imported
-    JwtModule.registerAsync({
-      imports: [ConfigModule], // Import ConfigModule
-      inject: [ConfigService], // Inject ConfigService
-      useFactory: async (configService: ConfigService) => {
-        return {
-          secret: configService.get<string>('jwt.secret'), // Use ConfigService to get JWT secret
-          signOptions: {
-            expiresIn: configService.get<string>('jwt.expiresIn'),
-          },
-        }
-      },
+    // JwtModule.registerAsync({
+    //   imports: [ConfigModule], // Ensure ConfigModule is imported here
+    //   inject: [ConfigService], // Inject ConfigService
+    //   useFactory: (configService: ConfigService) => ({
+    //     global: true, // Make the module global
+    //     secret: configService.get<string>('JWT_SECRETE'), // Use ConfigService for the JWT secret
+    //     signOptions: {
+    //       expiresIn: configService.get<string>('JWT_EXPIRES_IN'), // Use ConfigService for expiresIn
+    //     },
+    //   }),
+    // }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRETE,
+      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
     }),
     MessageModule,
     AdminModule,

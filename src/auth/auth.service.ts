@@ -16,7 +16,10 @@ import CreateAdminDto from 'src/admin/dto/create-admin-account.dto'
 import { generateOTP } from 'src/common/helpers/numbers.helper'
 import { removePassword } from 'src/common/helpers/parser.helper'
 import { RequestUser, UserType } from 'src/common/types/base.type'
-import { BaseAdminIdParams } from 'src/common/types/params.type'
+import {
+  BaseAdminIdParams,
+  BaseUserIdParams,
+} from 'src/common/types/params.type'
 import LoggerService from 'src/logger/logger.service'
 import MessageService from 'src/message/message.service'
 import EmailStrategy from 'src/message/strategies/email.strategy'
@@ -28,6 +31,7 @@ import CreateOTPDto from './dto/create-otp.dto'
 import UpdatePasswordDto from './dto/update-passowrd.dto'
 import VerifyOTPDto from './dto/verify-otp.dto'
 import VerifyUserDto from './dto/verify-user.dto'
+import UpdateAuthProviderDto from './dto/update-auth-provider.dto'
 
 @Injectable()
 export default class AuthService {
@@ -153,9 +157,9 @@ export default class AuthService {
     if (!user) throw new NotFoundException(`Invalid Email or Password`)
 
     if (userType === 'USER') {
-      if ((user as User).authProvider !== 'LOCAL')
+      if ((user as User).currentAuthMethod !== 'LOCAL')
         throw new UnauthorizedException(
-          `User is uses ${(user as User).authProvider} auth provider`,
+          `User is using ${(user as User).currentAuthMethod} auth provider`,
         )
     }
 
@@ -172,11 +176,11 @@ export default class AuthService {
     const payload = true
       ? {
           email: user.email,
-          sub: user.id,
+          id: user.id,
         }
       : {
           email: user.email,
-          sub: user.id,
+          id: user.id,
         }
 
     if (user?.status === 'CREATED' || user?.status === 'INACTIVE')
@@ -401,5 +405,38 @@ export default class AuthService {
       adminId: userType !== 'CLIENT_USER' && user.id,
     })
     return 'Password updated successfully'
+  }
+  async updateAuthProvider({
+    authMethod,
+    password,
+    userId,
+  }: UpdateAuthProviderDto & BaseUserIdParams) {
+    let data: any = { currentAuthMethod: authMethod }
+    const user = await this.userService.checkUserId({ id: userId })
+    if (authMethod === 'LOCAL' && !password)
+      throw new BadRequestException('passowrd is needed for LOCAL auth method ')
+
+    if (authMethod === 'LOCAL') data.password = await bcrypt.hash(password, 12)
+    else if (user.authProvider !== authMethod)
+      throw new BadRequestException(
+        `only ${user.authProvider} is allowed for this user`,
+      )
+
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        passwordUpdatedAt: new Date(),
+        updatedAt: new Date(),
+        ...data,
+      },
+    })
+
+    await this.loggerSerive.createLog({
+      logType: 'USER_ACTIVITY',
+      message: `user  with  id: ${user.id} name: ${user.firstName.concat(' ').concat(user.lastName)}  update auth method to ${authMethod}`,
+      context: 'password update',
+      userId,
+    })
+    return `auth methode updated to ${authMethod}`
   }
 }
