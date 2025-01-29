@@ -4,7 +4,6 @@ import {
   ApiConflictResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
-  ApiParam,
   ApiResponse,
 } from '@nestjs/swagger'
 import BusinessAddressResponse from '../responses/business-address.response'
@@ -40,7 +39,6 @@ export const DeleteBusinessAddressSwaggerDefinition = () =>
     }),
     ApiBadRequestResponse({ description: 'Invalid address Id' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiParam({ description: 'address Id', name: 'id' }),
   )
 export const GetBusinessAddressSwaggerDefinition = () =>
   applyDecorators(
@@ -50,5 +48,4 @@ export const GetBusinessAddressSwaggerDefinition = () =>
       type: String,
     }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiParam({ description: 'bussiness Id', name: 'businessId' }),
   )

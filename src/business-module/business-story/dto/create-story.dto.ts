@@ -1,24 +1,38 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator'
-import { StoryContentType } from '@prisma/client' // Adjust import based on your setup
+import { Transform } from 'class-transformer'
+import { IsArray, IsOptional, IsString } from 'class-validator'
 
 export default class CreateStoryDto {
-  @ApiProperty({
-    description: 'Unique identifier for the business associated with the story',
-    example: '550e8400-e29b-41d4-a716-446655440001',
+  @ApiPropertyOptional({
+    description: 'Images for the category',
+    type: 'array',
+    items: { type: 'string', format: 'binary' },
+    required: false,
   })
-  @IsString()
-  @IsNotEmpty()
-  businessId: string
+  // @IsArray()
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'object') return value
+    return [value]
+    // if (va) return [parseInt(value, 10)]
+    // return value.map((v) => parseInt(v, 10))
+    console.log(value, 'bbbbbbbbbbbbbbb')
+    return []
+  })
+  images?: Express.Multer.File[]
 
-  @ApiProperty({
-    description: 'Content type of the story',
-    example: 'STRING',
-    enum: StoryContentType,
+  @ApiPropertyOptional({
+    description: 'index where the text will be shown',
+    required: false,
+    example: [1],
   })
-  @IsEnum(StoryContentType)
-  @IsNotEmpty()
-  contentType: StoryContentType
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') return [parseInt(value, 10)]
+    return value.map((v) => parseInt(v, 10))
+  })
+  textViewOrder?: number[]
 
   @ApiProperty({
     description: 'Text content of the story',
@@ -28,12 +42,4 @@ export default class CreateStoryDto {
   @IsString()
   @IsOptional()
   text?: string
-
-  @ApiPropertyOptional({
-    description: 'Optional image URL for the story',
-    example: 'https://example.com/image.jpg',
-  })
-  @IsString()
-  @IsOptional()
-  image?: string
 }

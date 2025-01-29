@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { RequestUser } from 'src/common/types/base.type'
@@ -23,39 +24,43 @@ import CreateStoryDto from './dto/create-story.dto'
 import UpdateStoryDto from './dto/update-store.dto'
 
 @ApiTags('Businesses-Stories')
-@Controller('businesses/stories')
+@Controller('businesses')
 export default class BusinessStoryController {
   constructor(private readonly businessStoryService: BusinessStoryService) {}
 
-  @Post()
+  @Post('/:id/stories')
   @AddStory()
   async addStory(
     @Body() createStoryDto: CreateStoryDto,
     @User() user: RequestUser,
-    @UploadedFile() file?: Express.Multer.File,
+    @Param('id') businessId: string,
+    @UploadedFiles() images?: Express.Multer.File[],
   ) {
     return this.businessStoryService.addStory({
       ...createStoryDto,
       userId: user.id,
-      image: file?.path || undefined,
+      businessId,
+      images,
     })
   }
 
-  @Put()
+  @Put('stories/:id')
   @UpdateStory()
   async updateStory(
     @Body() updateStoryDto: UpdateStoryDto,
     @User() user: RequestUser,
-    @UploadedFile() file?: Express.Multer.File,
+    @Param('id') id: string,
+    @UploadedFile() images?: Express.Multer.File[],
   ) {
     return this.businessStoryService.updateStory({
       ...updateStoryDto,
       userId: user.id,
-      image: file?.path || undefined,
+      id,
+      images,
     })
   }
 
-  @Delete(':id')
+  @Delete('stories/:id')
   @DeleteStory()
   async deleteStory(@Param('id') id: string, @User() user: RequestUser) {
     return this.businessStoryService.deleteStory({
@@ -70,12 +75,9 @@ export default class BusinessStoryController {
     return this.businessStoryService.getStories({ userId: user.id })
   }
 
-  @Get(':businessId')
+  @Get(':id/stories')
   @GetBusinessStories()
-  async getStories(
-    @Param('businessId') businessId: string,
-    @User() user: RequestUser,
-  ) {
+  async getStories(@Param('id') businessId: string, @User() user: RequestUser) {
     return this.businessStoryService.getBusinessStories({
       businessId,
       userId: user.id,

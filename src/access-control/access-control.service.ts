@@ -190,7 +190,6 @@ export default class AccessControlService {
     const bussiness = await this.verifyBussinessId({
       id: isBussiness ? entity.id : (entity as any)?.businessId,
     })
-
     if (bussiness.ownerId !== user.id)
       throw new ForbiddenException('Bussiness deos not belong to you')
     return {

@@ -3,8 +3,10 @@ import Permissions from 'src/common/decorators/permission.decorator'
 import {
   CreateBusinessAddressSwaggerDefinition,
   DeleteBusinessAddressSwaggerDefinition,
+  GetBusinessAddressSwaggerDefinition,
   UpdateBusinessAddressSwaggerDefinition,
 } from './business-swagger.decorator'
+import Public from 'src/common/decorators/public.decorator'
 
 export const CreateBusinessAddress = () =>
   applyDecorators(
@@ -24,7 +26,4 @@ export const DeleteBusinessAddress = () =>
     DeleteBusinessAddressSwaggerDefinition(),
   )
 export const GetBusinessAddress = () =>
-  applyDecorators(
-    Permissions({ model: 'BUSINESS_ADDRESS', action: 'READ' }),
-    DeleteBusinessAddressSwaggerDefinition(),
-  )
+  applyDecorators(Public(), GetBusinessAddressSwaggerDefinition())

@@ -18,7 +18,7 @@ export const AddStorySwaggerDefinition = () =>
     }),
     ApiForbiddenResponse({ description: 'Only allowed for business owner ' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
+    ApiConsumes('multipart/form-data'),
   )
 export const UpdatedStorySwaggerDefinition = () =>
   applyDecorators(
@@ -29,7 +29,7 @@ export const UpdatedStorySwaggerDefinition = () =>
     }),
     ApiForbiddenResponse({ description: 'Only allowed for business owner ' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
+    ApiConsumes('multipart/form-data'),
   )
 
 export const DeleteStorySwaggerDefinition = () =>
@@ -41,7 +41,6 @@ export const DeleteStorySwaggerDefinition = () =>
     }),
     ApiForbiddenResponse({ description: 'Only allowed for business owner ' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
   )
 
 export const GetAllStoriesSwaggerDefinition = () =>
