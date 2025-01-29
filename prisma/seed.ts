@@ -2,6 +2,7 @@ import {
   ModuleName,
   Permission,
   PermissionType,
+  Prisma,
   PrismaClient,
 } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
@@ -26,7 +27,6 @@ async function seedPermissions() {
   const moduleList: Set<ModuleName> = new Set([
     'ROLE',
     'PERMISSION',
-    'APPLICANT',
     'ADMIN',
     'USER',
     'PROFILE',
@@ -92,7 +92,7 @@ async function seedAdmin() {
   }
   const hashedPassword = await bcrypt.hash(superAdminData.password, 10)
 
-  const ADMIN_PERMISSION_SELECTOR: any = {
+  const SUPER_ADMIN_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
     OR: [
       {
         AND: [{ moduleName: 'ROLE' }],
@@ -107,13 +107,16 @@ async function seedAdmin() {
         AND: [{ moduleName: 'USER' }, { permissionName: 'UPDATE' }],
       },
       {
+        AND: [{ moduleName: 'PACKAGE' }],
+      },
+      {
         AND: [{ moduleName: 'CATEGORY' }],
       },
     ],
   }
 
   const permissionList: Permission[] = await prisma.permission.findMany({
-    where: ADMIN_PERMISSION_SELECTOR,
+    where: SUPER_ADMIN_PERMISSION_SELECTOR,
   })
 
   const role = await prisma.role.create({

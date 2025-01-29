@@ -9,7 +9,6 @@ import AuthController from './auth.controller'
 import LocalStrategy from './strategies/local.strategy'
 import JwtStrategy from './strategies/jwt.strategry'
 import { GoogleStrategy } from './strategies/google.strategry'
-
 @Module({
   imports: [
     ConfigModule.forRoot(), // Ensure ConfigModule is imported

@@ -398,7 +398,6 @@ enum PermissionType {
 enum ModuleName {
   ROLE
   PERMISSION
-  APPLICANT
   ADMIN
   USER
   PROFILE

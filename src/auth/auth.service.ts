@@ -173,20 +173,17 @@ export default class AuthService {
   }
 
   async login(user: RequestUser) {
-    const payload = true
-      ? {
-          email: user.email,
-          id: user.id,
-        }
-      : {
-          email: user.email,
-          id: user.id,
-        }
+    console.log(user)
+    const payload = {
+      email: user.email,
+      id: user.id,
+      sub: user.id,
+    }
 
     if (user?.status === 'CREATED' || user?.status === 'INACTIVE')
       throw new UnauthorizedException('User not active')
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: await this.jwtService.signAsync(payload),
       ...user,
     }
   }

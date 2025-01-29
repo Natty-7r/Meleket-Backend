@@ -14,7 +14,7 @@ import {
   Bill,
 } from '@prisma/client'
 import {
-  ADMIN_PERMISSION_SELECTOR,
+  SUPER_ADMIN_PERMISSION_SELECTOR,
   USER_PERMISSION_SELECTOR,
 } from '../constants/access-control.contants'
 
@@ -207,7 +207,7 @@ export enum PermissionWeight {
 
 export type Selector =
   | typeof USER_PERMISSION_SELECTOR
-  | typeof ADMIN_PERMISSION_SELECTOR
+  | typeof SUPER_ADMIN_PERMISSION_SELECTOR
 
 export type RoleUserCountInfo = {
   _count: {

@@ -1,12 +1,10 @@
-import { ModuleName, PermissionType } from '@prisma/client'
+import { ModuleName, PermissionType, Prisma } from '@prisma/client'
 
 export const NULL_ROLE_NAME: string = 'NULL_ROLE' // when admin is revoked
 
 export const USER_ROLE_NAME = 'USER_ROLE'
 
 export const CLIENT_ROLE_NAME = 'CLIENT_ROLE'
-
-export const APPLICANT_PROBATION_PERIOD: number = 2 // number of probation date for applicant
 
 // Define the permission types
 export const PERMISSION_TYPES: Set<PermissionType> = new Set([
@@ -40,7 +38,7 @@ export const MODULE_LIST: Set<ModuleName> = new Set([
 ])
 
 // USER (Regular User) Permissions Selector
-export const USER_PERMISSION_SELECTOR: any = {
+export const USER_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
   OR: [
     {
       AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'READ' }],
@@ -65,7 +63,7 @@ export const USER_PERMISSION_SELECTOR: any = {
 }
 
 // CLIENT (Business Owner) Permissions Selector
-export const CLIENT_PERMISSION_SELECTOR: any = {
+export const CLIENT_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
   OR: [
     {
       AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'CREATE' }],
@@ -94,43 +92,39 @@ export const CLIENT_PERMISSION_SELECTOR: any = {
     {
       AND: [{ moduleName: 'CATEGORY' }, { permissionName: 'UPDATE' }],
     },
+    {
+      AND: [{ moduleName: 'BILL' }, { permissionName: 'READ' }],
+    },
+
     // Restriction: Cannot delete categories
     // Cannot access roles, permissions, or logs
   ],
 }
 
 // ADMIN Permissions Selector
-export const ADMIN_PERMISSION_SELECTOR: any = {
+export const SUPER_ADMIN_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
   OR: [
     {
-      AND: [{ moduleName: 'PERMISSION' }, { permissionName: 'CREATE' }],
+      AND: [{ moduleName: 'PERMISSION' }, { permissionName: 'READ' }],
+    },
+    { moduleName: 'ROLE' },
+    {
+      AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'UPDATE' }],
     },
     {
-      AND: [{ moduleName: 'PERMISSION' }, { permissionName: 'UPDATE' }],
+      AND: [{ moduleName: 'USER' }, { permissionName: 'UPDATE' }],
     },
     {
-      AND: [{ moduleName: 'PERMISSION' }, { permissionName: 'DELETE' }],
+      moduleName: 'CATEGORY',
     },
     {
-      AND: [{ moduleName: 'ROLE' }, { permissionName: 'CREATE' }],
+      moduleName: 'PACKAGE',
     },
     {
-      AND: [{ moduleName: 'ROLE' }, { permissionName: 'UPDATE' }],
+      moduleName: 'ADMIN',
     },
     {
-      AND: [{ moduleName: 'ROLE' }, { permissionName: 'DELETE' }],
-    },
-    {
-      AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'UPDATE' }], // Only update business status
-    },
-    {
-      AND: [{ moduleName: 'CATEGORY' }, { permissionName: 'CREATE' }],
-    },
-    {
-      AND: [{ moduleName: 'CATEGORY' }, { permissionName: 'UPDATE' }],
-    },
-    {
-      AND: [{ moduleName: 'CATEGORY' }, { permissionName: 'DELETE' }],
+      AND: [{ moduleName: 'BILL' }, { permissionName: 'DELETE' }],
     },
   ],
 }
