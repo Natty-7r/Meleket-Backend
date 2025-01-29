@@ -11,6 +11,7 @@ import {
   UpdateCategorySwaggerDefinition,
   VerifyCategorySwaggerDefinition,
 } from './category-swagger.decorator'
+import Public from 'src/common/decorators/public.decorator'
 
 export const CreateCategory = () =>
   applyDecorators(
@@ -42,10 +43,7 @@ export const VerifyCategory = () =>
   )
 
 export const GetCategories = () =>
-  applyDecorators(
-    Permissions({ model: 'CATEGORY', action: 'READ' }),
-    GetCategoriesSwaggerDefinition(),
-  )
+  applyDecorators(Public(), GetCategoriesSwaggerDefinition())
 
 export const DeleteCategory = () =>
   applyDecorators(
