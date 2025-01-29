@@ -171,6 +171,7 @@ export default class BusinessService {
 
   async createBusiness({
     userId,
+    image,
     ...createBusinessDto
   }: CreateBusinessDto & CreateBusinessParams): Promise<any> {
     await this.verifyCategoryId({ id: createBusinessDto.categoryId })
@@ -186,14 +187,6 @@ export default class BusinessService {
             image: true,
           },
         })
-    const a = await this.prismaService.category.findFirst({
-      where: {
-        id: createBusinessDto.categoryId,
-      },
-      select: {
-        image: true,
-      },
-    })
 
     const business = await this.prismaService.business.create({
       data: {

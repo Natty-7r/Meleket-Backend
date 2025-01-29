@@ -72,7 +72,7 @@ export default class AccessControlService {
     name,
   }: CheckRoleNameParams): Promise<boolean> {
     const role = await this.prismaService.role.findFirst({ where: { name } })
-    console.log(role, name)
+
     if (role) {
       if (!forUpdate) {
         // Case 1: Role exists and the role is not being updated
