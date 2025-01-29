@@ -68,7 +68,7 @@ export default class BusinessServiceController {
     })
   }
 
-  @Get()
+  @Get('services')
   @GetBusinessService()
   getServices(@Param('businessId') businessId: string) {
     return this.businessServiceService.getBusinessServices({

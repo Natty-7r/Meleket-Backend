@@ -66,24 +66,6 @@ export const USER_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
 export const CLIENT_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
   OR: [
     {
-      AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'CREATE' }],
-    },
-    {
-      AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'UPDATE' }],
-    },
-    {
-      AND: [{ moduleName: 'BUSINESS_SERVICE' }, { permissionName: 'CREATE' }],
-    },
-    {
-      AND: [{ moduleName: 'BUSINESS_SERVICE' }, { permissionName: 'UPDATE' }],
-    },
-    {
-      AND: [{ moduleName: 'STORY' }, { permissionName: 'CREATE' }],
-    },
-    {
-      AND: [{ moduleName: 'STORY' }, { permissionName: 'UPDATE' }],
-    },
-    {
       AND: [{ moduleName: 'STORY' }, { permissionName: 'DELETE' }],
     },
     {
@@ -95,6 +77,12 @@ export const CLIENT_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
     {
       AND: [{ moduleName: 'BILL' }, { permissionName: 'READ' }],
     },
+    { moduleName: 'BUSINESS_PACKAGE' },
+    { moduleName: 'BUSINESS' },
+    { moduleName: 'BUSINESS_ADDRESS' },
+    { moduleName: 'BUSINESS_SERVICE' },
+    { moduleName: 'BUSINESS_CONTACT' },
+    { moduleName: 'STORY' },
 
     // Restriction: Cannot delete categories
     // Cannot access roles, permissions, or logs

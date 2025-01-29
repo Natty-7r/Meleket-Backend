@@ -110,7 +110,6 @@ export default class AuthController {
     @User() user: RequestUser,
     @Body() updateAuthProviderDto: UpdateAuthProviderDto,
   ) {
-    console.log(user)
     return this.authService.updateAuthProvider({
       userId: user.id,
       ...updateAuthProviderDto,

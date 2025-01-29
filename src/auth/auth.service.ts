@@ -173,7 +173,6 @@ export default class AuthService {
   }
 
   async login(user: RequestUser) {
-    console.log(user)
     const payload = {
       email: user.email,
       id: user.id,
