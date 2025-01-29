@@ -271,14 +271,6 @@ export type TimeFrameParams = {
   startDate?: Date
 }
 
-export type LogParams = {
-  timeUnit?: TimeUnit
-  timeFrame?: number // time frame
-  logType?: LogType
-  startDate?: Date
-  endDate?: Date
-}
-
 export type LogFileFormatterParams = {
   logType: LogType
   fileNames: string[]

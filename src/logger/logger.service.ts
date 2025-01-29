@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common'
-import { LogParams } from 'src/common/types/params.type'
-import PrismaService from 'src/prisma/prisma.service'
 import { Cron } from '@nestjs/schedule'
 import { ARCHIVED_LOG_EXPIRATION_DATE } from 'src/common/constants/base.constants'
 import { calculateTimeFrame } from 'src/common/helpers/date.helper'
+import PrismaService from 'src/prisma/prisma.service'
 import CreateLogDto from './dto/create-log.dto'
-import WinstonLoggerService from './winston-logger/winston-logger.service'
+import { FileLogQueryDto } from './dto/file-log-query.dto'
+import { LogQueryDto } from './dto/log-query.dto'
 import ActivityLoggerStrategry from './winston-logger/strategies/activity-logger.strategry'
 import ErrorLoggerStrategy from './winston-logger/strategies/error-logger.strategry'
+import WinstonLoggerService from './winston-logger/winston-logger.service'
 
 @Injectable()
 export default class LoggerService {
@@ -54,7 +55,7 @@ export default class LoggerService {
     })
   }
 
-  async getFileLogs(params: LogParams) {
+  async getFileLogs(params: FileLogQueryDto) {
     return this.winstonLoggerService.getFileLogs(params)
   }
 
@@ -64,7 +65,7 @@ export default class LoggerService {
     timeFrame,
     startDate = new Date(),
     endDate,
-  }: LogParams) {
+  }: LogQueryDto) {
     const queryConditions: any = {}
 
     if (timeUnit && timeFrame) {

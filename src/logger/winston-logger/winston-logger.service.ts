@@ -1,14 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import * as Winston from 'winston'
-import * as DailyRotateFile from 'winston-daily-rotate-file'
-import {
-  LogFile,
-  LogFileFolder,
-  LoggerType,
-  LogType,
-  TimeUnit,
-} from 'src/common/types/base.type'
-import { LogParams } from 'src/common/types/params.type'
 import {
   calculateTimeFrame,
   compareDates,
@@ -20,7 +10,17 @@ import {
 } from 'src/common/helpers/file.helper'
 import formatLogFiles from 'src/common/helpers/formatter.helper'
 import { parseLogFile } from 'src/common/helpers/parser.helper'
+import {
+  LogFile,
+  LogFileFolder,
+  LoggerType,
+  LogType,
+  TimeUnit,
+} from 'src/common/types/base.type'
 import { LogFileData } from 'src/common/types/responses.type'
+import * as Winston from 'winston'
+import * as DailyRotateFile from 'winston-daily-rotate-file'
+import { FileLogQueryDto } from '../dto/file-log-query.dto'
 import LoggerStrategy from './interfaces/logger-strategy.interface'
 
 @Injectable()
@@ -83,16 +83,16 @@ export default class WinstonLoggerService {
     this.logger.verbose(message, metadata)
   }
 
-  async getFileLogs(params: LogParams) {
-    if (params.logType) return this.readLogFile(params)
+  async getFileLogs(query: FileLogQueryDto) {
+    if (query.logType) return this.readLogFile(query)
     return [
       {
         logType: LogType.ERROR,
-        logs: await this.readLogFile({ ...params, logType: LogType.ERROR }),
+        logs: await this.readLogFile({ ...query, logType: LogType.ERROR }),
       },
       {
         logType: LogType.ACTIVITY,
-        logs: await this.readLogFile({ ...params, logType: LogType.ACTIVITY }),
+        logs: await this.readLogFile({ ...query, logType: LogType.ACTIVITY }),
       },
     ]
   }
@@ -103,7 +103,7 @@ export default class WinstonLoggerService {
     startDate,
     timeUnit = TimeUnit.d,
     timeFrame = 1,
-  }: LogParams) {
+  }: FileLogQueryDto) {
     const folderName = LogFileFolder[logType]
     let logFileDatas: LogFileData[] = []
     let [initialDate, finalDate] = [new Date(), new Date()]
