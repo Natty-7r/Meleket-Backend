@@ -80,14 +80,24 @@ export const VerifyUserSwaggerDefinition = () => {
 
 export const UpdatePasswordSwaggerDefinition = () => {
   return applyDecorators(
-    ApiOperation({ summary: 'update password user ' }),
+    ApiOperation({ summary: 'update password  ' }),
     ApiResponse({
       type: String,
-      description: 'password verified successfully',
+      description: 'password updated successfully',
     }),
     ApiBadRequestResponse({ description: 'Invalid user id ' }),
     ApiNotFoundResponse({ description: 'OTP not found' }),
     ApiBadRequestResponse({ description: 'Invalid OTP' }),
     ApiGoneResponse({ description: 'OTP expired' }),
+  )
+}
+export const UpdateAuthProviderSwaggerDefinition = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'update auth provider user ' }),
+    ApiResponse({
+      type: String,
+      description: 'auth provider updated successfully',
+    }),
+    ApiBadRequestResponse({ description: 'LOCAL auth method needs password' }),
   )
 }

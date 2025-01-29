@@ -7,6 +7,7 @@ import {
   UpdatePackageSwaggerDefinition,
 } from './payment-swagger.decorator'
 import Permissions from 'src/common/decorators/permission.decorator'
+import Public from 'src/common/decorators/public.decorator'
 
 export const PurchasePackage = () =>
   applyDecorators(
@@ -33,7 +34,4 @@ export const UpdatePackage = () =>
   )
 
 export const GetPackages = () =>
-  applyDecorators(
-    Permissions({ model: 'PACKAGE', action: 'DELETE' }),
-    GetPackagesSwaggerDefinition(),
-  )
+  applyDecorators(Public(), GetPackagesSwaggerDefinition())

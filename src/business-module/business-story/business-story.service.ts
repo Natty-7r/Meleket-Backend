@@ -1,16 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
-import { Story } from '@prisma/client'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
-import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import { validateStory } from 'src/common/helpers/validator.helper'
-import AccessControlService from 'src/access-control/access-control.service'
 import {
-  BusinessIdParams,
-  UserIdParams,
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
+import { Story } from '@prisma/client'
+import AccessControlService from 'src/access-control/access-control.service'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
+import PrismaService from 'src/prisma/prisma.service'
+import {
   BaseIdParams,
-  StoryIdParams,
+  BusinessIdParams,
   OptionalUserIdParams,
+  StoryIdParams,
+  UserIdParams,
 } from '../../common/types/params.type'
 import CreateStoryDto from './dto/create-story.dto'
 import UpdateStoryDto from './dto/update-store.dto'
@@ -44,61 +46,61 @@ export default class BusinessStoryService {
   async addStory({
     businessId,
     userId,
+    images,
     ...createStoryDto
-  }: CreateStoryDto & UserIdParams): Promise<ApiResponse> {
+  }: CreateStoryDto & UserIdParams & BusinessIdParams): Promise<Story> {
     await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS',
       userId,
     })
-    validateStory({ ...createStoryDto })
-    const story = await this.prismaService.story.create({
+    if (!createStoryDto.text && (!images || images?.length === 0))
+      throw new BadRequestException('text or image is needed')
+
+    return await this.prismaService.story.create({
       data: {
         businessId,
+        images: images?.map((image) => image?.path),
         ...createStoryDto,
       },
     })
-
-    return {
-      status: 'success',
-      message: 'story added successfully',
-      data: story,
-    }
   }
 
   async updateStory({
     userId,
     id,
-    ...updateStoryDto
-  }: UpdateStoryDto & UserIdParams): Promise<ApiResponse> {
-    let oldImageUrl
+    images,
+    ...createStoryDto
+  }: UpdateStoryDto & UserIdParams & BaseIdParams): Promise<Story> {
+    let oldImageUrls: string[]
     const { entity: story } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
         model: 'STORY',
         userId,
       })
-    if (updateStoryDto.image) oldImageUrl = (story as Story).image
-    validateStory({ ...updateStoryDto })
+    if (images) oldImageUrls = (story as Story).images
     const updateStory = await this.prismaService.story.update({
       where: { id },
       data: {
-        ...updateStoryDto,
+        images: images
+          ? images?.map((image) => image?.path)
+          : (story as Story).images,
+        ...createStoryDto,
       },
     })
-    if (oldImageUrl) deleteFileAsync({ filePath: oldImageUrl })
+    if (oldImageUrls && oldImageUrls.length > 0)
+      oldImageUrls.forEach((imageUrl) =>
+        deleteFileAsync({ filePath: imageUrl }),
+      )
 
-    return {
-      status: 'success',
-      message: 'story updated  successfully',
-      data: updateStory,
-    }
+    return updateStory
   }
 
   async deleteStory({
     userId,
     id,
-  }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & UserIdParams): Promise<string> {
     const { entity: story } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
@@ -109,14 +111,14 @@ export default class BusinessStoryService {
     await this.prismaService.story.delete({
       where: { id },
     })
-    deleteFileAsync({ filePath: (story as Story)?.image || '' })
-    return {
-      status: 'success',
-      message: 'story deleted  successfully',
-    }
+    if ((story as Story)?.images?.length > 0)
+      (story as Story)?.images?.forEach((imageUrl) =>
+        deleteFileAsync({ filePath: imageUrl }),
+      )
+    return id
   }
 
-  async getStories({ userId }: OptionalUserIdParams): Promise<ApiResponse> {
+  async getStories({ userId }: OptionalUserIdParams): Promise<Story[]> {
     const stories = await this.prismaService.story.findMany({
       orderBy: [{ createdAt: 'desc' }],
     })
@@ -136,17 +138,13 @@ export default class BusinessStoryService {
       viewed: userId ? viewedStoryIds.has(story.id) : false,
     }))
 
-    return {
-      status: 'success',
-      message: 'Stories fetched successfully',
-      data: enhancedStories,
-    }
+    return enhancedStories
   }
 
   async getBusinessStories({
     userId,
     businessId,
-  }: BusinessIdParams & OptionalUserIdParams): Promise<ApiResponse> {
+  }: BusinessIdParams & OptionalUserIdParams): Promise<Story[]> {
     const stories = await this.prismaService.story.findMany({
       where: { businessId },
       orderBy: [{ createdAt: 'desc' }],
@@ -167,10 +165,6 @@ export default class BusinessStoryService {
       viewed: userId ? viewedStoryIds.has(story.id) : false,
     }))
 
-    return {
-      status: 'success',
-      message: 'Stories fetched successfully',
-      data: enhancedStories,
-    }
+    return enhancedStories
   }
 }

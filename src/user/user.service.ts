@@ -4,7 +4,12 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
+import { AuthProvider, Profile, Status } from '@prisma/client'
+import { CreateAccountDto } from 'src/auth/dto'
+import BusinessService from 'src/business-module/business/business.service'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
+import { removePassword } from 'src/common/helpers/parser.helper'
+import { validateAge } from 'src/common/helpers/validator.helper'
 import {
   BaseIdParams,
   BaseRoleIdParams,
@@ -12,15 +17,10 @@ import {
   StoryIdParams,
   UserIdParams,
 } from 'src/common/types/params.type'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
-import { validateAge } from 'src/common/helpers/validator.helper'
-import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import BusinessService from 'src/business-module/business/business.service'
-import { CreateAccountDto } from 'src/auth/dto'
-import { removePassword } from 'src/common/helpers/parser.helper'
+import { ApiResponse } from 'src/common/types/responses.type'
+import PrismaService from 'src/prisma/prisma.service'
 import AddProfileDto from './dto/add-profile.dto'
 import UpdateProfileDto from './dto/edit-profile.dto'
-import AddRatingDto from './dto/add.rating.dto'
 
 @Injectable()
 export default class UserService {
@@ -37,7 +37,7 @@ export default class UserService {
     })
 
     if (!user) throw new ForbiddenException('User not found')
-    return true
+    return user
   }
 
   async checkProfileLevel({ id }: BaseIdParams) {
@@ -50,24 +50,23 @@ export default class UserService {
     return true
   }
 
-  async createUserAccount({
-    firstName,
-    lastName,
-    email,
-    password,
-    roleId,
-  }: CreateAccountDto & BaseRoleIdParams) {
-    const user = await this.prismaService.user.findFirst({ where: { email } })
+  async createUserAccount(
+    createAccountDto: CreateAccountDto &
+      BaseRoleIdParams & { authProvider: AuthProvider },
+  ) {
+    const user = await this.prismaService.user.findFirst({
+      where: { email: createAccountDto.email },
+    })
     if (user) throw new ConflictException('Email is already in use!')
 
     return this.prismaService.user.create({
       data: {
-        firstName,
-        lastName,
-        email,
-        password,
-        status: 'CREATED',
-        roleId,
+        ...createAccountDto,
+        currentAuthMethod: createAccountDto.authProvider,
+        status:
+          createAccountDto.authProvider !== AuthProvider.LOCAL
+            ? 'ACTIVE'
+            : 'CREATED',
       },
     })
   }
@@ -78,18 +77,14 @@ export default class UserService {
     const userDetail = await this.prismaService.user.findFirst({
       where: { id },
     })
-    return {
-      status: 'success',
-      message: `user detail fetced  successfully`,
-      data: removePassword(userDetail),
-    }
+    return removePassword(userDetail)
   }
 
   async addProfile({
     userId,
     birthDate,
     ...addProfileDto
-  }: AddProfileDto & UserIdParams): Promise<ApiResponse> {
+  }: AddProfileDto & UserIdParams): Promise<Profile> {
     await this.checkUserId({ id: userId })
     let profile = await this.prismaService.profile.findFirst({
       where: { userId },
@@ -97,7 +92,7 @@ export default class UserService {
     if (profile)
       return this.updateProfile({ userId, ...addProfileDto, birthDate })
     const age = validateAge(birthDate)
-    profile = await this.prismaService.profile.create({
+    return this.prismaService.profile.create({
       data: {
         userId,
         birthDate,
@@ -105,18 +100,13 @@ export default class UserService {
         ...addProfileDto,
       },
     })
-    return {
-      status: 'success',
-      message: `profile added  successfully`,
-      data: profile,
-    }
   }
 
   async updateProfile({
     userId,
     birthDate,
     ...updateProfileDto
-  }: UpdateProfileDto & UserIdParams): Promise<ApiResponse> {
+  }: UpdateProfileDto & UserIdParams): Promise<Profile> {
     let oldProfilePicturePath
     await this.checkUserId({ id: userId })
 
@@ -137,60 +127,21 @@ export default class UserService {
     })
     if (oldProfilePicturePath)
       deleteFileAsync({ filePath: oldProfilePicturePath })
-    return {
-      status: 'success',
-      message: `profile updated  successfully`,
-      data: profile,
-    }
-  }
-
-  // Rating related
-  async addRating({
-    userId,
-    businessId,
-    rateValue,
-  }: AddRatingDto & UserIdParams): Promise<ApiResponse> {
-    await this.checkProfileLevel({ id: userId })
-    const business = await this.businessSevice.verifiyBusinessId({
-      id: businessId,
-    })
-    if (business.ownerId === userId)
-      throw new ForbiddenException('Owner cannot rate own business  ')
-    let rating = await this.prismaService.rating.findFirst({
-      where: {
-        businessId,
-        userId,
-      },
-    })
-
-    if (rating)
-      rating = await this.prismaService.rating.update({
-        where: { id: rating.id },
-        data: { rateValue },
-      })
-    rating = await this.prismaService.rating.create({
-      data: { userId, businessId, rateValue },
-    })
-    this.businessSevice.calculateRatingSummary({ id: businessId })
-    return {
-      status: 'success',
-      message: `Rating added successfully`,
-      data: rating,
-    }
+    return profile
   }
 
   // following
   async followBussiness({
     id,
     businessId,
-  }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & BusinessIdParams): Promise<any> {
     return this.businessSevice.addFollower({ id: businessId, userId: id })
   }
 
   async unFollowBussiness({
     id,
     businessId,
-  }: BaseIdParams & BusinessIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & BusinessIdParams): Promise<any> {
     return this.businessSevice.removeFollower({ id: businessId, userId: id })
   }
 
@@ -201,7 +152,7 @@ export default class UserService {
   async viewStory({
     storyId,
     userId,
-  }: StoryIdParams & UserIdParams): Promise<BareApiResponse> {
+  }: StoryIdParams & UserIdParams): Promise<string> {
     let userStoryView = await this.prismaService.userStoryView.findUnique({
       where: {
         /* eslint-disable */
@@ -223,9 +174,6 @@ export default class UserService {
       await this.businessSevice.updateStoryViewCount({ storyId })
     }
 
-    return {
-      status: 'success',
-      message: `User added as veiw for story successfully`,
-    }
+    return `User added as veiw for story successfully`
   }
 }

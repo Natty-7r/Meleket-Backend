@@ -14,7 +14,7 @@ import {
   Bill,
 } from '@prisma/client'
 import {
-  ADMIN_PERMISSION_SELECTOR,
+  SUPER_ADMIN_PERMISSION_SELECTOR,
   USER_PERMISSION_SELECTOR,
 } from '../constants/access-control.contants'
 
@@ -72,11 +72,6 @@ export interface CategoryTreeNode {
 export type CategoryTreeSwaggerConfig = {
   operationName: string
   successMessage: string
-}
-
-export enum SignUpType {
-  BY_EMAIL = 'BY_EMAIL',
-  OAUTH = 'OAUTH',
 }
 
 export interface ChapaConfig {
@@ -212,7 +207,7 @@ export enum PermissionWeight {
 
 export type Selector =
   | typeof USER_PERMISSION_SELECTOR
-  | typeof ADMIN_PERMISSION_SELECTOR
+  | typeof SUPER_ADMIN_PERMISSION_SELECTOR
 
 export type RoleUserCountInfo = {
   _count: {
@@ -244,3 +239,61 @@ export type BusinessSubEntity =
   | BusinessPackage
   | Story
   | Bill
+
+type AnyObject = { [key: string]: any }
+
+export type OrderByOption<T> = {
+  [K in keyof T]?: 'asc' | 'desc'
+} & AnyObject
+
+export type SelectOption<T> = {
+  [K in keyof T]?: boolean
+} & { [key: string]: any }
+export type IncludesOption<T> = {
+  [K in keyof T]?: boolean | IncludesOption<T[K]>
+} & AnyObject
+
+export type Condition<T> = {
+  [K in keyof T]?: T[K] | Condition<T[K]>
+} & { deletedAt?: any } & AnyObject
+
+export type PaginationOptions = {
+  page?: number | string
+  itemsPerPage?: number | string
+}
+
+// export type SelectionOptions<T> = {
+//   select?: SelectOption<T>
+//   include?: IncludesOption<T>
+//   orderBy?: OrderByOption<T>[]
+//   condition?: Condition<T>
+// }
+
+export type SelectionOptions<T> = {
+  select?: any
+  include?: any
+  orderBy?: any
+  condition?: any
+}
+
+export interface PaginatedResult<T> {
+  data: T[]
+  pagination: {
+    page: number
+    itemsPerPage: number
+
+    total: number
+    lastPage: number
+    prev: number | null
+    next: number | null
+  }
+}
+
+export enum BusinessSortableFields {
+  'rating' = 'rating',
+  'follower' = 'follower',
+  'service' = 'service',
+}
+export enum ReviewSortableFields {
+  'rating' = 'rating',
+}

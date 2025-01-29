@@ -1,24 +1,23 @@
 import { Module } from '@nestjs/common'
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import { ConfigModule } from '@nestjs/config'
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import AdminModule from './admin/admin.module'
-import PaymentModule from './payment/payment.module'
 import AppController from './app.controller'
 import AppService from './app.service'
-import MessageModule from './message/message.module'
 import AuthModule from './auth/auth.module'
+import MessageModule from './message/message.module'
+import PaymentModule from './payment/payment.module'
 
-import ErrorExceptionFilter from './common/filters/error.filter'
-import ActivityInterceptor from './common/interceptors/activity.interceptor'
-import CategoryModule from './category/category.module'
-import configuration from './config/configuration'
-import UserModule from './user/user.module'
-import LoggerModule from './logger/logger.module'
-import JwtAuthGuard from './auth/guards/jwt.guard'
 import AccessControlModule from './access-control/access-control.module'
 import BusinessBaseModule from './business-module/base-business.module'
+import CategoryModule from './category/category.module'
+import ErrorExceptionFilter from './common/filters/error.filter'
+import ActivityInterceptor from './common/interceptors/activity.interceptor'
+import configuration from './config/configuration'
+import LoggerModule from './logger/logger.module'
+import UserModule from './user/user.module'
 
 @Module({
   imports: [
@@ -48,7 +47,6 @@ import BusinessBaseModule from './business-module/base-business.module'
   providers: [
     { provide: APP_FILTER, useClass: ErrorExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: ActivityInterceptor },
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
     AppService,
   ],
 

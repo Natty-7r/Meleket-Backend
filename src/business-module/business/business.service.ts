@@ -1,45 +1,42 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
 import {
   Business,
+  BusinessContact,
   BussinessService as BussinesServiceModelType,
+  Prisma,
   Story,
 } from '@prisma/client'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
-import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import { generateBusinessSorting } from 'src/common/helpers/sorting.helper'
-import LoggerService from 'src/logger/logger.service'
 import AccessControlService from 'src/access-control/access-control.service'
-import { createPagination } from '../../common/helpers/pagination.helper'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
+import LoggerService from 'src/logger/logger.service'
+import PrismaService from 'src/prisma/prisma.service'
 
-import { ApiResponseWithPagination } from '../../common/types/responses.type'
-import CreateBusinessDto from './dto/create-business.dto'
-import UpdateBusinessDto from './dto/update-business.dto'
+import paginator from 'src/common/helpers/pagination.helper'
 import {
+  BusinessSortableFields,
+  PaginatedResult,
+} from 'src/common/types/base.type'
+import {
+  BaseIdParams,
+  BusinessIdParams,
   CheckBusinessAddressParams,
   CheckBusinessNameParams,
   CheckBusinessServiceNameParams,
   CreateBusinessParams,
-  UpdateBusinessImageParams,
+  StoryIdParams,
+  UserIdParams,
   VerifyBusinessIdParams,
   VerifyBusinessServiceIdParams,
-  BusinessIdParams,
-  CategoryIdParams,
-  SearchBusinessParams,
-  UserIdParams,
-  BaseIdParams,
-  StoryIdParams,
-  PaginationParams,
-  BaseNameParams,
 } from '../../common/types/params.type'
+import BusinessQueryDto from './dto/business-query.dto'
+import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
+import UpdateBusinessDto from './dto/update-business.dto'
 
 @Injectable()
 export default class BusinessService {
@@ -51,34 +48,6 @@ export default class BusinessService {
 
   // helper methods
 
-  async calculateRatingSummary({ id }: BaseIdParams) {
-    const ratings = await this.prismaService.rating.findMany({
-      where: {
-        businessId: id,
-      },
-    })
-
-    const averageRating =
-      ratings.reduce((sum, rating) => {
-        return sum + rating.rateValue
-      }, 0.0) / ratings.length
-    /* eslint-disable */
-    const ratingSummary = {
-      1: ratings.filter((rating) => rating.rateValue === 1).length,
-      2: ratings.filter((rating) => rating.rateValue === 2).length,
-      3: ratings.filter((rating) => rating.rateValue === 3).length,
-      4: ratings.filter((rating) => rating.rateValue === 4).length,
-      5: ratings.filter((rating) => rating.rateValue === 5).length,
-    }
-    /* eslint-disable */
-    return this.prismaService.business.update({
-      where: { id },
-      data: {
-        averageRating,
-        ratingSummary: JSON.stringify(ratingSummary),
-      },
-    })
-  }
   async updateStoryViewCount({ storyId }: StoryIdParams): Promise<Story> {
     const story = await this.verifyBusinessStoryId({ id: storyId })
 
@@ -90,15 +59,12 @@ export default class BusinessService {
     })
   }
 
-  async checkUserProfileLevel({ userId }: UserIdParams): Promise<boolean> {
-    const user = await this.prismaService.user.findFirst({
-      where: { id: userId },
+  async verifyCategoryId({ id }: BaseIdParams) {
+    const category = await this.prismaService.category.findFirst({
+      where: { id },
     })
-
-    if (!user) throw new UnauthorizedException('User not found ')
-    if (user?.status !== 'CREATED')
-      throw new ForbiddenException('Unverfied user cannot create business ')
-    return true
+    if (!category) throw new BadRequestException('Invalid category Id')
+    return category
   }
 
   async verifiyBusinessId({ id }: VerifyBusinessIdParams): Promise<Business> {
@@ -205,9 +171,10 @@ export default class BusinessService {
 
   async createBusiness({
     userId,
+    image,
     ...createBusinessDto
-  }: CreateBusinessDto & CreateBusinessParams): Promise<ApiResponse> {
-    await this.checkUserProfileLevel({ userId })
+  }: CreateBusinessDto & CreateBusinessParams): Promise<any> {
+    await this.verifyCategoryId({ id: createBusinessDto.categoryId })
     await this.checkBusinessName({ name: createBusinessDto.name })
 
     const businessMainImage = createBusinessDto.mainImage
@@ -239,6 +206,7 @@ export default class BusinessService {
         }),
       },
       select: {
+        id: true,
         owner: { select: { id: true, firstName: true, lastName: true } },
         name: true,
         description: true,
@@ -255,41 +223,7 @@ export default class BusinessService {
       context: 'new bussines',
       userId,
     })
-    return {
-      status: 'success',
-      message: 'Account created successfully',
-      data: {
-        ...business,
-      },
-    }
-  }
-
-  async updateBusinessImage({
-    id,
-    imageUrl,
-    userId,
-  }: UpdateBusinessImageParams): Promise<ApiResponse> {
-    const { entity: bussiness } =
-      await this.accessControlService.verifyBussinessOwnerShip({
-        id,
-        model: 'BUSINESS',
-        userId,
-      })
-
-    if (imageUrl.trim() == '') throw new BadRequestException('Invalid Image')
-
-    const updatedBusiness = await this.prismaService.business.update({
-      where: { id },
-      data: { mainImageUrl: imageUrl },
-    })
-    deleteFileAsync({ filePath: (bussiness as Business).mainImageUrl })
-    return {
-      status: 'success',
-      message: 'Buisness image updated successfully',
-      data: {
-        ...updatedBusiness,
-      },
-    }
+    return business
   }
 
   async updateBusiness({
@@ -297,7 +231,8 @@ export default class BusinessService {
     name,
     description,
     userId,
-  }: UpdateBusinessDto & UserIdParams): Promise<ApiResponse> {
+    image,
+  }: UpdateBusinessDto & UserIdParams & BaseIdParams): Promise<Business> {
     const { entity: bussiness } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
@@ -310,23 +245,21 @@ export default class BusinessService {
       data: {
         name: name || (bussiness as Business).name,
         description: description || (bussiness as Business).description,
+        mainImageUrl: image?.path || (bussiness as Business).mainImageUrl,
       },
     })
 
-    return {
-      status: 'success',
-      message: 'Buisness updated successfully',
-      data: {
-        ...updatedBusiness,
-      },
-    }
+    if (image && (bussiness as Business).mainImageUrl)
+      deleteFileAsync({ filePath: (bussiness as Business).mainImageUrl })
+
+    return updatedBusiness
   }
 
   async updateBusinessContact({
     businessId,
     userId,
     ...updateBusinessContactDto
-  }: UpdateBusinessContactDto & UserIdParams): Promise<ApiResponse> {
+  }: UpdateBusinessContactDto & UserIdParams): Promise<BusinessContact> {
     const {} = await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS_CONTACT',
@@ -339,108 +272,128 @@ export default class BusinessService {
           ...updateBusinessContactDto,
         },
       })
-    return {
-      status: 'success',
-      message: 'Buisness contact updated successfully',
-      data: {
-        ...updatedBuinessContact,
-      },
-    }
+    return updatedBuinessContact
   }
   // fetch related
 
-  async getCategoryBusinesses({
+  async getAllBusinesses({
+    search,
+    userId,
     categoryId,
-    page = 1,
-    items = 10,
-    sort = ['rating'],
-    sortType = 'desc',
-    name: categoryName,
-  }: CategoryIdParams & PaginationParams & BaseNameParams): Promise<
-    ApiResponseWithPagination<Business[]>
-  > {
-    const businesses = await this.prismaService.business.findMany({
-      where: { categoryId },
-      take: items,
-      skip: (page - 1) * items,
-      orderBy: generateBusinessSorting({ sortKeys: sort, sortType }),
-    })
-    const totalBusinesses = await this.prismaService.business.count({
-      where: { categoryId },
-    })
-
-    return {
-      status: 'success',
-      message: `${categoryName}  buisness fetched successfully`,
-      data: {
-        pagination: createPagination({
-          totalCount: totalBusinesses,
-          page,
-          items,
-        }),
-        payload: businesses,
-      },
+    orderOption,
+    orderType,
+    page,
+    itemsPerPage,
+  }: BusinessQueryDto): Promise<PaginatedResult<Business>> {
+    const where: Prisma.BusinessWhereInput = { AND: [{ deletedAt: null }] }
+    let orderBy: Prisma.BusinessOrderByWithRelationInput = {
+      createdAt: 'desc',
     }
-  }
-
-  async getAllBusinesses(): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany({
-      select: {
-        id: true,
-        name: true,
-        mainImageUrl: true,
-        description: true,
-        averageRating: true,
-        category: {
-          select: {
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            reviews: true,
-            followers: true,
-          },
+    const select: Prisma.BusinessSelect = {
+      id: true,
+      name: true,
+      mainImageUrl: true,
+      description: true,
+      averageRating: true,
+      category: {
+        select: {
+          name: true,
         },
       },
-    })
-    return {
-      status: 'success',
-      message: 'All buisness fetched successfully',
-      data: business,
-    }
-  }
-
-  async getUserBusinesses({ userId }: UserIdParams): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany({
-      where: { ownerId: userId },
-      select: {
-        id: true,
-        name: true,
-        mainImageUrl: true,
-        description: true,
-        averageRating: true,
-        category: {
-          select: {
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            reviews: true,
-            followers: true,
-          },
+      _count: {
+        select: {
+          reviews: true,
+          followers: true,
         },
       },
-    })
-    return {
-      status: 'success',
-      message: 'User buisness fetched successfully',
-      data: business,
     }
+    /** Where constructor */
+    if (search) {
+      where.AND = [
+        ...(where.AND as any),
+        {
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+            {
+              description: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+            {
+              address: {
+                some: {
+                  OR: [
+                    {
+                      city: {
+                        contains: search,
+                        mode: 'insensitive',
+                      },
+                      country: {
+                        contains: search,
+                        mode: 'insensitive',
+                      },
+                      specificLocation: {
+                        contains: search,
+                        mode: 'insensitive',
+                      },
+                      state: {
+                        contains: search,
+                        mode: 'insensitive',
+                      },
+                      streetAddress: {
+                        contains: search,
+                        mode: 'insensitive',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      ]
+    }
+    if (userId) where.AND = [...(where.AND as any), { ownerId: userId }]
+    if (categoryId) where.AND = [...(where.AND as any), { categoryId }]
+
+    /** Order by constructor */
+    if (orderOption && orderType) {
+      if (orderOption === BusinessSortableFields.follower)
+        orderBy = {
+          followers: {
+            _count: orderType,
+          },
+        }
+      if (orderOption === BusinessSortableFields.rating)
+        orderBy = {
+          averageRating: orderType,
+        }
+      if (orderOption === BusinessSortableFields.service)
+        orderBy = {
+          services: {
+            _count: orderType,
+          },
+        }
+    }
+
+    return paginator<Business, Business>({
+      model: this.prismaService.business,
+      selectionOption: {
+        condition: where,
+        select: select as any,
+        orderBy: orderBy as any,
+      },
+      pageOptions: { page, itemsPerPage },
+    })
   }
 
-  async getBusinessDetail({ id }: BaseIdParams): Promise<ApiResponse> {
+  async getBusinessDetail({ id }: BaseIdParams): Promise<any> {
     const businessDetail = await this.prismaService.business.findFirst({
       where: { id },
       select: {
@@ -451,7 +404,6 @@ export default class BusinessService {
           },
         },
         id: true,
-        ratings: true,
         reviews: {
           take: 10,
           orderBy: [{ createdAt: 'desc' }],
@@ -465,13 +417,9 @@ export default class BusinessService {
         services: true,
       },
     })
-
-    return {
-      status: 'success',
-      message: 'All buisness fetched successfully',
-      data: businessDetail,
-    }
+    return businessDetail
   }
+
   async getBusinessPackageDetail({ businessId }: BusinessIdParams) {
     return this.prismaService.business.findFirst({
       where: { id: businessId },
@@ -490,7 +438,7 @@ export default class BusinessService {
   async getUserBusinessDetail({
     businessId,
     userId,
-  }: BusinessIdParams & UserIdParams): Promise<ApiResponse> {
+  }: BusinessIdParams & UserIdParams): Promise<any> {
     await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS',
@@ -512,7 +460,6 @@ export default class BusinessService {
             name: true,
           },
         },
-        ratings: true,
         reviews: true,
         address: true,
         contact: true,
@@ -521,96 +468,14 @@ export default class BusinessService {
         packages: true,
       },
     })
-    return {
-      status: 'success',
-      message: 'All buisness fetched successfully',
-      data: businessDetail,
-    }
-  }
-
-  async searchBusinesses({
-    searchKey,
-  }: SearchBusinessParams): Promise<ApiResponse> {
-    const business = await this.prismaService.business.findMany({
-      where: {
-        OR: [
-          {
-            name: {
-              contains: searchKey,
-              mode: 'insensitive',
-            },
-          },
-          {
-            description: {
-              contains: searchKey,
-              mode: 'insensitive',
-            },
-          },
-          {
-            address: {
-              some: {
-                OR: [
-                  {
-                    city: {
-                      contains: searchKey,
-                      mode: 'insensitive',
-                    },
-                    country: {
-                      contains: searchKey,
-                      mode: 'insensitive',
-                    },
-                    specificLocation: {
-                      contains: searchKey,
-                      mode: 'insensitive',
-                    },
-                    state: {
-                      contains: searchKey,
-                      mode: 'insensitive',
-                    },
-                    streetAddress: {
-                      contains: searchKey,
-                      mode: 'insensitive',
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        ],
-      },
-      select: {
-        id: true,
-        name: true,
-        mainImageUrl: true,
-        description: true,
-        averageRating: true,
-        category: {
-          select: {
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            reviews: true,
-            followers: true,
-          },
-        },
-      },
-    })
-    if (!business || business.length == 0)
-      throw new NotFoundException(`no buisness for  ${searchKey} key `)
-    return {
-      status: 'success',
-      message: `buisness for ${searchKey} key fetched successfully`,
-      data: business,
-    }
+    return businessDetail
   }
 
   // follow related
   async addFollower({
     id,
     userId,
-  }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & UserIdParams): Promise<string> {
     await this.verifiyBusinessId({ id })
 
     await this.prismaService.business.update({
@@ -623,17 +488,13 @@ export default class BusinessService {
         },
       },
     })
-
-    return {
-      status: 'success',
-      message: 'User followed buisness  successfully',
-    }
+    return 'User followed buisness  successfully'
   }
 
   async removeFollower({
     id,
     userId,
-  }: BaseIdParams & UserIdParams): Promise<BareApiResponse> {
+  }: BaseIdParams & UserIdParams): Promise<string> {
     await this.verifiyBusinessId({ id })
 
     await this.prismaService.business.update({
@@ -646,14 +507,10 @@ export default class BusinessService {
         },
       },
     })
-
-    return {
-      status: 'success',
-      message: 'User unfollowed buisness successfully',
-    }
+    return 'User unfollowed buisness successfully'
   }
 
-  async getFollowerBusiness({ userId }: UserIdParams): Promise<ApiResponse> {
+  async getFollowerBusiness({ userId }: UserIdParams): Promise<any> {
     const businesses = await this.prismaService.business.findMany({
       where: {
         followers: {
@@ -681,12 +538,6 @@ export default class BusinessService {
         },
       },
     })
-    return {
-      status: 'success',
-      message: 'followed  buisness feteched successfully',
-      data: businesses,
-    }
+    return businesses
   }
-
-  //
 }

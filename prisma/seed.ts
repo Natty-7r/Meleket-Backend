@@ -2,6 +2,7 @@ import {
   ModuleName,
   Permission,
   PermissionType,
+  Prisma,
   PrismaClient,
 } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
@@ -26,7 +27,6 @@ async function seedPermissions() {
   const moduleList: Set<ModuleName> = new Set([
     'ROLE',
     'PERMISSION',
-    'APPLICANT',
     'ADMIN',
     'USER',
     'PROFILE',
@@ -66,19 +66,18 @@ async function seedPermissions() {
         default:
           permissionWeight = 1
       }
-      if (!(permissionType !== 'READ' && module == 'PERMISSION'))
-        permissions.push({
-          moduleName: module,
-          permissionName: permissionType,
-          permissionWeight,
-        })
+
+      permissions.push({
+        moduleName: module,
+        permissionName: permissionType,
+        permissionWeight,
+      })
     })
   })
   await prisma.permission.deleteMany({})
   await prisma.permission.createMany({
     data: permissions,
   })
-  console.log('Permissions seeded successfully')
 }
 
 async function seedAdmin() {
@@ -93,16 +92,22 @@ async function seedAdmin() {
   }
   const hashedPassword = await bcrypt.hash(superAdminData.password, 10)
 
-  const ADMIN_PERMISSION_SELECTOR: any = {
+  const SUPER_ADMIN_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
     OR: [
       {
         AND: [{ moduleName: 'ROLE' }],
       },
       {
-        AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'UPDATE' }], // Only update business status
+        AND: [{ moduleName: 'PERMISSION' }, { permissionName: 'READ' }],
       },
       {
-        AND: [{ moduleName: 'USER' }, { permissionName: 'UPDATE' }], // Only update business status
+        AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'UPDATE' }],
+      },
+      {
+        AND: [{ moduleName: 'USER' }, { permissionName: 'UPDATE' }],
+      },
+      {
+        AND: [{ moduleName: 'PACKAGE' }],
       },
       {
         AND: [{ moduleName: 'CATEGORY' }],
@@ -111,7 +116,7 @@ async function seedAdmin() {
   }
 
   const permissionList: Permission[] = await prisma.permission.findMany({
-    where: ADMIN_PERMISSION_SELECTOR,
+    where: SUPER_ADMIN_PERMISSION_SELECTOR,
   })
 
   const role = await prisma.role.create({
@@ -127,9 +132,10 @@ async function seedAdmin() {
       ...superAdminData,
       roleId: role.id,
       password: hashedPassword,
+      inActiveReason: '',
+      status: 'ACTIVE',
     },
   })
-  console.log('Admins, and Roles seeded successfully')
 }
 
 async function seedPackages() {
@@ -156,8 +162,7 @@ async function seedPackages() {
 async function main() {
   await seedPermissions()
   await seedAdmin()
-  seedPackages()
-  console.log('Seeding completed successfully')
+  await seedPackages()
 }
 
 main()

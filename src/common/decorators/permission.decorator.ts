@@ -14,7 +14,6 @@ const Permissions = (...permissions: PermisionSet[]) =>
   applyDecorators(
     SetMetadata(PERMISSIONS_KEY, permissions),
     UseGuards(JwtAuthGuard, PermissionGuard),
-    UseGuards(PermissionGuard),
     ApiBearerAuth(),
     ApiUnauthorizedResponse({ description: 'Unauthorized' }),
     ApiForbiddenResponse({ description: 'not allowed' }),

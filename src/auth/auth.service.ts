@@ -2,32 +2,36 @@ import {
   BadGatewayException,
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
-import * as bcrypt from 'bcrypt'
-import { JwtService } from '@nestjs/jwt'
-import { OTPType, Admin } from '@prisma/client'
-import { RequestUser, SignUpType } from 'src/common/types/base.type'
-import { generateOTP } from 'src/common/helpers/numbers.helper'
-import MessageService from 'src/message/message.service'
 import { ConfigService } from '@nestjs/config'
-import EmailStrategy from 'src/message/strategies/email.strategy'
-import { BaseAdminIdParams } from 'src/common/types/params.type'
-import LoggerService from 'src/logger/logger.service'
+import { JwtService } from '@nestjs/jwt'
+import { Admin, AuthProvider, OTPType, User } from '@prisma/client'
+import * as bcrypt from 'bcrypt'
 import AccessControlService from 'src/access-control/access-control.service'
 import AdminService from 'src/admin/admin.service'
 import CreateAdminDto from 'src/admin/dto/create-admin-account.dto'
-import UserService from 'src/user/user.service'
+import { generateOTP } from 'src/common/helpers/numbers.helper'
 import { removePassword } from 'src/common/helpers/parser.helper'
-import { CreateAccountDto, SignInDto } from './dto'
-import VerifyOTPDto from './dto/verify-otp.dto'
-import CreateOTPDto from './dto/create-otp.dto'
-import VerifyUserDto from './dto/verify-user.dto'
+import { RequestUser, UserType } from 'src/common/types/base.type'
+import {
+  BaseAdminIdParams,
+  BaseUserIdParams,
+} from 'src/common/types/params.type'
+import LoggerService from 'src/logger/logger.service'
+import MessageService from 'src/message/message.service'
+import EmailStrategy from 'src/message/strategies/email.strategy'
+import PrismaService from 'src/prisma/prisma.service'
+import UserService from 'src/user/user.service'
 import SmsStrategy from '../message/strategies/sms.strategy'
+import { CreateAccountDto, SignInDto } from './dto'
+import CreateOTPDto from './dto/create-otp.dto'
 import UpdatePasswordDto from './dto/update-passowrd.dto'
+import VerifyOTPDto from './dto/verify-otp.dto'
+import VerifyUserDto from './dto/verify-user.dto'
+import UpdateAuthProviderDto from './dto/update-auth-provider.dto'
 
 @Injectable()
 export default class AuthService {
@@ -38,17 +42,19 @@ export default class AuthService {
     private readonly confgiService: ConfigService,
     private readonly smsStrategy: SmsStrategy,
     private readonly emailStrategy: EmailStrategy,
-    private readonly configService: ConfigService,
     private readonly loggerSerive: LoggerService,
     private readonly accessContolService: AccessControlService,
     private readonly adminService: AdminService,
     private readonly userService: UserService,
   ) {}
 
-  async createUserAccount(
-    { firstName, lastName, email, password }: CreateAccountDto,
-    signUpType: SignUpType,
-  ) {
+  async createUserAccount({
+    firstName,
+    lastName,
+    email,
+    password,
+    authProvider,
+  }: CreateAccountDto & { authProvider: AuthProvider }) {
     const hashedPassword = await bcrypt.hash(password, 12)
 
     const userRole = await this.accessContolService.getUserRole()
@@ -59,8 +65,9 @@ export default class AuthService {
       email,
       password: hashedPassword,
       roleId: userRole.id,
+      authProvider,
     })
-    if (signUpType === SignUpType.BY_EMAIL) {
+    if (authProvider === AuthProvider.LOCAL) {
       const { otpCode } = await this.createOTP({
         channelType: 'EMAIL',
         email,
@@ -83,11 +90,7 @@ export default class AuthService {
       context: 'user account creation',
       userId: userCreated.id,
     })
-    return {
-      status: 'success',
-      message: 'Account created successfully',
-      data: removePassword(userCreated),
-    }
+    return removePassword(userCreated)
   }
 
   async createAdminAccount({
@@ -100,9 +103,7 @@ export default class AuthService {
     const adminRole = await this.accessContolService.getAdminRole({
       roleId,
     })
-
     const hashedPassword = await bcrypt.hash(password, 12)
-
     const adminAccount = await this.adminService.createAdminAccount({
       firstName,
       lastName,
@@ -124,62 +125,65 @@ export default class AuthService {
       context: 'admin account creation',
       adminId: adminAccount.id,
     })
-    return {
-      status: 'success',
-      message: 'Admin created successfully',
-      data: removePassword(adminAccount),
+    return removePassword(adminAccount)
+  }
+
+  async checkEmail({
+    email,
+  }: {
+    email: string
+  }): Promise<{ user: User | Admin; userType: UserType }> {
+    let userType: UserType = 'USER'
+    let user: User | Admin
+
+    user = await this.prismaService.user.findFirst({
+      where: { email },
+      include: { role: { select: { id: true, name: true } } },
+    })
+    if (!user) {
+      userType = 'ADMIN'
+      user = await this.prismaService.admin.findFirst({
+        where: { email },
+        include: { role: { select: { id: true, name: true } } },
+      })
     }
+    if (!user) return { user: null, userType: 'USER' }
+    if (userType === 'ADMIN') return { user: user as Admin, userType }
+    return { user: user as User, userType }
   }
 
   async validateUser({ email, password }: SignInDto): Promise<any> {
-    // let userType: UserType = 'CLIENT_USER'
-    let user: RequestUser = await this.prismaService.user.findFirst({
-      where: { email },
-    })
-    if (!user) {
-      // userType = 'ADMIN'
-      user = await this.prismaService.admin.findFirst({ where: { email } })
-    }
+    const { user, userType } = await this.checkEmail({ email })
+    if (!user) throw new NotFoundException(`Invalid Email or Password`)
 
-    if (!user)
-      throw new NotFoundException(`No user is registered with ${email} email`)
+    if (userType === 'USER') {
+      if ((user as User).currentAuthMethod !== 'LOCAL')
+        throw new UnauthorizedException(
+          `User is using ${(user as User).currentAuthMethod} auth provider`,
+        )
+    }
 
     const doesPasswordMatch = await bcrypt.compare(password, user.password)
     if (!doesPasswordMatch)
       throw new BadRequestException('Invalid Email or Password')
 
-    // if (userType !== 'CLIENT_USER' && (user as any).status !== 'ACTIVE')
-    // throw new UnauthorizedException('Admin is Inactive currenlty ')
-    /* eslint-disable */
-    const { password: _, ...result } = user
-    /* eslint-disable */
-    return result
+    if (userType === 'ADMIN' && (user as Admin).status !== 'ACTIVE')
+      throw new UnauthorizedException('Admin is Inactive currenlty ')
+    return removePassword(user)
   }
 
   async login(user: RequestUser) {
-    const payload = true
-      ? {
-          email: user.email,
-          sub: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          // userType: user.userType,
-        }
-      : {
-          email: user.email,
-          sub: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          // userType: user.userType,
-          status: (user as Admin).status,
-        }
+    const payload = {
+      email: user.email,
+      id: user.id,
+      sub: user.id,
+    }
 
-    if (payload?.status === 'CREATED' || payload?.status === 'INACTIVE')
-      throw new ForbiddenException('User not active')
+    if (user?.status === 'CREATED' || user?.status === 'INACTIVE')
+      throw new UnauthorizedException('User not active')
     return {
-      status: 'success',
-      message: 'User Logged in successfully',
-      access_token: this.jwtService.sign(payload),
+      access_token: await this.jwtService.signAsync(payload),
+      ...user,
     }
   }
 
@@ -254,13 +258,8 @@ export default class AuthService {
     })
 
     return {
-      status: 'success',
-      message: `${type} OTP sent is to ${channelValue}  successfully  `,
-      data: {
-        otpCode,
-        channelType,
-        channelValue,
-      },
+      channelType,
+      channelValue,
     }
   }
 
@@ -329,10 +328,7 @@ export default class AuthService {
     await this.prismaService.oTP.deleteMany({
       where: { channelValue: email, type: 'VERIFICATION' },
     })
-    return {
-      status: 'success',
-      message: 'User Verified successfully',
-    }
+    return 'User Verified successfully'
   }
 
   async checkOTPVerification({
@@ -404,9 +400,39 @@ export default class AuthService {
       userId: userType === 'CLIENT_USER' && user.id,
       adminId: userType !== 'CLIENT_USER' && user.id,
     })
-    return {
-      status: 'success',
-      message: 'Password updated successfully',
-    }
+    return 'Password updated successfully'
+  }
+  async updateAuthProvider({
+    authMethod,
+    password,
+    userId,
+  }: UpdateAuthProviderDto & BaseUserIdParams) {
+    let data: any = { currentAuthMethod: authMethod }
+    const user = await this.userService.checkUserId({ id: userId })
+    if (authMethod === 'LOCAL' && !password)
+      throw new BadRequestException('passowrd is needed for LOCAL auth method ')
+
+    if (authMethod === 'LOCAL') data.password = await bcrypt.hash(password, 12)
+    else if (user.authProvider !== authMethod)
+      throw new BadRequestException(
+        `only ${user.authProvider} is allowed for this user`,
+      )
+
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        passwordUpdatedAt: new Date(),
+        updatedAt: new Date(),
+        ...data,
+      },
+    })
+
+    await this.loggerSerive.createLog({
+      logType: 'USER_ACTIVITY',
+      message: `user  with  id: ${user.id} name: ${user.firstName.concat(' ').concat(user.lastName)}  update auth method to ${authMethod}`,
+      context: 'password update',
+      userId,
+    })
+    return `auth methode updated to ${authMethod}`
   }
 }

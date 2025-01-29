@@ -7,8 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 enum PaymentMethod {
   CHAPA
 }
@@ -26,6 +24,14 @@ enum UserType {
   SUPER_ADMIN
 }
 
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+  LINKEDIN
+  TELEGRAM
+}
+
 enum OTPType {
   VERIFICATION
   RESET
@@ -37,17 +43,11 @@ enum Status {
   CREATED // in active b/c just created need to reset password
 }
 
-
 enum ChannelType {
   EMAIL
   PHONE
 }
 
-enum StoryContentType {
-  STRING
-  IMAGE
-  BOTH
-}
 
 enum Sex {
   MALE
@@ -63,27 +63,31 @@ enum LogType {
 }
 
 model User {
-  id                 String           @id @default(uuid())
+  id                 String       @id @default(uuid())
   firstName          String
   lastName           String
-  email              String           @unique
+  email              String       @unique
   phoneNumber        String?
   password           String
   profile            Profile?
   reviews            Review[]
-  ratings            Rating[]
   bills              Bill[]
-  businesses         Business[]       @relation("UserOwnsBusiness")
-  followedBusinesses Business[]       @relation("UserFollowsBusiness")
-  createdAt          DateTime         @default(now())
-  passwordUpdatedAt  DateTime         @updatedAt
-  status             Status           @default(CREATED)
-  inActiveReason     String           @default("new account")
+  businesses         Business[]   @relation("UserOwnsBusiness")
+  followedBusinesses Business[]   @relation("UserFollowsBusiness")
+  passwordUpdatedAt  DateTime     @updatedAt
+  status             Status       @default(CREATED)
+  inActiveReason     String       @default("new account")
   roleId             String
-  role               Role             @relation(name: "UserRoles", fields: [roleId], references: [id])
+  authProvider       AuthProvider @default(LOCAL)
+  currentAuthMethod  AuthProvider @default(LOCAL)
+  role               Role         @relation(name: "UserRoles", fields: [roleId], references: [id])
 
   // New relation to UserStoryView
   storyViews UserStoryView[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime @updatedAt
 }
 
 model OTP {
@@ -96,6 +100,7 @@ model OTP {
   isVerified   Boolean     @default(false)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+  deletedAt    DateTime    @updatedAt
 }
 
 model Admin {
@@ -110,8 +115,9 @@ model Admin {
   createRoles    Role[]  @relation(name: "CreatedBy")
   role           Role?   @relation(name: "AdminRoles", fields: [roleId], references: [id])
 
-  createdAat DateTime @default(now()) @map("created_at")
-  updatedAat DateTime @updatedAt @map("updated_at")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
 }
 
 model Profile {
@@ -128,25 +134,27 @@ model Profile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
 }
 
 model Category {
   id       String  @id @default(uuid())
-  name     String  @db.VarChar(255)
+  name     String  @unique @db.VarChar(255)
   parentId String?
   level    Int
   price    Float // for day
   image    String
   verified Boolean @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
   parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
   children Category[] @relation("CategoryToCategory")
   business Business[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
 }
 
 model Business {
@@ -169,14 +177,14 @@ model Business {
   followers     User[]            @relation("UserFollowsBusiness")
   packages      BusinessPackage[]
   reviews       Review[]
-  ratings       Rating[]
   ratingSummary Json
   averageRating Float
   bills         Bill[]
   stories       Story[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
 }
 
 model BussinessService {
@@ -189,8 +197,11 @@ model BussinessService {
 
   business Business @relation(fields: [businessId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  @@map("bussiness_service")
 }
 
 model BusinessAddress {
@@ -204,8 +215,11 @@ model BusinessAddress {
 
   business Business @relation(fields: [businessId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  @@map("bussiness_address")
 }
 
 model BusinessContact {
@@ -221,51 +235,48 @@ model BusinessContact {
 
   business Business @relation(fields: [businessId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  @@map("bussiness_contact")
 }
 
 model Review {
-  id         String @id @default(uuid())
+  id         String  @id @default(uuid())
   userId     String
   businessId String
-  review     String
+  review     String?
+  rating     Int?
 
   user     User     @relation(fields: [userId], references: [id])
   business Business @relation(fields: [businessId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-model Rating {
-  id         String @id @default(uuid())
-  userId     String
-  businessId String
-  rateValue  Int
-
-  user     User     @relation(fields: [userId], references: [id])
-  business Business @relation(fields: [businessId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  @@map("raview")
 }
 
 model Story {
-  id          String           @id @default(uuid())
-  contentType StoryContentType
-  text        String?
-  image       String?
-  viewCount   Int              @default(0) // Total number of views
+  id            String           @id @default(uuid())
+  text          String?
+  images         String[]
+  textViewOrder Int[]      // where the text is shown
+  viewCount     Int              @default(0)
 
   businessId String
   business   Business @relation(fields: [businessId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
 
   // New relation to UserStoryView
   userViews UserStoryView[]
+
+  @@map("user_story_view")
 }
 
 model UserStoryView {
@@ -277,20 +288,28 @@ model UserStoryView {
   user  User  @relation(fields: [userId], references: [id])
   story Story @relation(fields: [storyId], references: [id])
 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
+
   @@unique([userId, storyId]) // Ensures that each user can view a story only once
+  @@map("user_story")
 }
 
 model Package {
   id               String            @id @default(uuid())
-  name             String
+  name             String            @unique
   code             String
   price            Float // amount in birr 
   monthCount       Int // number of months the package used for 
   description      String?
   businessPackages BusinessPackage[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  @@map("package")
 }
 
 model BusinessPackage {
@@ -310,8 +329,11 @@ model BusinessPackage {
 
   business Business @relation(fields: [businessId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  @@map("bussiness_package")
 }
 
 model Bill {
@@ -327,8 +349,11 @@ model Bill {
   business Business @relation(fields: [businessId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  @@map("bills")
 }
 
 // log related 
@@ -343,6 +368,12 @@ model Log {
   archivedAt DateTime?
   userId     String?
   adminId    String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  @@map("logs")
 }
 
 // Role-Based Access Control (RBAC) Schema
@@ -362,7 +393,6 @@ enum PermissionType {
 enum ModuleName {
   ROLE
   PERMISSION
-  APPLICANT
   ADMIN
   USER
   PROFILE
@@ -391,11 +421,12 @@ model Role {
   permissions Permission[]
   admins      Admin[]      @relation(name: "AdminRoles")
   users       User[]       @relation(name: "UserRoles")
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now())
-  deletedAt   DateTime?
 
   createdBy Admin? @relation(name: "CreatedBy", fields: [creatorId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
 
   @@map("roles")
 }
@@ -407,8 +438,9 @@ model Permission {
   permissionWeight Int            @default(0)
 
   Roles     Role[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
 
   @@unique([moduleName, permissionName])
   @@map("permissions")

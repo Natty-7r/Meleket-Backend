@@ -1,26 +1,24 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import PrismaService from 'src/prisma/prisma.service'
 import { BussinessService as BussinesServiceModelType } from '@prisma/client'
-import { ApiResponse, BareApiResponse } from 'src/common/types/responses.type'
-import { deleteFileAsync } from 'src/common/helpers/file.helper'
 import AccessControlService from 'src/access-control/access-control.service'
-import CreateBusinessServiceDto from './dto/create-business-service.dto'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
+import PrismaService from 'src/prisma/prisma.service'
 import {
-  CheckBusinessAddressParams,
-  CheckBusinessServiceNameParams,
-  UpdateBusinessImageParams,
-  VerifyBusinessServiceIdParams,
-  DeleteBusinessServicesParams,
-  ImageUrlParams,
-  UserIdParams,
   BaseBusinessIdParams,
+  BaseIdParams,
+  BaseUserIdParams,
+  BusinessIdParams,
+  CheckBusinessServiceNameParams,
+  DeleteBusinessServicesParams,
+  UserIdParams,
+  VerifyBusinessServiceIdParams,
 } from '../../common/types/params.type'
-import UpdateBusinessServicesDto from './dto/update-business-services.dto'
+import CreateBusinessServiceDto from './dto/create-business-service.dto'
+import UpdateBusinessServiceDto from './dto/update-business-service.dto'
 
 @Injectable()
 export default class BusinessServiceService {
@@ -37,43 +35,6 @@ export default class BusinessServiceService {
     })
     if (!service) throw new NotFoundException('Invalid business Service ID')
     return service
-  }
-
-  async checkBusinessAddress({
-    country,
-    state,
-    city,
-    specificLocation,
-    streetAddress,
-    businessId,
-  }: CheckBusinessAddressParams): Promise<boolean> {
-    const business = await this.prismaService.business.findFirst({
-      where: {
-        id: businessId,
-        address: {
-          some: {
-            OR: [
-              {
-                country: { contains: country, mode: 'insensitive' },
-                city: { contains: city, mode: 'insensitive' },
-                state: { contains: state, mode: 'insensitive' },
-                streetAddress: {
-                  contains: streetAddress || '',
-                  mode: 'insensitive',
-                },
-                specificLocation: {
-                  contains: specificLocation || '',
-                  mode: 'insensitive',
-                },
-              },
-            ],
-          },
-        },
-      },
-    })
-    if (business)
-      throw new ConflictException('The address is already registered')
-    return true
   }
 
   async checkBusinessServiceName({
@@ -106,10 +67,10 @@ export default class BusinessServiceService {
     businessId,
     specifications,
     userId,
-    imageUrl,
+    image,
   }: CreateBusinessServiceDto &
     UserIdParams &
-    ImageUrlParams): Promise<ApiResponse> {
+    BusinessIdParams): Promise<BussinesServiceModelType> {
     await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS',
@@ -127,90 +88,44 @@ export default class BusinessServiceService {
         businessId,
         description,
         specifications: specifications as any,
-        image: imageUrl,
+        image: image?.path,
       },
     })
-    return {
-      status: 'success',
-      message: 'Buisness Service added successfully',
-      data: {
-        ...buinessService,
-      },
-    }
+
+    return buinessService
   }
 
-  async updateBusinessServiceImage({
+  async updateBusinessService({
     id,
-    imageUrl,
     userId,
-  }: UpdateBusinessImageParams): Promise<ApiResponse> {
+    image,
+    ...updateBusinessServiceDto
+  }: UpdateBusinessServiceDto &
+    BaseIdParams &
+    BaseUserIdParams): Promise<BussinesServiceModelType> {
     const { entity: service } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
         model: 'BUSINESS_SERVICE',
         userId,
       })
+    if (image && (service as BussinesServiceModelType).image)
+      deleteFileAsync({ filePath: (service as BussinesServiceModelType).image })
 
-    if (imageUrl.trim() === '') throw new BadRequestException('Invalid Image')
-    const updatedBusiness = await this.prismaService.bussinessService.update({
+    return await this.prismaService.bussinessService.update({
       where: { id },
-      data: { image: imageUrl },
-    })
-    deleteFileAsync({ filePath: (service as BussinesServiceModelType).image })
-    return {
-      status: 'success',
-      message: 'Buisness image updated successfully',
       data: {
-        ...updatedBusiness,
+        ...updateBusinessServiceDto,
+        image: image?.path || (service as BussinesServiceModelType).image,
+        specifications: updateBusinessServiceDto.specifications as any,
       },
-    }
-  }
-
-  async updateBusinessServices({
-    services,
-    businessId,
-    userId,
-  }: UpdateBusinessServicesDto & UserIdParams): Promise<ApiResponse> {
-    /* eslint-disable */
-    for (const { id } of services) await this.verifyBusinessServiceId({ id })
-
-    for (const { id, description, name, specifications } of services) {
-      const { entity: service } =
-        await this.accessControlService.verifyBussinessOwnerShip({
-          /* eslint-disable */
-          id,
-          model: 'BUSINESS_SERVICE',
-          userId,
-        })
-
-      await this.prismaService.bussinessService.update({
-        where: { id },
-        data: {
-          name: name || (service as BussinesServiceModelType).description,
-          description:
-            description || (service as BussinesServiceModelType).description,
-          specifications:
-            specifications ||
-            ((service as BussinesServiceModelType).specifications as any),
-        },
-      })
-    }
-
-    const business = await this.prismaService.business.findFirst({
-      where: { id: businessId },
     })
-
-    return {
-      status: 'success',
-      message: 'Buisness services updated successfully',
-      data: { ...business },
-    }
   }
 
   async deleteBusinessServices({
     id,
     userId,
-  }: DeleteBusinessServicesParams): Promise<BareApiResponse> {
+  }: DeleteBusinessServicesParams): Promise<string> {
     const { businessId } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
@@ -224,24 +139,17 @@ export default class BusinessServiceService {
         id,
       },
     })
-    return {
-      status: 'success',
-      message: 'Buisness services deleted successfully',
-    }
+
+    return id
   }
 
   async getBusinessServices({
     businessId,
-  }: BaseBusinessIdParams): Promise<ApiResponse> {
-    const services = await this.prismaService.bussinessService.findMany({
+  }: BaseBusinessIdParams): Promise<BussinesServiceModelType[]> {
+    return await this.prismaService.bussinessService.findMany({
       where: {
         businessId,
       },
     })
-    return {
-      data: services,
-      status: 'success',
-      message: 'Buisness services fetched successfully',
-    }
   }
 }

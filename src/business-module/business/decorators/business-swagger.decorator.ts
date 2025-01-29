@@ -8,14 +8,13 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger'
-import BusinessResponse from '../responses/business.response'
-import BusinessDetailResponse from '../responses/business-detail.response'
-import BusinessContactResponse from '../responses/business-contact.response'
 import CreateBusinessDto from '../dto/create-business.dto'
+import BusinessContactResponse from '../responses/business-contact.response'
+import BusinessDetailResponse from '../responses/business-detail.response'
+import BusinessResponse from '../responses/business.response'
 
 export const CreateBusinessSwaggerDefinition = () =>
   applyDecorators(
@@ -32,19 +31,6 @@ export const CreateBusinessSwaggerDefinition = () =>
     }),
   )
 
-export const UpdateBusinessImageSwaggerDefinition = () =>
-  applyDecorators(
-    ApiOperation({ summary: 'Update buiness image' }),
-    ApiResponse({
-      description: 'Business image updated successfully',
-      type: BusinessResponse,
-    }),
-    ApiParam({ description: 'business Id', name: 'id' }),
-    ApiBadRequestResponse({ description: 'Invalid business Id' }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-    ApiConsumes('image'),
-  )
-
 export const UpdateBusinessSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ summary: 'Update business' }),
@@ -52,6 +38,7 @@ export const UpdateBusinessSwaggerDefinition = () =>
       description: 'Business  updated successfully',
       type: BusinessResponse,
     }),
+    ApiConsumes('multipart/form-data'),
     ApiBadRequestResponse({ description: 'Invalid business Id' }),
     ApiConflictResponse({ description: 'Business name already taken' }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
@@ -85,47 +72,6 @@ export const GetBussinesDetailSwaggerDefinition = () =>
       type: BusinessDetailResponse,
     }),
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-  )
-export const GetCategoryBusinessSwaggerDefinition = () =>
-  applyDecorators(
-    ApiOperation({ summary: 'Get businesses by category' }),
-    ApiResponse({
-      description: 'Category businesses fetched successfully',
-      type: [BusinessResponse], // Assuming this contains the business data
-    }),
-    ApiParam({
-      description: 'Category ID',
-      name: 'id',
-      required: true,
-      type: 'string',
-    }),
-    ApiQuery({
-      name: 'page',
-      description: 'Page number for pagination (default: 1)',
-      required: false,
-      type: 'number',
-    }),
-    ApiQuery({
-      name: 'items',
-      description: 'Number of items per page (default: 10)',
-      required: false,
-      type: 'number',
-    }),
-    ApiQuery({
-      name: 'sort',
-      description: 'Fields to sort by (e.g., averageRating, name)',
-      required: false,
-      type: 'string',
-      isArray: true, // Indicates that this query parameter can be an array
-    }),
-    ApiQuery({
-      name: 'sortType',
-      description: 'Sort direction (asc or desc)',
-      required: false,
-      type: 'string',
-      enum: ['asc', 'desc'], // Define accepted values
-    }),
-    ApiBadRequestResponse({ description: 'Invalid category ID' }),
   )
 
 export const UpdateBusinessContactSwaggerDefinition = () =>

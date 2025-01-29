@@ -8,13 +8,11 @@ import {
   Put,
   UploadedFile,
 } from '@nestjs/common'
-import User from 'src/common/decorators/user.decorator'
 import { ApiTags } from '@nestjs/swagger'
+import User from 'src/common/decorators/user.decorator'
 import { RequestUser } from 'src/common/types/base.type'
-import UserService from './user.service'
 import {
   AddProfile,
-  AddRating,
   FollowBusiness,
   GetFollowedBusiness,
   UnFollowBusiness,
@@ -22,7 +20,7 @@ import {
   ViewStory,
 } from './decorators/user-endpoint.decorator'
 import AddProfileDto from './dto/add-profile.dto'
-import AddRatingDto from './dto/add.rating.dto'
+import UserService from './user.service'
 
 @ApiTags('User')
 @Controller('user')
@@ -54,15 +52,6 @@ export default class UserController {
       ...addProfileDto,
       userId: user.id,
       profilePicture: file?.path || undefined,
-    })
-  }
-
-  @AddRating()
-  @Post('rating')
-  addRaging(@Body() addRatingDto: AddRatingDto, @User() user: RequestUser) {
-    return this.userService.addRating({
-      ...addRatingDto,
-      userId: user.id,
     })
   }
 

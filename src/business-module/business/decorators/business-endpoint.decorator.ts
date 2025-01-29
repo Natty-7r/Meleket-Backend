@@ -1,17 +1,16 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
+import Permissions from 'src/common/decorators/permission.decorator'
+import Public from 'src/common/decorators/public.decorator'
+import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import {
-  UpdateBusinessImageSwaggerDefinition,
   CreateBusinessSwaggerDefinition,
-  UpdateBusinessSwaggerDefinition,
-  SearchBusinessSwaggerDefinition,
   GetBusinessSwaggerDefinition,
   GetBussinesDetailSwaggerDefinition,
+  SearchBusinessSwaggerDefinition,
   UpdateBusinessContactSwaggerDefinition,
+  UpdateBusinessSwaggerDefinition,
 } from './business-swagger.decorator'
-import { FileInterceptor } from '@nestjs/platform-express'
-import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
-import Public from 'src/common/decorators/public.decorator'
-import Permissions from 'src/common/decorators/permission.decorator'
 
 export const CreateBusiness = () =>
   applyDecorators(
@@ -29,21 +28,19 @@ export const CreateBusiness = () =>
     CreateBusinessSwaggerDefinition(),
   )
 
-export const UpdateBusinessImage = () =>
+export const UpdateBusiness = () =>
   applyDecorators(
     Permissions({ model: 'BUSINESS', action: 'UPDATE' }),
     UseInterceptors(
       FileInterceptor('image', {
         storage: muluterStorage({ folder: 'business', filePrefix: 'b' }),
-        fileFilter: multerFilter({ fileType: 'image', maxSize: 5 }),
+        fileFilter: multerFilter({
+          fileType: 'image',
+          maxSize: 5,
+          optional: true,
+        }),
       }),
     ),
-    UpdateBusinessImageSwaggerDefinition(),
-  )
-
-export const UpdateBusiness = () =>
-  applyDecorators(
-    Permissions({ model: 'BUSINESS', action: 'UPDATE' }),
     UpdateBusinessSwaggerDefinition(),
   )
 

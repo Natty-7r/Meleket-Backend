@@ -1,23 +1,16 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
+import Permissions from 'src/common/decorators/permission.decorator'
+import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import {
   AddProfileSwaggerDefinition,
-  AddRatingSwaggerDefinition,
   FollowBusinessSwaggerDefinition,
   FollowedBusinessSwaggerDefinition,
-  UnFollowBusinessSwaggerDefinition,
   GetFollowedBusinessSwaggerDefinition,
+  UnFollowBusinessSwaggerDefinition,
   UpdateProfileSwaggerDefinition,
   ViewStorySwaggerDefinition,
 } from './user-swagger.decorator'
-import { FileInterceptor } from '@nestjs/platform-express'
-import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
-import Permissions from 'src/common/decorators/permission.decorator'
-
-export const AddRating = () =>
-  applyDecorators(
-    Permissions({ model: 'RATING', action: 'CREATE' }),
-    AddRatingSwaggerDefinition(),
-  )
 
 // follow related
 

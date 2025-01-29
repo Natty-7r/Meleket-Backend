@@ -1,16 +1,12 @@
 // business.service.params.ts
 
-import {
-  Category,
-  OTPType,
-  PaymentMethod,
-  StoryContentType,
-  User,
-} from '@prisma/client'
+import { Category, OTPType, PaymentMethod, User } from '@prisma/client'
 import {
   BusinessSubModel,
   ChapaCustomerInfo,
   LogType,
+  PaginationOptions,
+  SelectionOptions,
   Selector,
   TimeUnit,
 } from './base.type'
@@ -149,12 +145,6 @@ export type CreateBusinessParams = {
   mainImage?: string
 }
 
-export type UpdateBusinessImageParams = {
-  id: string
-  imageUrl: string
-  userId: string
-}
-
 export type UpdateBusinessServiceImageParams = {
   id: string
   imageUrl: string
@@ -186,10 +176,6 @@ export type GetCategoryBusinessParams = {
   categoryId: string
 }
 
-export type SearchBusinessParams = {
-  searchKey: string
-}
-
 export type SearchBusinessByAddressParams = {
   address: string
 }
@@ -219,12 +205,6 @@ export type BaseFolderPathParams = {
  * Validation params
  */
 
-export type ValidateStory = {
-  contentType: StoryContentType
-  text?: string
-  image?: string
-}
-
 /**
  * Pagination params
  */
@@ -246,11 +226,6 @@ export type CreatePaginatioParams = {
 /**
  * Sort related
  */
-
-export type GenerateSortingParams = {
-  sortKeys: string[]
-  sortType: SortType
-}
 
 export type APIMethods = 'GET' | 'POST' | 'PUT' | 'DELETE'
 export interface ApiCallBody {
@@ -284,14 +259,6 @@ export type TimeFrameParams = {
   startDate?: Date
 }
 
-export type LogParams = {
-  timeUnit?: TimeUnit
-  timeFrame?: number // time frame
-  logType?: LogType
-  startDate?: Date
-  endDate?: Date
-}
-
 export type LogFileFormatterParams = {
   logType: LogType
   fileNames: string[]
@@ -311,3 +278,9 @@ export type VerifyOwnershipParams = {
   model: BusinessSubModel
 } & BaseUserIdParams &
   BaseIdParams
+
+export type PaginatorParams<T> = {
+  model: any
+  pageOptions: PaginationOptions
+  selectionOption?: SelectionOptions<T>
+}

@@ -37,7 +37,7 @@ export const parseActivityFileLog = (logCotent: string): ActivityLogData[] => {
   return logEntries.map((logEntry) => {
     const parsedLog = JSON.parse(logEntry)
     return {
-      id: parsedLog?.id,
+      id: parsedLog.id,
       level: parsedLog?.level,
       message: parsedLog?.message || 'No message',
       method: parsedLog?.method,
@@ -54,7 +54,7 @@ export const parseErrorFileLog = (logCotent: string): ErrorLogData[] => {
   return logEntries.map((logEntry) => {
     const parsedLog = JSON.parse(logEntry)
     return {
-      id: parsedLog?.id,
+      id: parsedLog.id,
       level: parsedLog?.level,
       message: parsedLog?.message || 'No message',
       method: parsedLog?.method,

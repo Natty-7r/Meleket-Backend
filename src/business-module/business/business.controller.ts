@@ -9,20 +9,19 @@ import {
   UploadedFile,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { RequestUser } from 'src/common/types/base.type'
 import User from 'src/common/decorators/user.decorator'
-import CreateBusinessDto from './dto/create-business.dto'
+import { RequestUser } from 'src/common/types/base.type'
 import BusinessService from './business.service'
 import {
   CreateBusiness,
-  UpdateBusiness,
-  UpdateBusinessImage,
-  SearchBusiness,
   GetBusinesses,
+  UpdateBusiness,
   UpdateBusinessContact,
 } from './decorators/business-endpoint.decorator'
-import UpdateBusinessDto from './dto/update-business.dto'
+import BusinessQueryDto from './dto/business-query.dto'
+import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
+import UpdateBusinessDto from './dto/update-business.dto'
 
 @ApiTags('Businesses')
 @Controller('businesses')
@@ -34,38 +33,28 @@ export default class BusinessController {
   async createBusiness(
     @Body() createBusinessDto: CreateBusinessDto,
     @User() user: RequestUser,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() image?: Express.Multer.File,
   ) {
     return this.businessService.createBusiness({
       ...createBusinessDto,
       userId: user.id,
-      mainImage: file?.path || undefined,
+      mainImage: image?.path || undefined,
     })
   }
 
-  @Put('/image')
-  @UpdateBusinessImage()
-  async updateBusinessImage(
-    @Param('id') id: string,
-    @User() user: RequestUser,
-    @UploadedFile('image') image: Express.Multer.File,
-  ) {
-    return this.businessService.updateBusinessImage({
-      id,
-      imageUrl: image.path,
-      userId: user.id,
-    })
-  }
-
-  @Put()
+  @Put('/:id')
   @UpdateBusiness()
   async updateBusiness(
+    @Param('id') id: string,
     @Body() updateBusinessDto: UpdateBusinessDto,
     @User() user: RequestUser,
+    @UploadedFile() image?: Express.Multer.File,
   ) {
     return this.businessService.updateBusiness({
       ...updateBusinessDto,
       userId: user.id,
+      id,
+      image,
     })
   }
 
@@ -83,13 +72,7 @@ export default class BusinessController {
 
   @Get()
   @GetBusinesses()
-  getAllBusiness() {
-    return this.businessService.getAllBusinesses()
-  }
-
-  @Get('search')
-  @SearchBusiness()
-  searchBusiness(@Query('searchKey') searchKey: string) {
-    return this.businessService.searchBusinesses({ searchKey })
+  getAllBusiness(@Query() query: BusinessQueryDto) {
+    return this.businessService.getAllBusinesses(query)
   }
 }

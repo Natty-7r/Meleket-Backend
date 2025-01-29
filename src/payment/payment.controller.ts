@@ -66,6 +66,6 @@ export default class PaymentController {
     @Param('reference') reference: string,
     @User() user: RequestUser,
   ) {
-    return this.paymentService.verifyChapaPayment(reference, user?.id)
+    return this.paymentService.verifyChapaPayment(reference, user.id)
   }
 }
