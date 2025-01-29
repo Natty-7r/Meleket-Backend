@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { Story } from '@prisma/client'
 import AccessControlService from 'src/access-control/access-control.service'
 import { deleteFileAsync } from 'src/common/helpers/file.helper'
-import { validateStory } from 'src/common/helpers/validator.helper'
 import PrismaService from 'src/prisma/prisma.service'
 import {
   BaseIdParams,
@@ -43,17 +46,21 @@ export default class BusinessStoryService {
   async addStory({
     businessId,
     userId,
+    images,
     ...createStoryDto
-  }: CreateStoryDto & UserIdParams): Promise<Story> {
+  }: CreateStoryDto & UserIdParams & BusinessIdParams): Promise<Story> {
     await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS',
       userId,
     })
-    validateStory({ ...createStoryDto })
+    if (!createStoryDto.text && (!images || images?.length === 0))
+      throw new BadRequestException('text or image is needed')
+
     return await this.prismaService.story.create({
       data: {
         businessId,
+        images: images?.map((image) => image?.path),
         ...createStoryDto,
       },
     })
@@ -62,24 +69,30 @@ export default class BusinessStoryService {
   async updateStory({
     userId,
     id,
-    ...updateStoryDto
-  }: UpdateStoryDto & UserIdParams): Promise<Story> {
-    let oldImageUrl
+    images,
+    ...createStoryDto
+  }: UpdateStoryDto & UserIdParams & BaseIdParams): Promise<Story> {
+    let oldImageUrls: string[]
     const { entity: story } =
       await this.accessControlService.verifyBussinessOwnerShip({
         id,
         model: 'STORY',
         userId,
       })
-    if (updateStoryDto.image) oldImageUrl = (story as Story).image
-    validateStory({ ...updateStoryDto })
+    if (images) oldImageUrls = (story as Story).images
     const updateStory = await this.prismaService.story.update({
       where: { id },
       data: {
-        ...updateStoryDto,
+        images: images
+          ? images?.map((image) => image?.path)
+          : (story as Story).images,
+        ...createStoryDto,
       },
     })
-    if (oldImageUrl) deleteFileAsync({ filePath: oldImageUrl })
+    if (oldImageUrls && oldImageUrls.length > 0)
+      oldImageUrls.forEach((imageUrl) =>
+        deleteFileAsync({ filePath: imageUrl }),
+      )
 
     return updateStory
   }
@@ -98,7 +111,10 @@ export default class BusinessStoryService {
     await this.prismaService.story.delete({
       where: { id },
     })
-    deleteFileAsync({ filePath: (story as Story)?.image || '' })
+    if ((story as Story)?.images?.length > 0)
+      (story as Story)?.images?.forEach((imageUrl) =>
+        deleteFileAsync({ filePath: imageUrl }),
+      )
     return id
   }
 

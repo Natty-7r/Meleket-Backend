@@ -6,6 +6,8 @@ import AccessControlService from 'src/access-control/access-control.service'
 import { BusinessAddress } from '@prisma/client'
 import {
   BaseBusinessIdParams,
+  BaseIdParams,
+  BusinessIdParams,
   CheckBusinessAddressParams,
   DeleteBusinessAddressParams,
   UserIdParams,
@@ -65,7 +67,9 @@ export default class BusinessAddressService {
     specificLocation,
     streetAddress,
     userId,
-  }: CreateBusinessAddressDto & UserIdParams): Promise<BusinessAddress> {
+  }: CreateBusinessAddressDto &
+    UserIdParams &
+    BusinessIdParams): Promise<BusinessAddress> {
     await this.accessControlService.verifyBussinessOwnerShip({
       id: businessId,
       model: 'BUSINESS',
@@ -95,23 +99,25 @@ export default class BusinessAddressService {
   }
 
   async updateBusinessAddress({
-    addressId,
+    id,
     city,
     country,
     state,
     specificLocation,
     streetAddress,
     userId,
-  }: UpdateBusinessAddressDto & UserIdParams): Promise<BusinessAddress> {
+  }: UpdateBusinessAddressDto &
+    UserIdParams &
+    BaseIdParams): Promise<BusinessAddress> {
     const { businessId } =
       await this.accessControlService.verifyBussinessOwnerShip({
-        id: addressId,
+        id,
         model: 'BUSINESS_ADDRESS',
         userId,
       })
     const updatedBuinessAddress =
       await this.prismaService.businessAddress.update({
-        where: { id: addressId, businessId },
+        where: { id, businessId },
         data: {
           country: country && country,
           state: state && state,

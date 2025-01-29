@@ -10,6 +10,8 @@ export const MIN_USER_AGE: number = 15
 
 export const ITEMS_PER_ROUND: number = 10
 
+export const MAX_IMAGE_UPLOAD_COUNT: number = 10
+
 export const PACKAGE_CODE_PREFIX: string = 'P_'
 
 export const MAX_ACTIVE_BUSINESS_COUNT: number = 2

@@ -1,12 +1,6 @@
 // business.service.params.ts
 
-import {
-  Category,
-  OTPType,
-  PaymentMethod,
-  StoryContentType,
-  User,
-} from '@prisma/client'
+import { Category, OTPType, PaymentMethod, User } from '@prisma/client'
 import {
   BusinessSubModel,
   ChapaCustomerInfo,
@@ -210,12 +204,6 @@ export type BaseFolderPathParams = {
 /**
  * Validation params
  */
-
-export type ValidateStory = {
-  contentType: StoryContentType
-  text?: string
-  image?: string
-}
 
 /**
  * Pagination params

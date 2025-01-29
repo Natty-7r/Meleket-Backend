@@ -45,7 +45,7 @@ export default class BusinessServiceController {
     })
   }
 
-  @Put('/services')
+  @Put('services/:id')
   @UpdateBusinessServices()
   async updateBusinessServices(
     @Param('id') id: string,
@@ -68,9 +68,9 @@ export default class BusinessServiceController {
     })
   }
 
-  @Get('services')
+  @Get('/:id/services')
   @GetBusinessService()
-  getServices(@Param('businessId') businessId: string) {
+  getServices(@Param('id') businessId: string) {
     return this.businessServiceService.getBusinessServices({
       businessId,
     })
