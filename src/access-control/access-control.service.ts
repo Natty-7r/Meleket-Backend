@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { Admin, Business, Permission, Role, User } from '@prisma/client'
 import {
@@ -97,7 +98,7 @@ export default class AccessControlService {
       user = await this.prismaService.admin.findFirst({ where: { id } })
       userType = 'ADMIN'
     }
-    if (!user) throw new NotFoundException(' User Not found')
+    if (!user) throw new UnauthorizedException()
     return { user, userType }
   }
   async verifyUserStatus({

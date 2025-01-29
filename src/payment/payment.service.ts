@@ -109,7 +109,7 @@ export default class PaymentService {
 
   private async verifyPackageName({ name }: BaseNameParams) {
     const previousPackage = await this.prismaService.package.findFirst({
-      where: { name },
+      where: { name: { equals: name, mode: 'insensitive' } },
     })
     if (previousPackage)
       throw new BadRequestException('Package with that name exists')

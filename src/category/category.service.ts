@@ -76,7 +76,9 @@ export default class CategoryService {
     })
 
     const previesCategory = await this.prismaService.category.findFirst({
-      where: { name: createCategoryDto.name.toLocaleLowerCase().trim() },
+      where: {
+        name: { mode: 'insensitive', equals: createCategoryDto.name },
+      },
     })
     if (previesCategory)
       throw new ConflictException('Category with same name exits!')
@@ -93,7 +95,6 @@ export default class CategoryService {
 
     return this.prismaService.category.create({
       data: {
-        name: createCategoryDto.name.toLocaleLowerCase().trim(),
         ...createCategoryDto,
         verified: userType === 'ADMIN',
         price: createCategoryDto.price || 50,
