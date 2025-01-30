@@ -43,16 +43,6 @@ export const DeleteStorySwaggerDefinition = () =>
     ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
   )
 
-export const GetAllStoriesSwaggerDefinition = () =>
-  applyDecorators(
-    ApiOperation({ summary: 'Fetch stories ' }),
-    ApiCreatedResponse({
-      description: 'stories fetched successfully',
-      type: Array<StoryResponse>,
-    }),
-    ApiInternalServerErrorResponse({ description: 'Something went wrong' }),
-  )
-
 export const GetBusinessStoriesSwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ summary: 'Fetch business stories ' }),

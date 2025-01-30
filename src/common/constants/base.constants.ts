@@ -23,3 +23,5 @@ export const EMAIL_TEMPLATE_FOLDER_PATH: string = '/src/message/templates/mail/'
 export const SMS_TEMPLATE_FOLDER_PATH: string = '/src/message/templates/sms/'
 
 export const DEFAULE_O_AUTH_PASSWORD: string = '123456'
+
+export const ETB_TO_USD_RATE: number = 129
