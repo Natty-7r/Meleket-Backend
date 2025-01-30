@@ -7,7 +7,6 @@ import muluterStorage, { multerFilter } from 'src/common/helpers/multer.helper'
 import {
   AddStorySwaggerDefinition,
   DeleteStorySwaggerDefinition,
-  GetAllStoriesSwaggerDefinition,
   GetBusinessStoriesSwaggerDefinition,
 } from './business-story-swagger.decorator'
 
@@ -47,9 +46,6 @@ export const DeleteStory = () =>
     Permissions({ model: 'STORY', action: 'DELETE' }),
     DeleteStorySwaggerDefinition(),
   )
-
-export const GetAllStories = () =>
-  applyDecorators(Public(), GetAllStoriesSwaggerDefinition())
 
 export const GetBusinessStories = () =>
   applyDecorators(Public(), GetBusinessStoriesSwaggerDefinition())

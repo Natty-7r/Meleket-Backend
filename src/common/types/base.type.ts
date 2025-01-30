@@ -123,6 +123,11 @@ export interface Config {
     password: string
   }
   chapa: ChapaConfig
+  stripe: {
+    secretKey: string
+    successUrl: string
+    failUrl: string
+  }
 }
 export enum SEX {
   MALE = 'MALE',
@@ -146,6 +151,21 @@ export interface ChapaCustomerInfo {
   tx_ref: string // Optional, will be generated if not provided
   /* eslint-disable */
   customization?: Record<string, any> // Customize based on actual usage
+}
+export interface StripeSessionInfo {
+  sessionId: string
+  url: string
+}
+
+export interface StripeCheckoutSessionItem {
+  price_data: {
+    currency: string
+    product_data: {
+      name: string
+    }
+    unit_amount: number
+  }
+  quantity: number
 }
 
 export enum TimeUnit {

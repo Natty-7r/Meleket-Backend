@@ -8,6 +8,7 @@ import {
   PaginationOptions,
   SelectionOptions,
   Selector,
+  StripeSessionInfo,
   TimeUnit,
 } from './base.type'
 
@@ -244,18 +245,19 @@ export type RandomStringOptions = {
   lowercase?: boolean
 }
 
-export type PaymentInitParams = ChapaCustomerInfo
-
-export type GenerateParmentInitOptionParams = {
+export type ChapaInitOptionParams = {
   user: User
   amount: number
-  paymentMethod: PaymentMethod
   callbackUrl: string
+}
+export type StripeInitOptionParams = {
+  amount: number
+  productName: string
 }
 
 export type TimeFrameParams = {
   timeUnit: TimeUnit
-  timeFrame: number // time frame
+  timeFrame: number
   startDate?: Date
 }
 

@@ -28,6 +28,12 @@ import UpdateBusinessDto from './dto/update-business.dto'
 export default class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
+  @Get()
+  @GetBusinesses()
+  getAllBusiness(@Query() query: BusinessQueryDto) {
+    return this.businessService.getAllBusinesses(query)
+  }
+
   @Post()
   @CreateBusiness()
   async createBusiness(
@@ -68,11 +74,5 @@ export default class BusinessController {
       ...updateBusinessContactDto,
       userId: user.id,
     })
-  }
-
-  @Get()
-  @GetBusinesses()
-  getAllBusiness(@Query() query: BusinessQueryDto) {
-    return this.businessService.getAllBusinesses(query)
   }
 }
