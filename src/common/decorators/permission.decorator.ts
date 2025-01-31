@@ -13,7 +13,7 @@ import { PermisionSet } from '../types/base.type'
 const Permissions = (...permissions: PermisionSet[]) =>
   applyDecorators(
     SetMetadata(PERMISSIONS_KEY, permissions),
-    UseGuards(JwtAuthGuard),
+    UseGuards(JwtAuthGuard, PermissionGuard),
     ApiBearerAuth(),
     ApiUnauthorizedResponse({ description: 'Unauthorized' }),
     ApiForbiddenResponse({ description: 'not allowed' }),

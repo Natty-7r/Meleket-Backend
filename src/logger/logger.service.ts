@@ -96,8 +96,8 @@ export default class LoggerService {
   }
 
   async log(message: string, metadata?: Record<string, unknown>) {
-    this.winstonLoggerService.configure(this.activityLoggerStrategry)
-    this.winstonLoggerService.log(message, metadata)
+    // this.winstonLoggerService.configure(this.activityLoggerStrategry)
+    // this.winstonLoggerService.log(message, metadata)
   }
 
   async error(
@@ -113,6 +113,6 @@ export default class LoggerService {
         context ||
         `at filename: ${metadata?.fileName} from IP: ${metadata?.ip} saved with Id: ${metadata.id}`,
     })
-    this.winstonLoggerService.error(message, metadata)
+    // this.winstonLoggerService.error(message, metadata)
   }
 }

@@ -125,8 +125,6 @@ export interface Config {
   chapa: ChapaConfig
   stripe: {
     secretKey: string
-    successUrl: string
-    failUrl: string
   }
 }
 export enum SEX {
@@ -152,9 +150,17 @@ export interface ChapaCustomerInfo {
   /* eslint-disable */
   customization?: Record<string, any> // Customize based on actual usage
 }
-export interface StripeSessionInfo {
-  sessionId: string
-  url: string
+
+export type StripeStatus = 'paid' | 'failed' | 'completed'
+export interface PaymentInitResponse {
+  sessionId?: string
+  checkout_url: string
+  reference: string
+}
+export interface PaymentSuccessResponse {
+  amount: number
+  currency: string
+  isExprired?: boolean
 }
 
 export interface StripeCheckoutSessionItem {

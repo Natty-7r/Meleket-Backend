@@ -1,11 +1,11 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { PaymentMethod } from '@prisma/client'
 import BusinessService from 'src/business-module/business/business.service'
 import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/constants/base.constants'
 import {
@@ -13,7 +13,10 @@ import {
   calculatePackageStartDate,
 } from 'src/common/helpers/date.helper'
 import { generatePackageCode } from 'src/common/helpers/string.helper'
-import { StripeCheckoutSessionItem } from 'src/common/types/base.type'
+import {
+  PaymentInitResponse,
+  PaymentSuccessResponse,
+} from 'src/common/types/base.type'
 import {
   AdminIdParams,
   BaseNameParams,
@@ -179,7 +182,7 @@ export default class PaymentService {
     paymentMethod,
     callbackUrl,
   }: PurchasePackageDto & UserIdParams) {
-    let paymentReference: string, paymentDetail: any
+    let paymentDetail: PaymentInitResponse
 
     await this.verifyPackageId({ packageId })
     await this.businsesService.verifiyBusinessId({ id: businessId })
@@ -208,11 +211,15 @@ export default class PaymentService {
       paymentDetail = data
     }
     if (paymentMethod === 'STRIPE') {
-      const data = await this.stripe.createCheckoutSession({
-        amount: packageAmount,
-        productName: packageDetail.name,
-      })
-      paymentReference = data.sessionId
+      const { status, message, data } = await this.stripe.createCheckoutSession(
+        {
+          amount: packageAmount,
+          productName: packageDetail.name,
+          callbackUrl,
+        },
+      )
+      if (status === 'fail')
+        throw new InternalServerErrorException(`Payemnt error:${message}`)
       paymentDetail = data
     }
 
@@ -221,8 +228,10 @@ export default class PaymentService {
         businessId,
         startDate: calculatePackageStartDate(lastPackageExpireData || null),
         expreDate: calculatePackageExpireDate(packageDetail.monthCount),
-        reference: paymentReference,
         packageId: packageDetail.id,
+        reference: paymentDetail.reference,
+        sessionId: paymentDetail.sessionId,
+        amount: packageAmount,
       },
     })
 
@@ -232,29 +241,44 @@ export default class PaymentService {
     }
   }
 
-  async verifyChapaPayment(reference: string, userId: string) {
+  async verifyPayment(reference: string, userId: string) {
     const boughtPackage = await this.prismaService.businessPackage.findFirst({
       where: { reference },
     })
     if (!boughtPackage) throw new NotFoundException('Invalid refrence value')
-    if (boughtPackage.billed)
-      throw new ConflictException('Package billed already')
+    if (boughtPackage.billed) return boughtPackage
 
-    const response = await this.chapa.verify(reference)
-    if (response.status === 'pending')
-      throw new BadRequestException('Payment not finished')
-    if (response.status === 'fail')
-      throw new BadRequestException('Payment failed')
+    let paymentMethod: PaymentMethod, paymnetDetail: PaymentSuccessResponse
+
+    if (!boughtPackage.sessionId) {
+      const { isExprired, ...rest } = await this.chapa.verify(reference)
+      paymentMethod = 'CHAPA'
+      paymnetDetail = rest
+    }
+    if (boughtPackage.sessionId) {
+      const { isExprired, ...rest } = await this.stripe.verify(
+        boughtPackage.sessionId,
+      )
+      paymentMethod = 'STRIPE'
+      paymnetDetail = rest
+      if (isExprired) {
+        await this.prismaService.businessPackage.delete({
+          where: { id: boughtPackage.id },
+        })
+        throw new BadRequestException('Payment expired recreate the package')
+      }
+    }
 
     const packageBill = await this.prismaService.bill.create({
       data: {
-        paymentMethod: 'CHAPA',
         businessId: boughtPackage.businessId,
+        paymentMethod,
         userId,
-        amount: response.amount,
         reference,
+        ...paymnetDetail,
       },
     })
+
     const billedPackage = await this.prismaService.businessPackage.update({
       where: { id: boughtPackage.id },
       data: {
@@ -275,11 +299,13 @@ export default class PaymentService {
         },
       },
     })
+
     this.loggerService.createLog({
       logType: 'USER_ACTIVITY',
-      message: 'Package billed',
+      message: `Package billed with ${paymentMethod}`,
       context: `bussinesPackageId: ${boughtPackage.id} businessId: ${boughtPackage.businessId} amount: ${packageBill.amount} billId: ${packageBill.id} userId: ${userId}`,
     })
+
     return billedPackage
   }
 

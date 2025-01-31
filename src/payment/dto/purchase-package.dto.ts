@@ -29,7 +29,7 @@ export default class PurchasePackageDto {
 
   @ApiProperty({
     description: 'callback url to redirect the client after payment',
-    example: 'localhost:8080',
+    example: 'http://localhost:8080/',
   })
   @IsString()
   @IsNotEmpty()

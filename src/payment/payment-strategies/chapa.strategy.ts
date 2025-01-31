@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { generateRandomString } from 'src/common/helpers/string.helper'
 import api from 'src/common/lib/api'
@@ -5,6 +6,8 @@ import {
   ChapaConfig,
   ChapaCustomerInfo,
   Options,
+  PaymentInitResponse,
+  PaymentSuccessResponse,
 } from 'src/common/types/base.type'
 import { ChapaInitOptionParams } from 'src/common/types/params.type'
 import { ApiResponse } from 'src/common/types/responses.type'
@@ -107,7 +110,7 @@ export default class Chapa {
   async initialize(
     initParams: ChapaInitOptionParams,
     options: Options = {},
-  ): Promise<ApiResponse> {
+  ): Promise<ApiResponse<PaymentInitResponse>> {
     try {
       const customerInfo = this.generateParmentInitOption(initParams)
       this.validateCustomerInfo(customerInfo, options)
@@ -119,9 +122,16 @@ export default class Chapa {
         authToken: this.config.secretKey,
         method: 'POST',
       })
-      response.data.txRef = customerInfo.tx_ref
-      return response
+      return {
+        status: 'success',
+        message: '',
+        data: {
+          reference: customerInfo.tx_ref,
+          ...response.data,
+        },
+      }
     } catch (error) {
+      console.log(error)
       return {
         status: 'fail',
         message: error.message,
@@ -136,16 +146,28 @@ export default class Chapa {
    * @returns A Promise that resolves to the API response.
    * @throws Error Throws an error if the verification fails.
    */
-  async verify(txnRef: string): Promise<any> {
-    if (!txnRef || typeof txnRef !== 'string') {
-      throw new Error('Transaction reference must be a non-empty string!')
+  async verify(txnRef: string): Promise<PaymentSuccessResponse> {
+    try {
+      if (!txnRef || typeof txnRef !== 'string') {
+        throw new Error('Transaction reference must be a non-empty string!')
+      }
+      const response: ApiResponse = await api({
+        method: 'GET',
+        url: `${this.config.baseUrl}${this.config.verifyPath}${txnRef}`,
+        authToken: this.config.secretKey,
+      })
+      if (response.status !== 'success') throw new Error(response.message)
+      const data = response.data
+      if (data.status === 'pending')
+        throw new BadRequestException('Payment not finished')
+      if (data.status === 'fail')
+        throw new BadRequestException('Payment failed')
+      return {
+        amount: data.amount,
+        currency: data.currency,
+      }
+    } catch (error) {
+      throw error
     }
-    const response: ApiResponse = await api({
-      method: 'GET',
-      url: `${this.config.baseUrl}${this.config.verifyPath}${txnRef}`,
-      authToken: this.config.secretKey,
-    })
-    if (response.status !== 'success') throw new Error(response.message)
-    return response.data
   }
 }

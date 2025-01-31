@@ -320,7 +320,9 @@ model BusinessPackage {
   expreDate DateTime
   expired   Boolean  @default(false)
   billed    Boolean  @default(false)
-  reference String // reference 
+  reference String   @unique
+  sessionId String?
+  amount    Float // in birr
 
   bill      Bill?   @relation(fields: [billId], references: [id])
   billId    String? @unique // Ensure that each Package has only one Bill
@@ -345,6 +347,7 @@ model Bill {
   reference     String
   package       BusinessPackage?
   paymentMethod PaymentMethod
+  currency      String
 
   business Business @relation(fields: [businessId], references: [id])
   user     User     @relation(fields: [userId], references: [id])

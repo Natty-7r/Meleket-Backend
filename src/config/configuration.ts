@@ -49,7 +49,5 @@ export default (): Config => ({
   },
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY,
-    successUrl: process.env.STRIPE_SUCCSS_URL,
-    failUrl: process.env.STRIPE_FAIL_URL,
   },
 })
