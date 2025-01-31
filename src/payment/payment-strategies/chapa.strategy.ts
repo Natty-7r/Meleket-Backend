@@ -1,11 +1,13 @@
+import { ConfigService } from '@nestjs/config'
+import { generateRandomString } from 'src/common/helpers/string.helper'
+import api from 'src/common/lib/api'
 import {
   ChapaConfig,
   ChapaCustomerInfo,
   Options,
 } from 'src/common/types/base.type'
+import { ChapaInitOptionParams } from 'src/common/types/params.type'
 import { ApiResponse } from 'src/common/types/responses.type'
-import { ConfigService } from '@nestjs/config'
-import api from 'src/common/lib/api'
 
 export default class Chapa {
   config: ChapaConfig
@@ -16,6 +18,22 @@ export default class Chapa {
       baseUrl: this.configService.get<string>('chapa.baseUrl'),
       initializePath: this.configService.get<string>('chapa.initializePath'),
       verifyPath: this.configService.get<string>('chapa.verifyPath'),
+    }
+  }
+
+  generateParmentInitOption({
+    user,
+    amount,
+    callbackUrl,
+  }: ChapaInitOptionParams): ChapaCustomerInfo {
+    return {
+      first_name: user.firstName,
+      last_name: user.lastName,
+      email: user.email,
+      currency: 'ETB',
+      amount,
+      tx_ref: generateRandomString({}),
+      callback_url: callbackUrl,
     }
   }
 
@@ -87,10 +105,11 @@ export default class Chapa {
    * @throws Error Throws an error if the initialization fails.
    */
   async initialize(
-    customerInfo: ChapaCustomerInfo,
+    initParams: ChapaInitOptionParams,
     options: Options = {},
   ): Promise<ApiResponse> {
     try {
+      const customerInfo = this.generateParmentInitOption(initParams)
       this.validateCustomerInfo(customerInfo, options)
       this.handleCustomizations(customerInfo)
 

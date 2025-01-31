@@ -9,6 +9,7 @@ datasource db {
 
 enum PaymentMethod {
   CHAPA
+  STRIPE
 }
 
 enum BusinessStatus {
@@ -47,7 +48,6 @@ enum ChannelType {
   EMAIL
   PHONE
 }
-
 
 enum Sex {
   MALE
@@ -260,11 +260,11 @@ model Review {
 }
 
 model Story {
-  id            String           @id @default(uuid())
+  id            String   @id @default(uuid())
   text          String?
-  images         String[]
-  textViewOrder Int[]      // where the text is shown
-  viewCount     Int              @default(0)
+  images        String[]
+  textViewOrder Int[] // where the text is shown
+  viewCount     Int      @default(0)
 
   businessId String
   business   Business @relation(fields: [businessId], references: [id])
