@@ -10,16 +10,15 @@ import {
   UploadedFiles,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { RequestUser } from 'src/common/types/base.type'
 import User from 'src/common/decorators/user.decorator'
+import { RequestUser } from 'src/common/types/base.type'
+import BusinessStoryService from './business-story.service'
 import {
   AddStory,
-  UpdateStory,
   DeleteStory,
   GetBusinessStories,
-  GetAllStories,
+  UpdateStory,
 } from './decorators/business-story-endpoint.decorator'
-import BusinessStoryService from './business-story.service'
 import CreateStoryDto from './dto/create-story.dto'
 import UpdateStoryDto from './dto/update-store.dto'
 
@@ -67,12 +66,6 @@ export default class BusinessStoryController {
       userId: user.id,
       id,
     })
-  }
-
-  @Get()
-  @GetAllStories()
-  async fetchAllStories(@User() user: RequestUser) {
-    return this.businessStoryService.getStories({ userId: user.id })
   }
 
   @Get(':id/stories')

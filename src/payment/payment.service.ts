@@ -1,28 +1,27 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { PaymentMethod } from '@prisma/client'
 import BusinessService from 'src/business-module/business/business.service'
 import { MAX_ACTIVE_BUSINESS_COUNT } from 'src/common/constants/base.constants'
 import {
   calculatePackageExpireDate,
   calculatePackageStartDate,
 } from 'src/common/helpers/date.helper'
+import { generatePackageCode } from 'src/common/helpers/string.helper'
 import {
-  generatePackageCode,
-  generateRandomString,
-} from 'src/common/helpers/string.helper'
+  PaymentInitResponse,
+  PaymentSuccessResponse,
+} from 'src/common/types/base.type'
 import {
   AdminIdParams,
   BaseNameParams,
   BusinessIdParams,
-  GenerateParmentInitOptionParams,
   PackageIdParams,
-  PaymentInitParams,
   UserIdParams,
 } from 'src/common/types/params.type'
 import LoggerService from 'src/logger/logger.service'
@@ -32,11 +31,13 @@ import CreatePackageDto from './dto/create-package.dto'
 import PurchasePackageDto from './dto/purchase-package.dto'
 import UpdatePackageDto from './dto/update-package.dto'
 import Chapa from './payment-strategies/chapa.strategy'
+import Stripe from './payment-strategies/stripe.strategry'
 
 @Injectable()
 export default class PaymentService {
   constructor(
     private readonly chapa: Chapa,
+    private readonly stripe: Stripe,
     private readonly businsesService: BusinessService,
     private readonly userService: UserService,
     private readonly prismaService: PrismaService,
@@ -181,6 +182,8 @@ export default class PaymentService {
     paymentMethod,
     callbackUrl,
   }: PurchasePackageDto & UserIdParams) {
+    let paymentDetail: PaymentInitResponse
+
     await this.verifyPackageId({ packageId })
     await this.businsesService.verifiyBusinessId({ id: businessId })
     await this.checkUnBilledPackage({ businessId })
@@ -197,59 +200,85 @@ export default class PaymentService {
     const packageAmount = businessDetail.category.price * packageDetail.price
 
     const user = await this.userService.checkUserId({ id: userId })
-    const paymentInitParams: PaymentInitParams = this.generateParmentInitOption(
-      {
+    if (paymentMethod === 'CHAPA') {
+      const { status, message, data } = await this.chapa.initialize({
         user: user as any,
         amount: packageAmount,
-        paymentMethod,
         callbackUrl,
-      },
-    )
-
-    const { status, message, data } =
-      await this.chapa.initialize(paymentInitParams)
-    if (status === 'fail')
-      throw new InternalServerErrorException(`Payemnt error:${message}`)
+      })
+      if (status === 'fail')
+        throw new InternalServerErrorException(`Payemnt error:${message}`)
+      paymentDetail = data
+    }
+    if (paymentMethod === 'STRIPE') {
+      const { status, message, data } = await this.stripe.createCheckoutSession(
+        {
+          amount: packageAmount,
+          productName: packageDetail.name,
+          callbackUrl,
+        },
+      )
+      if (status === 'fail')
+        throw new InternalServerErrorException(`Payemnt error:${message}`)
+      paymentDetail = data
+    }
 
     const businessPackage = await this.prismaService.businessPackage.create({
       data: {
         businessId,
         startDate: calculatePackageStartDate(lastPackageExpireData || null),
         expreDate: calculatePackageExpireDate(packageDetail.monthCount),
-        reference: paymentInitParams.tx_ref,
         packageId: packageDetail.id,
+        reference: paymentDetail.reference,
+        sessionId: paymentDetail.sessionId,
+        amount: packageAmount,
       },
     })
 
     return {
       package: businessPackage,
-      payment: data,
+      payment: paymentDetail,
     }
   }
 
-  async verifyChapaPayment(reference: string, userId: string) {
+  async verifyPayment(reference: string, userId: string) {
     const boughtPackage = await this.prismaService.businessPackage.findFirst({
       where: { reference },
     })
     if (!boughtPackage) throw new NotFoundException('Invalid refrence value')
-    if (boughtPackage.billed)
-      throw new ConflictException('Package billed already')
+    if (boughtPackage.billed) return boughtPackage
 
-    const response = await this.chapa.verify(reference)
-    if (response.status === 'pending')
-      throw new BadRequestException('Payment not finished')
-    if (response.status === 'fail')
-      throw new BadRequestException('Payment failed')
+    let paymentMethod: PaymentMethod, paymnetDetail: PaymentSuccessResponse
+
+    if (!boughtPackage.sessionId) {
+      const { isExprired, ...rest } = await this.chapa.verify(reference)
+      paymentMethod = 'CHAPA'
+      paymnetDetail = rest
+    }
+    if (boughtPackage.sessionId) {
+      const { isExprired, ...rest } = await this.stripe.verify(
+        boughtPackage.sessionId,
+      )
+      paymentMethod = 'STRIPE'
+      paymnetDetail = rest
+      if (isExprired) {
+        await this.prismaService.businessPackage.delete({
+          where: { id: boughtPackage.id },
+        })
+        throw new BadRequestException('Payment expired recreate the package')
+      }
+    }
 
     const packageBill = await this.prismaService.bill.create({
       data: {
-        paymentMethod: 'CHAPA',
         businessId: boughtPackage.businessId,
+        paymentMethod,
         userId,
-        amount: response.amount,
         reference,
+        ...paymnetDetail,
       },
     })
+
     const billedPackage = await this.prismaService.businessPackage.update({
       where: { id: boughtPackage.id },
       data: {
@@ -270,11 +299,13 @@ export default class PaymentService {
         },
       },
     })
+
     this.loggerService.createLog({
       logType: 'USER_ACTIVITY',
-      message: 'Package billed',
+      message: `Package billed with ${paymentMethod}`,
       context: `bussinesPackageId: ${boughtPackage.id} businessId: ${boughtPackage.businessId} amount: ${packageBill.amount} billId: ${packageBill.id} userId: ${userId}`,
     })
+
     return billedPackage
   }
 
@@ -293,27 +324,5 @@ export default class PaymentService {
       message: 'unbilled packages clead',
       context: `Date: ${oneDayAgo.toLocaleString()} `,
     })
-  }
-
-  generateParmentInitOption({
-    paymentMethod,
-    user,
-    amount,
-    callbackUrl,
-  }: GenerateParmentInitOptionParams): PaymentInitParams {
-    switch (paymentMethod) {
-      case 'CHAPA':
-        return {
-          first_name: user.firstName,
-          last_name: user.lastName,
-          email: user.email,
-          currency: 'ETB',
-          amount,
-          tx_ref: generateRandomString({}),
-          callback_url: callbackUrl,
-        }
-      default:
-        throw new BadRequestException('Unknown payment method')
-    }
   }
 }

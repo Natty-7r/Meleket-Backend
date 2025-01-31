@@ -13,6 +13,7 @@ import { GenerateCategoryTreeParams } from '../common/types/params.type'
 import CreateCategoryDto from './dto/create-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import UpdateCategoryDto from './dto/update-category.dto'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
 
 @Injectable()
 export default class CategoryService {
@@ -98,7 +99,7 @@ export default class CategoryService {
         ...createCategoryDto,
         verified: userType === 'ADMIN',
         price: createCategoryDto.price || 50,
-        image: image.path || 'uploads/category/category.png',
+        image: image?.path || 'uploads/category/category.png',
         level,
         parentId: parentId || null,
       },
@@ -110,6 +111,7 @@ export default class CategoryService {
     name,
     price,
     parentId,
+    image,
   }: UpdateCategoryDto & BaseIdParams): Promise<Category> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
@@ -126,7 +128,7 @@ export default class CategoryService {
       level = parentCategory.level + 1
     }
 
-    return this.prismaService.category.update({
+    const categoryUpdated = await this.prismaService.category.update({
       where: {
         id,
       },
@@ -135,8 +137,11 @@ export default class CategoryService {
         name: name || category.name,
         price: price || category.price,
         parentId: parentId || category.parentId,
+        image: image?.path || category.image,
       },
     })
+    if (image && category.image) deleteFileAsync({ filePath: category.image })
+    return categoryUpdated
   }
 
   async verifyCategory({ id }: BaseIdParams): Promise<Category> {

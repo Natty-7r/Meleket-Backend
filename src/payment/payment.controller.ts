@@ -19,7 +19,7 @@ export default class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @CreatePackage()
-  @Post('package')
+  @Post('packages')
   createPackage(
     @Body() createPackageDto: CreatePackageDto,
     @User() user: RequestUser,
@@ -31,7 +31,7 @@ export default class PaymentController {
   }
 
   @CreatePackage()
-  @Put('package')
+  @Put('packages')
   updatePackage(
     @Body() updatePackageDto: UpdatePackageDto,
     @User() user: RequestUser,
@@ -43,13 +43,13 @@ export default class PaymentController {
   }
 
   @GetPackages()
-  @Get('package/all')
+  @Get('packages')
   getPackages() {
     return this.paymentService.getPackages()
   }
 
   @PurchasePackage()
-  @Post('business-package')
+  @Post('business-packages')
   purchasePackage(
     @Body() purchasePackageDto: PurchasePackageDto,
     @User() user: RequestUser,
@@ -61,11 +61,11 @@ export default class PaymentController {
   }
 
   @BillPackage()
-  @Put('chapa/verify/:reference')
+  @Put('/:reference')
   chapaCallback(
     @Param('reference') reference: string,
     @User() user: RequestUser,
   ) {
-    return this.paymentService.verifyChapaPayment(reference, user.id)
+    return this.paymentService.verifyPayment(reference, user.id)
   }
 }

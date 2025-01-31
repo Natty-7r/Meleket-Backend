@@ -41,16 +41,16 @@ export const MODULE_LIST: Set<ModuleName> = new Set([
 export const USER_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
   OR: [
     {
-      AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'READ' }],
+      moduleName: 'PROFILE',
+    },
+    {
+      AND: [{ moduleName: 'BUSINESS_PACKAGE' }, { permissionName: 'READ' }],
     },
     {
       AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'CREATE' }],
     },
     {
-      AND: [{ moduleName: 'BUSINESS_SERVICE' }, { permissionName: 'READ' }],
-    },
-    {
-      AND: [{ moduleName: 'BUSINESS_CONTACT' }, { permissionName: 'READ' }],
+      AND: [{ moduleName: 'BUSINESS' }, { permissionName: 'READ' }],
     },
     {
       AND: [{ moduleName: 'STORY' }, { permissionName: 'READ' }],
@@ -58,7 +58,6 @@ export const USER_PERMISSION_SELECTOR: Prisma.PermissionWhereInput = {
     {
       AND: [{ moduleName: 'CATEGORY' }, { permissionName: 'READ' }],
     },
-    // Can read other business-related entities...
   ],
 }
 

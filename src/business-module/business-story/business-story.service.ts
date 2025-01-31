@@ -118,29 +118,6 @@ export default class BusinessStoryService {
     return id
   }
 
-  async getStories({ userId }: OptionalUserIdParams): Promise<Story[]> {
-    const stories = await this.prismaService.story.findMany({
-      orderBy: [{ createdAt: 'desc' }],
-    })
-
-    let viewedStoryIds: Set<string> = new Set()
-    if (userId) {
-      const userViews = await this.prismaService.userStoryView.findMany({
-        where: { userId },
-        select: { storyId: true },
-      })
-
-      viewedStoryIds = new Set(userViews.map((view) => view.storyId))
-    }
-
-    const enhancedStories = stories.map((story) => ({
-      ...story,
-      viewed: userId ? viewedStoryIds.has(story.id) : false,
-    }))
-
-    return enhancedStories
-  }
-
   async getBusinessStories({
     userId,
     businessId,

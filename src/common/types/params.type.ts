@@ -1,9 +1,8 @@
 // business.service.params.ts
 
-import { Category, OTPType, PaymentMethod, User } from '@prisma/client'
+import { Category, OTPType, User } from '@prisma/client'
 import {
   BusinessSubModel,
-  ChapaCustomerInfo,
   LogType,
   PaginationOptions,
   SelectionOptions,
@@ -244,18 +243,20 @@ export type RandomStringOptions = {
   lowercase?: boolean
 }
 
-export type PaymentInitParams = ChapaCustomerInfo
-
-export type GenerateParmentInitOptionParams = {
+export type ChapaInitOptionParams = {
   user: User
   amount: number
-  paymentMethod: PaymentMethod
+  callbackUrl: string
+}
+export type StripeInitOptionParams = {
+  amount: number
+  productName: string
   callbackUrl: string
 }
 
 export type TimeFrameParams = {
   timeUnit: TimeUnit
-  timeFrame: number // time frame
+  timeFrame: number
   startDate?: Date
 }
 
