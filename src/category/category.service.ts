@@ -13,6 +13,8 @@ import { GenerateCategoryTreeParams } from '../common/types/params.type'
 import CreateCategoryDto from './dto/create-category.dto'
 import UpdateParentCategoryDto from './dto/update-category-parent.dto'
 import UpdateCategoryDto from './dto/update-category.dto'
+import { MAIN_CATEGORY_PATH } from 'src/common/constants/base.constants'
+import { deleteFileAsync } from 'src/common/helpers/file.helper'
 
 @Injectable()
 export default class CategoryService {
@@ -98,7 +100,7 @@ export default class CategoryService {
         ...createCategoryDto,
         verified: userType === 'ADMIN',
         price: createCategoryDto.price || 50,
-        image: image.path || 'uploads/category/category.png',
+        image: image?.path || MAIN_CATEGORY_PATH,
         level,
         parentId: parentId || null,
       },
@@ -110,7 +112,8 @@ export default class CategoryService {
     name,
     price,
     parentId,
-  }: UpdateCategoryDto & BaseIdParams): Promise<Category> {
+    image,
+  }: UpdateCategoryDto & BaseIdParams): Promise<CategoryTreeNode[]> {
     const category = await this.prismaService.category.findFirst({
       where: { id },
     })
@@ -126,7 +129,10 @@ export default class CategoryService {
       level = parentCategory.level + 1
     }
 
-    return this.prismaService.category.update({
+    if (image && category.image != MAIN_CATEGORY_PATH)
+      deleteFileAsync({ filePath: category.image })
+
+    await this.prismaService.category.update({
       where: {
         id,
       },
@@ -135,8 +141,11 @@ export default class CategoryService {
         name: name || category.name,
         price: price || category.price,
         parentId: parentId || category.parentId,
+        image: image?.path || MAIN_CATEGORY_PATH,
       },
     })
+    const updatedCategories = await this.prismaService.category.findMany()
+    return this.generateCategoryTree({ categories: updatedCategories })
   }
 
   async verifyCategory({ id }: BaseIdParams): Promise<Category> {
@@ -181,12 +190,15 @@ export default class CategoryService {
         `Category has ${category._count.business} business atached to it`,
       )
     /*eslint-disable*/
+
     await this.prismaService.category.delete({
       where: {
         id,
       },
     })
 
+    if (category.image != MAIN_CATEGORY_PATH)
+      deleteFileAsync({ filePath: category.image })
     const updatedCategories = await this.prismaService.category.findMany()
     return this.generateCategoryTree({ categories: updatedCategories })
   }

@@ -47,14 +47,6 @@ export const CreateCategorySwaggerDefinition = () =>
     }),
   )
 
-export const DeleteCategorySwaggerDefinition = () =>
-  applyDecorators(
-    ApiOperation({ summary: 'Delete category ' }),
-    ApiResponse({ description: 'Category deleted succefully' }),
-    ApiNotFoundResponse({ description: 'Invalid category id  ' }),
-    ApiBadRequestResponse({ description: 'Invalid parent id' }),
-  )
-
 export const UpdateCategorySwaggerDefinition = () =>
   applyDecorators(
     ApiOperation({ summary: 'Update category' }),
@@ -62,6 +54,15 @@ export const UpdateCategorySwaggerDefinition = () =>
     ApiNotFoundResponse({ description: 'Invalid category id  ' }),
     ApiBadRequestResponse({ description: 'Invalid parent id' }),
     ApiParam({ description: 'Category ID', name: 'id' }),
+    ApiConsumes('multipart/form-data'),
+  )
+
+export const DeleteCategorySwaggerDefinition = () =>
+  applyDecorators(
+    ApiOperation({ summary: 'Delete category ' }),
+    ApiResponse({ description: 'Category deleted succefully' }),
+    ApiNotFoundResponse({ description: 'Invalid category id  ' }),
+    ApiBadRequestResponse({ description: 'Invalid parent id' }),
   )
 
 export const UpdateCategoryParentSwaggerDefinition = () =>
