@@ -7,6 +7,7 @@ import {
   CreateCategorySwaggerDefinition,
   DeleteCategorySwaggerDefinition,
   GetCategoriesSwaggerDefinition,
+  GetCategoryDetailSwaggerDefinition,
   UpdateCategoryParentSwaggerDefinition,
   UpdateCategorySwaggerDefinition,
   VerifyCategorySwaggerDefinition,
@@ -40,6 +41,12 @@ export const VerifyCategory = () =>
   applyDecorators(
     Permissions({ model: 'CATEGORY', action: 'UPDATE' }),
     VerifyCategorySwaggerDefinition(),
+  )
+
+export const GetCategoryDetail = () =>
+  applyDecorators(
+    Permissions({ model: 'CATEGORY', action: 'READ' }),
+    GetCategoryDetailSwaggerDefinition(),
   )
 
 export const GetCategories = () =>

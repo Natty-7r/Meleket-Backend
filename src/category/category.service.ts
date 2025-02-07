@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common'
 import { Category } from '@prisma/client'
 import AccessControlService from 'src/access-control/access-control.service'
-import { CategoryTreeNode } from 'src/common/types/base.type'
+import { CategoryDetail, CategoryTreeNode } from 'src/common/types/base.type'
 import { BaseIdParams, BaseUserIdParams } from 'src/common/types/params.type'
 import PrismaService from 'src/prisma/prisma.service'
 import { GenerateCategoryTreeParams } from '../common/types/params.type'
@@ -38,6 +38,7 @@ export default class CategoryService {
   generateCategoryTree({
     categories,
   }: GenerateCategoryTreeParams): CategoryTreeNode[] {
+    const childrenIdList: string[] = []
     const categoryMap = new Map<string, CategoryTreeNode>()
     categories.forEach((category) => {
       categoryMap.set(category.id, {
@@ -50,17 +51,20 @@ export default class CategoryService {
         children: [],
       })
     })
-
     categories.forEach((category) => {
       if (category.parentId && categoryMap.has(category.parentId)) {
         const parentCategory = categoryMap.get(category.parentId)
         parentCategory.children.push(categoryMap.get(category.id))
+        childrenIdList.push(category.id)
       }
     })
 
-    const categoryTree = Array.from(categoryMap.values()).filter(
-      (category) => !category.parentId,
-    )
+    for (const childrenId of childrenIdList) categoryMap.delete(childrenId)
+
+    // const categoryTree = Array.from(categoryMap.values()).filter(
+    //   (category) => !category.parentId,
+    // )
+    const categoryTree = Array.from(categoryMap.values())
     this.categoryTree = categoryTree
 
     return categoryTree
@@ -146,6 +150,29 @@ export default class CategoryService {
     })
     const updatedCategories = await this.prismaService.category.findMany()
     return this.generateCategoryTree({ categories: updatedCategories })
+  }
+
+  async getCagetoryDetail({ id }: BaseIdParams) {
+    const categoryDetail: CategoryDetail =
+      await this.prismaService.category.findFirst({
+        where: { id },
+        include: {
+          children: true,
+          _count: { select: { business: true } },
+        },
+      })
+    if (!categoryDetail) return null
+    const { _count, children, ...category } = categoryDetail
+    const tree = this.generateCategoryTree({
+      categories: [category, ...children],
+    })[0]
+    return {
+      tree: { ...category, children: tree.children },
+      _count: {
+        business: _count.business,
+        children: children.length,
+      },
+    }
   }
 
   async verifyCategory({ id }: BaseIdParams): Promise<Category> {

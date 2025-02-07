@@ -17,6 +17,7 @@ import {
   CreateCategory,
   DeleteCategory,
   GetCategories,
+  GetCategoryDetail,
   UpdateCategory,
   UpdateCategoryParent,
   VerifyCategory,
@@ -29,6 +30,18 @@ import UpdateCategoryDto from './dto/update-category.dto'
 @Controller('category')
 export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
+
+  @GetCategories()
+  @Get('')
+  getCategories() {
+    return this.categoryService.getCategories()
+  }
+
+  @GetCategoryDetail()
+  @Get('/:id')
+  getCategoryDetail(@Param('id') id: string, @User() user: RequestUser) {
+    return this.categoryService.getCagetoryDetail({ id })
+  }
 
   @CreateCategory()
   @Post()
@@ -65,12 +78,6 @@ export default class CategoryController {
     @Body() updateParentCategoryDto: UpdateParentCategoryDto,
   ) {
     return this.categoryService.updateParentCategory(updateParentCategoryDto)
-  }
-
-  @GetCategories()
-  @Get('')
-  getCategories() {
-    return this.categoryService.getCategories()
   }
 
   @DeleteCategory()
