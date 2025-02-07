@@ -1,6 +1,7 @@
 import { ApiResponseProperty } from '@nestjs/swagger'
+import CategoryTreeResponse from './category-tree.response'
 
-export default class CategoryTreeResponse {
+export default class CategoryDetailResponse {
   @ApiResponseProperty({
     type: String,
     example: '8ada29bb-5c51-4dd9-9819-4fb5175dd5ac',
@@ -38,7 +39,7 @@ export default class CategoryTreeResponse {
   image: string
 
   @ApiResponseProperty({
-    type: () => [CategoryTreeResponse],
+    type: Array<CategoryTreeResponse>,
     example: [
       {
         id: '31b513c1-7092-4c1d-a889-5da436d927c1',
@@ -69,11 +70,23 @@ export default class CategoryTreeResponse {
       },
     ],
   })
-  children: CategoryTreeResponse[]
+  tree: CategoryTreeResponse
 
   @ApiResponseProperty({ type: Date, example: '"2024-07-26T16:30:54.784Z' })
   createdAt: Date
 
   @ApiResponseProperty({ type: Date, example: '"2024-07-26T16:30:54.784Z' })
   updatedAt: Date
+
+  @ApiResponseProperty({
+    type: Object,
+    example: {
+      business: 0,
+      children: 3,
+    },
+  })
+  _count: {
+    business: number
+    children: number
+  }
 }

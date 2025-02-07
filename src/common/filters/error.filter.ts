@@ -65,7 +65,10 @@ export default class ErrorExceptionFilter implements ExceptionFilter {
     }
     response.status(statusCode).json({
       statusCode,
-      message: messageResponse,
+      message:
+        statusCode === 500
+          ? 'Something went wrong please try again'
+          : messageResponse,
       property,
     })
   }

@@ -12,6 +12,7 @@ import {
   BussinessService,
   Story,
   Bill,
+  Category,
 } from '@prisma/client'
 import {
   SUPER_ADMIN_PERMISSION_SELECTOR,
@@ -316,4 +317,11 @@ export enum BusinessSortableFields {
 }
 export enum ReviewSortableFields {
   'rating' = 'rating',
+}
+
+export interface CategoryDetail extends Category {
+  children: Category[]
+  _count: {
+    business: number
+  }
 }

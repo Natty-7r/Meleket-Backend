@@ -37,6 +37,7 @@ import BusinessQueryDto from './dto/business-query.dto'
 import CreateBusinessDto from './dto/create-business.dto'
 import UpdateBusinessContactDto from './dto/update-business-contact.dto'
 import UpdateBusinessDto from './dto/update-business.dto'
+import { MAIN_CATEGORY_PATH } from 'src/common/constants/base.constants'
 
 @Injectable()
 export default class BusinessService {
@@ -249,7 +250,7 @@ export default class BusinessService {
       },
     })
 
-    if (image && (bussiness as Business).mainImageUrl)
+    if (image && (bussiness as Business).mainImageUrl != MAIN_CATEGORY_PATH)
       deleteFileAsync({ filePath: (bussiness as Business).mainImageUrl })
 
     return updatedBusiness
