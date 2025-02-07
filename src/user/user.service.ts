@@ -58,7 +58,7 @@ export default class UserService {
       where: { email: createAccountDto.email },
     })
     if (user) throw new ConflictException('Email is already in use!')
-
+    createAccountDto.email = createAccountDto.email.trim()
     return this.prismaService.user.create({
       data: {
         ...createAccountDto,

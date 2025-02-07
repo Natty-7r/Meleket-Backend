@@ -137,13 +137,13 @@ export default class AuthService {
     let user: User | Admin
 
     user = await this.prismaService.user.findFirst({
-      where: { email },
+      where: { email: { mode: 'insensitive', equals: email.trim() } },
       include: { role: { select: { id: true, name: true } } },
     })
     if (!user) {
       userType = 'ADMIN'
       user = await this.prismaService.admin.findFirst({
-        where: { email },
+        where: { email: { mode: 'insensitive', equals: email.trim() } },
         include: { role: { select: { id: true, name: true } } },
       })
     }

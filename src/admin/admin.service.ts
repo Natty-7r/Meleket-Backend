@@ -48,7 +48,7 @@ export default class AdminService {
       data: {
         firstName,
         lastName,
-        email,
+        email: email.trim(),
         password,
         roleId,
         status: 'CREATED',

@@ -7,6 +7,7 @@ export default class CreateCategoryDto {
     description: 'image for the category',
     type: 'string',
     format: 'binary',
+    required: false,
   })
   @IsOptional()
   image?: Express.Multer.File
