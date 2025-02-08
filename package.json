@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "nest build",
+    "meilisearch": "echo \"deb [trusted=yes] https://apt.fury.io/meilisearch/ / \" |  tee /etc/apt/sources.list.d/fury.list &&  apt update &&  apt install meilisearch && meilisearch",
     "deploy": "npm install;npx prisma generate; npx prisma db push; nest build",
     "deploy-clean": "npm install; npx prisma generate; npx prisma db push --force-reset; nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
