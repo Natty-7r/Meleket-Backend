@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
+import SearchServiceModule from './search-service/search-service.module'
 import AdminModule from './admin/admin.module'
 import AppController from './app.controller'
 import AppService from './app.service'
@@ -42,6 +43,7 @@ import UserModule from './user/user.module'
     MessageModule,
     BusinessBaseModule,
     PaymentModule,
+    SearchServiceModule,
   ],
 
   providers: [

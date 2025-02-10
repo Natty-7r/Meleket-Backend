@@ -325,3 +325,42 @@ export interface CategoryDetail extends Category {
     business: number
   }
 }
+export type TAG = 'SERVICE' | 'ADDRESS' | 'BUSINESS' | 'CATEGORY'
+
+export type ServiceSearchResult = {
+  id: string
+  businessId: string
+  name: string
+  description: string
+  specifications: any // json
+  // specifications:Record<string, any>;
+
+  business: BusinessSearchResult
+  tag?: TAG
+}
+
+export type AddressSearchResult = {
+  id: string
+  businessId: string
+  country: string
+  city: string
+  state: string
+  streetAddress: string
+  specificLocation: string
+
+  business: BusinessSearchResult
+  tag?: TAG
+}
+
+export type BusinessSearchResult = {
+  id: string
+  name: string
+  description: string
+  tag?: TAG
+}
+
+export type CategorySearchResult = {
+  id: string
+  name: string
+  tag?: TAG
+}
