@@ -30,6 +30,7 @@ export enum LoggerType {
   ACTIVITY = 'ACTIVITY',
   ERROR = 'ERROR',
 }
+
 export type LoggerOption = {
   level: string
   dirname?: string

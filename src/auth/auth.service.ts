@@ -183,61 +183,65 @@ export default class AuthService {
       throw new UnauthorizedException('User not active')
     return {
       access_token: await this.jwtService.signAsync(payload),
-      ...user,
+      ...removePassword(user),
     }
   }
 
   // private method to create otp
   async createOTP({ type, email, phone, channelType, userType }: CreateOTPDto) {
-    const otpCode = generateOTP()
-    let colSpecification = {}
-    let channelValue = 'EMAIL'
-    if (channelType === 'EMAIL') {
-      colSpecification = { email }
-      channelValue = email
-    } else {
-      colSpecification = { phoneNumber: phone }
-      channelValue = phone
+    try {
+      const otpCode = generateOTP()
+      let colSpecification = {}
+      let channelValue = 'EMAIL'
+      if (channelType === 'EMAIL') {
+        colSpecification = { email }
+        channelValue = email
+      } else {
+        colSpecification = { phoneNumber: phone }
+        channelValue = phone
+      }
+
+      const user =
+        userType === 'CLIENT_USER'
+          ? await this.prismaService.user.findFirst({
+              where: { ...colSpecification },
+            })
+          : await this.prismaService.admin.findFirst({
+              where: { ...colSpecification },
+            })
+      if (!user)
+        throw new BadRequestException(
+          `Invalid ${channelType === 'EMAIL' ? 'email' : 'phone number'}`,
+        )
+
+      if ((user as any).profileLevel === 'VERIFIED' && type === 'VERIFICATION')
+        throw new ConflictException('User is already verified ')
+
+      const otpRecord = await this.prismaService.oTP.findFirst({
+        where: { channelValue, type },
+      })
+      if (otpRecord)
+        await this.prismaService.oTP.update({
+          where: { id: otpRecord.id },
+          data: {
+            code: otpCode,
+          },
+        })
+      else
+        await this.prismaService.oTP.create({
+          data: {
+            code: otpCode,
+            type,
+            channelType,
+            channelValue,
+            userId: user.id,
+          },
+        })
+
+      return { otpCode, type, channelValue, channelType, user }
+    } catch (error) {
+      console.log(error)
     }
-
-    const user =
-      userType === 'CLIENT_USER'
-        ? await this.prismaService.user.findFirst({
-            where: { ...colSpecification },
-          })
-        : await this.prismaService.admin.findFirst({
-            where: { ...colSpecification },
-          })
-    if (!user)
-      throw new BadGatewayException(
-        `Invalid ${channelType === 'EMAIL' ? 'email' : 'phone number'}`,
-      )
-
-    if ((user as any).profileLevel === 'VERIFIED' && type === 'VERIFICATION')
-      throw new ConflictException('User is already verified ')
-
-    const otpRecord = await this.prismaService.oTP.findFirst({
-      where: { channelValue, type },
-    })
-    if (otpRecord)
-      await this.prismaService.oTP.update({
-        where: { id: otpRecord.id },
-        data: {
-          code: otpCode,
-        },
-      })
-    else
-      await this.prismaService.oTP.create({
-        data: {
-          code: otpCode,
-          type,
-          channelType,
-          channelValue,
-          userId: user.id,
-        },
-      })
-
-    return { otpCode, type, channelValue, channelType, user }
   }
 
   // to request otp for verification and reset
@@ -304,7 +308,7 @@ export default class AuthService {
   }
 
   async verifyAccount({ email, otp: otpCode }: VerifyUserDto) {
-    const user = await this.prismaService.user.findFirst({
+    let user = await this.prismaService.user.findFirst({
       where: { email },
     })
 
@@ -321,14 +325,14 @@ export default class AuthService {
     if (status != 'success')
       throw new BadRequestException('Unable to verify user ')
 
-    await this.prismaService.user.update({
+    user = await this.prismaService.user.update({
       where: { id: user.id },
       data: { status: 'ACTIVE' },
     })
     await this.prismaService.oTP.deleteMany({
       where: { channelValue: email, type: 'VERIFICATION' },
     })
-    return 'User Verified successfully'
+    return this.login(user)
   }
 
   async checkOTPVerification({

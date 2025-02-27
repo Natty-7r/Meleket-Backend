@@ -66,7 +66,7 @@ export default class AuthController {
 
   @SignIn()
   @UseGuards(LocalAuthGuard)
-  @Post('/sign-in')
+  @Post('/login')
   async login(@Body() _: SignInDto, @Request() req: RequestWithUser) {
     return this.authService.login(req.user)
   }
@@ -84,6 +84,7 @@ export default class AuthController {
   @RequestOTP()
   @Post('/otp')
   requestOTP(@Body() createOTPDto: CreateOTPDto) {
+    console.log(createOTPDto)
     return this.authService.requestOTP(createOTPDto)
   }
 

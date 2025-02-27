@@ -1,23 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { ChannelType, OTPType } from '@prisma/client'
+import { ChannelType, OTPType, UserType } from '@prisma/client'
 import {
   IsEmail,
-  IsNotEmpty,
-  IsString,
+  IsEnum,
   IsIn,
-  ValidateIf,
+  IsNotEmpty,
   IsPhoneNumber,
+  IsString,
+  ValidateIf,
 } from 'class-validator'
 
 export default class CreateOTPDto {
   @ApiProperty({
     type: String,
-    example: 'CLIENT_USER',
+    example: 'USER',
     description: 'user type',
   })
-  @IsString()
+  @IsEnum(UserType)
   @IsNotEmpty()
-  userType: any
+  userType: UserType
 
   @ApiProperty({
     type: String,
