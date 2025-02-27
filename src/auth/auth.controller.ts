@@ -84,7 +84,6 @@ export default class AuthController {
   @RequestOTP()
   @Post('/otp')
   requestOTP(@Body() createOTPDto: CreateOTPDto) {
-    console.log(createOTPDto)
     return this.authService.requestOTP(createOTPDto)
   }
 

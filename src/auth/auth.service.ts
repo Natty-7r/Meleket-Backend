@@ -240,7 +240,7 @@ export default class AuthService {
 
       return { otpCode, type, channelValue, channelType, user }
     } catch (error) {
-      console.log(error)
+      throw error
     }
   }
 
@@ -303,7 +303,7 @@ export default class AuthService {
 
     return {
       status: 'success',
-      message: 'OTP Verified',
+      message: 'OTP Verified successfully',
     }
   }
 
@@ -360,29 +360,29 @@ export default class AuthService {
     if (!otpRecord.isVerified) throw new BadGatewayException('OTP not verified')
   }
 
-  async updatePassword({ password, userId, userType }: UpdatePasswordDto) {
+  async updatePassword({ password, email, userType }: UpdatePasswordDto) {
     const user =
       userType === 'CLIENT_USER'
         ? await this.prismaService.user.findUnique({
-            where: { id: userId },
+            where: { email },
           })
         : await this.prismaService.admin.findUnique({
-            where: { id: userId },
+            where: { email },
           })
-    if (!user) throw new BadRequestException('Invalid user id ')
+    if (!user) throw new BadRequestException('Invalid Email')
 
-    await this.checkOTPVerification({ type: 'RESET', userId })
+    await this.checkOTPVerification({ type: 'RESET', userId: user.id })
 
     const hashedPassword = await bcrypt.hash(password, 12)
 
     if (userType === 'CLIENT_USER')
       await this.prismaService.user.update({
-        where: { id: userId },
+        where: { id: user.id },
         data: { password: hashedPassword },
       })
     else {
       await this.prismaService.admin.update({
-        where: { id: userId },
+        where: { id: user.id },
         data: {
           password: hashedPassword,
           // activating user when updating password
@@ -397,12 +397,15 @@ export default class AuthService {
         },
       })
     }
+    await this.prismaService.oTP.deleteMany({
+      where: { channelValue: email, type: 'RESET' },
+    })
     this.loggerSerive.createLog({
       logType: userType === 'CLIENT_USER' ? 'USER_ACTIVITY' : 'ADMIN_ACTIVITY',
       message: `${userType == 'CLIENT_USER' ? 'user ' : 'admin'} with  id: ${user.id} name: ${user.firstName.concat(' ').concat(user.lastName)}  update password`,
       context: 'password update',
-      userId: userType === 'CLIENT_USER' && user.id,
-      adminId: userType !== 'CLIENT_USER' && user.id,
+      userId: userType === 'CLIENT_USER' ? user.id : undefined,
+      adminId: userType !== 'CLIENT_USER' ? user.id : undefined,
     })
     return 'Password updated successfully'
   }

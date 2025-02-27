@@ -16,7 +16,6 @@ export default class CreateStoryDto {
     return [value]
     // if (va) return [parseInt(value, 10)]
     // return value.map((v) => parseInt(v, 10))
-    console.log(value, 'bbbbbbbbbbbbbbb')
     return []
   })
   images?: Express.Multer.File[]

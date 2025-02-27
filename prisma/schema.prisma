@@ -19,11 +19,6 @@ enum BusinessStatus {
   HIDDEN // when package is done
 }
 
-enum UserType {
-  CLIENT_USER
-  ADMIN
-  SUPER_ADMIN
-}
 
 enum AuthProvider {
   LOCAL
@@ -47,6 +42,12 @@ enum Status {
 enum ChannelType {
   EMAIL
   PHONE
+}
+
+enum UserType {
+  CLIENT_USER
+  ADMIN
+  SUPER_ADMIN
 }
 
 enum Sex {
